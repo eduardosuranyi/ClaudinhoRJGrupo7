@@ -1,0 +1,10 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Dados extraídos e estado do scrapper
+data/raw/
+data/state/
+*.jsonl

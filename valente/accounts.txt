@@ -1,0 +1,27 @@
+# Lista de contas X/Twitter monitoradas — uma por linha, sem @.
+# Linhas iniciadas com # são ignoradas.
+#
+# Seed inicial: contas públicas que costumam reportar roubos/furtos no RJ.
+# Verifique cada uma antes de produzir — algumas podem estar inativas/renomeadas.
+
+# --- Agregadores cidadãos / alertas comunitários ---
+ondetemtiroteio
+fogocruzadoapp
+vozdacomunidade
+RioOnWatch
+AlertaRJ
+
+# --- Imprensa / portais com cobertura policial RJ ---
+extra
+OGlobo_Rio
+g1rio
+bandnewsfmrio
+
+# --- Forças de segurança (oficiais) ---
+PMERJ
+PCERJ
+GovRJ_
+
+# --- Comunidades de alerta (apps/coletivos) ---
+sosrio
+canguruzinho
