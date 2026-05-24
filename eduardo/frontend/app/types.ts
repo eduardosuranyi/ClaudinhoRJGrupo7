@@ -307,6 +307,14 @@ export interface AgentState {
   thinkingDetail: string | null
 }
 
+/** A fatores-urbanos or chamados-1746 point that was clicked on the map. */
+export interface InspectedPoint {
+  type: 'fator' | 'chamado'
+  lat: number
+  lng: number
+  properties: Record<string, any>
+}
+
 export interface MapControl {
   toggleLayer: (layer: AgentLayerKey, visible: boolean) => void
   zoomToArea: (areaId: number) => void
@@ -314,4 +322,5 @@ export interface MapControl {
   clearAnnotations: () => void
   snapshotLayers: () => Record<AgentLayerKey, boolean>
   restoreLayers: (snapshot: Record<AgentLayerKey, boolean>) => void
+  highlightTrechos: (indices: number[]) => void
 }
