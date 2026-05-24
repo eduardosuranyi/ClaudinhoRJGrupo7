@@ -17,6 +17,7 @@ interface LayerVisibility {
   cameras: boolean
   psr: boolean
   dominio: boolean
+  gaps: boolean
 }
 
 // Weighted score given current sliders
@@ -38,7 +39,7 @@ export default function MapView({ data, selected, weights, onSelectArea }: Props
   const popupRef = useRef<any>(null)
   const [mapReady, setMapReady] = useState(false)
   const [layers, setLayers] = useState<LayerVisibility>({
-    crime: false, fatores: false, cameras: false, psr: false, dominio: false,
+    crime: false, fatores: false, cameras: false, psr: false, dominio: false, gaps: false,
   })
 
   // ─────────────────────────────────────────────────────────
@@ -248,6 +249,33 @@ export default function MapView({ data, selected, weights, onSelectArea }: Props
       },
     })
 
+    const gapFeatures = data.areas.flatMap(a =>
+      a.camera_gaps.gaps.map(g => ({
+        type: 'Feature' as const,
+        properties: {
+          recommendation: g.recommendation,
+          rank: g.rank,
+          uncovered_crimes: g.uncovered_crimes,
+          justification: g.justification,
+        },
+        geometry: { type: 'Point' as const, coordinates: [g.lng, g.lat] },
+      }))
+    )
+    map.addSource('gaps', { type: 'geojson', data: { type: 'FeatureCollection', features: gapFeatures } })
+    map.addLayer({
+      id: 'gaps-dot',
+      type: 'circle',
+      source: 'gaps',
+      layout: { visibility: 'none' },
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 4, 15, 8],
+        'circle-color': ['match', ['get', 'recommendation'], 'instalar', '#ef4444', '#fbb040'],
+        'circle-opacity': 0.9,
+        'circle-stroke-color': '#07070a',
+        'circle-stroke-width': 1.5,
+      },
+    })
+
     // ── PSR ─────────────────────────────────────────────
     const psrFeatures = data.areas.flatMap(a =>
       a.map_layers.psr_points.map(p => ({
@@ -383,6 +411,23 @@ export default function MapView({ data, selected, weights, onSelectArea }: Props
       popupRef.current?.remove()
     })
 
+    map.on('mouseenter', 'gaps-dot', (e: any) => {
+      map.getCanvas().style.cursor = 'pointer'
+      const f = e.features[0].properties
+      popupRef.current
+        .setLngLat(e.lngLat)
+        .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;max-width:220px">
+          <div style="font-size:9px;color:${f.recommendation === 'instalar' ? '#ef4444' : '#fbb040'};text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">#${f.rank} ${f.recommendation}</div>
+          <div style="font-size:11px;margin-bottom:4px">${f.uncovered_crimes} ocorrências sem cobertura</div>
+          <div style="font-size:10px;color:#8a8a95">${f.justification}</div>
+        </div>`)
+        .addTo(map)
+    })
+    map.on('mouseleave', 'gaps-dot', () => {
+      map.getCanvas().style.cursor = ''
+      popupRef.current?.remove()
+    })
+
     // Click outside areas → deselect
     map.on('click', (e: any) => {
       const features = map.queryRenderedFeatures(e.point, { layers: ['areas-fill'] })
@@ -424,6 +469,7 @@ export default function MapView({ data, selected, weights, onSelectArea }: Props
       cameras: ['cameras-dot'],
       psr:     ['psr-dot'],
       dominio: ['dominio-fill', 'dominio-stroke'],
+      gaps:    ['gaps-dot'],
     }
     layerIds[key].forEach(id => map.setLayoutProperty(id, 'visibility', next[key] ? 'visible' : 'none'))
   }
@@ -436,6 +482,7 @@ export default function MapView({ data, selected, weights, onSelectArea }: Props
   const totalCameras = data.areas.reduce((s, a) => s + a.stats.cameras_total, 0)
   const totalPSR     = data.areas.reduce((s, a) => s + a.stats.psr_total, 0)
   const totalDominio = data.areas.reduce((s, a) => s + a.dominio_territorial.length, 0)
+  const totalGaps    = data.areas.reduce((s, a) => s + a.camera_gaps.gaps.length, 0)
 
   return (
     <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
@@ -460,6 +507,7 @@ export default function MapView({ data, selected, weights, onSelectArea }: Props
         <LayerBtn label="Câmeras CIVITAS"       color="#4a90e2" active={layers.cameras} n={totalCameras} onClick={() => toggleLayer('cameras')} />
         <LayerBtn label="Pop. Situação de Rua"  color="#a855f7" active={layers.psr}     n={totalPSR}     onClick={() => toggleLayer('psr')} />
         <LayerBtn label="Domínio Territorial"   color="#fbb040" active={layers.dominio} n={totalDominio} onClick={() => toggleLayer('dominio')} />
+        <LayerBtn label="Pontos Cegos"          color="#ef4444" active={layers.gaps}    n={totalGaps}    onClick={() => toggleLayer('gaps')} />
 
         <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(42,42,53,0.7)' }}>
           <div className="label-overline" style={{ marginBottom: 5 }}>Legenda Facções</div>

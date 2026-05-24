@@ -6,11 +6,13 @@ import TopHeader from './components/TopHeader'
 import Sidebar from './components/Sidebar'
 import MapView from './components/MapView'
 import AreaPanel from './components/AreaPanel'
+import ComparativoPage from './components/tabs/ComparativoPage'
 
 export default function Home() {
   const [data, setData] = useState<AreasData | null>(null)
   const [selected, setSelected] = useState<Area | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showComparativo, setShowComparativo] = useState(false)
 
   // Scoring weights (default matches backend default)
   const [weights, setWeights] = useState({
@@ -46,33 +48,54 @@ export default function Home() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--bg)', overflow: 'hidden' }}>
-      <TopHeader data={data} />
-
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <Sidebar
-          data={data}
-          selected={selected}
-          weights={weights}
-          setWeights={setWeights}
-          onSelectArea={setSelected}
-        />
-
-        <MapView
-          data={data}
-          selected={selected}
-          weights={weights}
-          onSelectArea={setSelected}
-        />
-
-        {selected && (
-          <AreaPanel
-            area={selected}
-            allAreas={data.areas}
-            weights={weights}
-            onClose={() => setSelected(null)}
-          />
-        )}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ flex: 1 }}><TopHeader data={data} /></div>
+        <button
+          onClick={() => { setShowComparativo(v => !v); if (!showComparativo) setSelected(null) }}
+          style={{
+            padding: '6px 14px', marginRight: 16,
+            background: showComparativo ? 'var(--accent-soft)' : 'none',
+            border: `1px solid ${showComparativo ? 'var(--accent)' : 'var(--border)'}`,
+            color: showComparativo ? 'var(--accent)' : 'var(--text-dim)',
+            fontSize: 11, fontWeight: 600, cursor: 'pointer', borderRadius: 2,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {showComparativo ? '← Mapa' : 'Comparativo'}
+        </button>
       </div>
+
+      {showComparativo ? (
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px' }}>
+          <ComparativoPage data={data} weights={weights} />
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          <Sidebar
+            data={data}
+            selected={selected}
+            weights={weights}
+            setWeights={setWeights}
+            onSelectArea={setSelected}
+          />
+
+          <MapView
+            data={data}
+            selected={selected}
+            weights={weights}
+            onSelectArea={setSelected}
+          />
+
+          {selected && (
+            <AreaPanel
+              area={selected}
+              allAreas={data.areas}
+              weights={weights}
+              onClose={() => setSelected(null)}
+            />
+          )}
+        </div>
+      )}
     </div>
   )
 }

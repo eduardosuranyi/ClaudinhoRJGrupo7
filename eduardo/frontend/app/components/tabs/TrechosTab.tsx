@@ -68,12 +68,25 @@ function TrechoRow({ rank, trecho, maxTotal }: { rank: number; trecho: any; maxT
           }}>
             {cap(trecho.locf_norm)}
           </div>
-          <div style={{ display: 'flex', gap: 10, marginTop: 4, fontSize: 9 }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 4, fontSize: 9, flexWrap: 'wrap' }}>
             <ChipBreak label="transeunte" value={trecho.roubo_transeunte} color="#ff6b35" />
             <ChipBreak label="celular" value={trecho.roubo_celular} color="#fbb040" />
             <ChipBreak label="coletivo" value={trecho.roubo_coletivo} color="#a855f7" />
             {trecho.pico_hora !== undefined && (
               <span style={{ color: 'var(--text-muted)' }}>pico {trecho.pico_hora}h</span>
+            )}
+            {trecho.bingo_count !== undefined && trecho.bingo_count >= 2 && (
+              <span style={{
+                padding: '1px 5px',
+                borderRadius: 2,
+                fontSize: 8,
+                fontWeight: 700,
+                background: trecho.bingo_count >= 3 ? 'rgba(239,68,68,0.15)' : 'rgba(251,176,64,0.15)',
+                border: `1px solid ${trecho.bingo_count >= 3 ? '#ef4444' : '#fbb040'}`,
+                color: trecho.bingo_count >= 3 ? '#ef4444' : '#fbb040',
+              }}>
+                BINGO {trecho.bingo_count}/3
+              </span>
             )}
           </div>
         </div>

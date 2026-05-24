@@ -121,7 +121,7 @@ export default function AreaPanel({ area, allAreas, weights, onClose }: Props) {
       {/* Tab content */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {tab === 'escala'       && <EscalaTab area={area} allAreas={allAreas} weights={weights} />}
-        {tab === 'overview'     && <OverviewTab area={area} />}
+        {tab === 'overview'     && <OverviewTab area={area} allAreas={allAreas} />}
         {tab === 'trechos'      && <TrechosTab area={area} />}
         {tab === 'denuncias'    && <DenunciasTab area={area} />}
         {tab === 'inteligencia' && <InteligenciaTab area={area} />}

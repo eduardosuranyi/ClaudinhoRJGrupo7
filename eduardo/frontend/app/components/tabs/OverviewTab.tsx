@@ -3,8 +3,9 @@
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, YAxis } from 'recharts'
 import type { Area } from '../../types'
 import { fmt, MODUS_LABELS } from '../../lib/helpers'
+import RiskSignals from '../RiskSignals'
 
-export default function OverviewTab({ area }: { area: Area }) {
+export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?: Area[] }) {
   const horaData = Object.entries(area.stats.hora_distribution)
     .map(([h, v]) => ({ hora: `${h}h`, value: v, hour: Number(h) }))
     .sort((a, b) => a.hour - b.hour)
@@ -34,6 +35,11 @@ export default function OverviewTab({ area }: { area: Area }) {
         <KPI label="Denúncias" value={fmt(area.stats.denuncias_total)} hint="Disque Denúncia" />
         <KPI label="Fatores" value={fmt(area.stats.fatores_urbanos_total)} hint="pendentes" />
         <KPI label="Pop. Rua" value={fmt(area.stats.psr_total)} hint="censo 2024" />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+        <KPI label="Bingo 2+/3" value={fmt(area.n_bingo_trechos)} hint="trechos coincidentes" />
+        <KPI label="Bingo 3/3" value={fmt(area.n_triple_bingo)} hint="tripla coincidência" />
+        <KPI label="Pontos Cegos" value={fmt(area.camera_gaps.gaps.length)} hint={`${fmt(area.camera_gaps.n_cameras)} câmeras`} />
       </div>
 
       {/* Crime types */}
@@ -157,6 +163,8 @@ export default function OverviewTab({ area }: { area: Area }) {
           </div>
         </div>
       )}
+
+      {allAreas && <RiskSignals area={area} allAreas={allAreas} />}
     </div>
   )
 }

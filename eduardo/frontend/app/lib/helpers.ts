@@ -1,14 +1,14 @@
-// Format number with thousand separator
+/** Format a number with Brazilian thousand separators (e.g. 1.234). */
 export function fmt(n: number): string {
   return n.toLocaleString('pt-BR')
 }
 
-// Pluralize a count
+/** Pluralize: returns "1 ocorrência" or "5 ocorrências". */
 export function plural(n: number, sing: string, plur: string): string {
   return n === 1 ? `${fmt(n)} ${sing}` : `${fmt(n)} ${plur}`
 }
 
-// Score color
+/** Map a risk score (0–100) to a CSS color variable for the dark theme. */
 export function scoreColor(score: number): string {
   if (score >= 60) return 'var(--red)'
   if (score >= 40) return 'var(--accent)'
@@ -16,7 +16,7 @@ export function scoreColor(score: number): string {
   return 'var(--text-muted)'
 }
 
-// Faction color
+/** Map a faction identifier to its display color. */
 export function faccaoColor(faccao: string): string {
   const map: Record<string, string> = {
     'CV': '#ef4444',
@@ -27,7 +27,7 @@ export function faccaoColor(faccao: string): string {
   return map[faccao] || '#8a8a95'
 }
 
-// Short name for area
+/** Shorten an area name for compact display (strips prefixes, takes first segment). */
 export function shortName(nome: string): string {
   return nome
     .split(' - ')[0]
@@ -37,20 +37,20 @@ export function shortName(nome: string): string {
     .trim()
 }
 
-// Capitalize first
+/** Capitalize the first letter of a string. */
 export function cap(s: string): string {
   if (!s) return ''
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
 }
 
-// Time ago
+/** Format current time as HH:MM. */
 export function timeAgo(now: Date): string {
   const h = now.getHours()
   const m = now.getMinutes()
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
-// Modus operandi labels
+/** Human-readable labels for modus operandi keys extracted by NLP. */
 export const MODUS_LABELS: Record<string, string> = {
   'a_pe': 'A pé',
   'motocicleta': 'Motocicleta',
@@ -62,7 +62,7 @@ export const MODUS_LABELS: Record<string, string> = {
   'veiculo': 'Veículo',
 }
 
-// Órgão display
+/** Display labels for municipal agencies responsible for urban factors. */
 export const ORGAO_LABELS: Record<string, string> = {
   'COMLURB': 'Comlurb',
   'SMAS': 'SMAS',
@@ -74,6 +74,7 @@ export const ORGAO_LABELS: Record<string, string> = {
   'SMTR': 'SMTR',
 }
 
+/** Contact email addresses for dispatching urban factor resolutions. */
 export const ORGAO_EMAIL: Record<string, string> = {
   'COMLURB': 'atendimento@comlurb.rio.gov.br',
   'SMAS': 'gabinete.smas@rio.rj.gov.br',

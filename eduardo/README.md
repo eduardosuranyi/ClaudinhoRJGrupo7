@@ -41,15 +41,28 @@ eduardo/
 ### Pré-requisitos
 - Python 3.10+
 - Node 20+
-- Repositório de dados clonado ao lado do projeto:
-  `git clone https://github.com/CompStat-Rio/claude_impact_lab_compstat_rio.git compstat`
+- Repositório de dados: **opcional**. Os Parquet já estão neste projeto em **`ClaudinhoRJGrupo7/data/clean/`** (é o uso padrão do pipeline ao rodar de `eduardo/backend`).  
+  Para layout legacy com CSV nomeados igual ao hackathon, clone ao lado `git clone … compstat`.
 - Chave da Anthropic em `frontend/.env.local`: `ANTHROPIC_API_KEY=sk-ant-...`
 
 ### Backend
+
+Usa **`--data-dir` apontando para uma das duas estruturas:**
+
+1. **Repositório Grupo 7** (pastas `clean/*.parquet` — padrão abaixo)  
+   O caminho padrão de `data_pipeline.py` assume que você está em `eduardo/backend/` e que o clone contém **`data/clean/ocorrencias.parquet`**.
+
+2. **Pacote legacy “compstat”** (CSV/XLSX/SHP + `relints/*.docx`, como na documentação hackathon original) — clone `claude_impact_lab_compstat_rio` como `compstat` e passe `--data-dir ../../compstat`.
+
 ```bash
 cd eduardo/backend
 pip install -r requirements.txt
-python data_pipeline.py --data-dir ../../compstat --output areas_data.json
+# Dados já versionados neste repo (pastas clean/ — padrão)
+python data_pipeline.py --data-dir ../../data --output areas_data.json
+
+# Ou pacote CSV externo
+# python data_pipeline.py --data-dir ../../compstat --output areas_data.json
+
 cp areas_data.json ../frontend/public/areas_data.json
 ```
 
@@ -97,6 +110,33 @@ Formato oficial CompStat com identificação institucional, indicadores, dinâmi
 | RELINTs | 8 | inteligência, síntese |
 | Domínio Territorial | 1.260 | camada, identificação |
 | Censo PSR | 23.332 | KPI, camada |
+
+## Features Novas
+
+- **Camera Gap Analysis (Pontos Cegos)** — Detecta áreas sem cobertura de câmeras usando buffer de 50 m. Classifica cada ponto entre `instalar` e `remanejar`. Exibido como camada toggleável no mapa e na tab Dados.
+- **Bingo / Coincidência de Camadas** — Identifica trechos onde crime, fatores urbanos e sinais do Disque Denúncia se sobrepõem. Tags **BINGO 2/3** e **3/3** nos trechos prioritários.
+- **Comparativo Cross-Area** — Página com radar chart multidimensional, ranking com gradiente e bar chart comparativo entre todas as 8 áreas FM.
+- **Sinais de Risco Automatizados** — 8 regras de detecção automática de risco (alto volume, sem câmeras, % noturno, ORCRIM, etc.).
+- **Relatório Analítico In-Browser** — Relatório completo de 9 seções visível no dashboard, com download em `.md` e `.html`.
+
+## Testes
+
+```bash
+# Backend (32 testes)
+cd eduardo/backend
+python -m pytest tests/ -v
+
+# Frontend (19 testes)
+cd eduardo/frontend
+npm run test:run
+```
+
+## Documentação
+
+- [Arquitetura](docs/ARCHITECTURE.md)
+- [Dicionário de Dados](docs/DATA_DICTIONARY.md)
+- [Referência da API](docs/API_REFERENCE.md)
+- [Guia de Contribuição](docs/CONTRIBUTING.md)
 
 ---
 

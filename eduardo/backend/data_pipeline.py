@@ -15,9 +15,14 @@ from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
-from shapely.geometry import shape
+from shapely.geometry import Point, shape
 
 warnings.filterwarnings("ignore")
+
+
+def _repo_clean_bundle(data_dir: Path) -> bool:
+    """True quando `data_dir` aponta para a pasta `data/` do repositório (subpasta clean/)."""
+    return (data_dir / "clean" / "ocorrencias.parquet").is_file()
 
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -25,6 +30,30 @@ warnings.filterwarnings("ignore")
 # ───────────────────────────────────────────────────────────────────────────
 
 def load_ocorrencias(data_dir: Path) -> pd.DataFrame:
+    if _repo_clean_bundle(data_dir):
+        df = pd.read_parquet(data_dir / "clean" / "ocorrencias.parquet")
+        df = df[df["latitude"].between(-23.2, -22.7) & df["longitude"].between(-43.9, -43.0)].copy()
+        df = df.rename(columns={"delito_descricao": "desc_delito"})
+        hr = df.get("hora_original")
+        df["hora"] = hr.fillna("") if hr is not None else ""
+        dp = pd.to_datetime(df["data_parsed"], errors="coerce")
+        df["data"] = dp.dt.strftime("%d/%m/%Y")
+        df["aisp"] = pd.to_numeric(df.get("aisp"), errors="coerce")
+        df["risp"] = pd.to_numeric(df.get("risp"), errors="coerce")
+        def parse_hora(h):
+            try:
+                return int(str(h).split(":")[0])
+            except Exception:
+                return None
+        df["hora_num"] = df["hora"].apply(parse_hora)
+
+        df["locf_norm"] = (
+            df["locf"].fillna("").str.lower()
+            .str.replace(r"\b(avenida|rua|praca|praça|vila|travessa|alameda|estrada)\s+\1\b", r"\1", regex=True)
+            .str.strip()
+        )
+        return df
+
     path = data_dir / "dados" / "df_ocorrencias_tratado - Extração 1 .csv"
     df = pd.read_csv(path, low_memory=False)
     df = df[df["latitude"].between(-23.2, -22.7) & df["longitude"].between(-43.9, -43.0)].copy()
@@ -45,6 +74,15 @@ def load_ocorrencias(data_dir: Path) -> pd.DataFrame:
 
 
 def load_disk_denuncia(data_dir: Path) -> tuple:
+    if _repo_clean_bundle(data_dir):
+        df = pd.read_parquet(data_dir / "clean" / "disque_denuncia.parquet")
+        mask = df["tipo"].str.contains("ROUBO|FURTO", case=False, na=False)
+        df = df[mask].copy()
+        df["bairro_norm"] = df["bairro_logradouro"].fillna("").str.upper().str.strip()
+        df["data_parsed"] = pd.to_datetime(df["data_denuncia"], errors="coerce", format="mixed")
+        valid_geo = df["latitude"].between(-23.2, -22.7) & df["longitude"].between(-43.9, -43.0)
+        return df[valid_geo].copy(), df[~valid_geo].copy()
+
     path = data_dir / "dados" / "disk_denuncia.csv"
     df = pd.read_csv(path, encoding="latin-1", sep=";", low_memory=False, decimal=",")
     # Só roubo/furto
@@ -57,6 +95,11 @@ def load_disk_denuncia(data_dir: Path) -> tuple:
 
 
 def load_fatores_urbanos(data_dir: Path) -> pd.DataFrame:
+    if _repo_clean_bundle(data_dir):
+        df = pd.read_parquet(data_dir / "clean" / "fatores_urbanos.parquet")
+        df = df[df["latitude"].between(-23.2, -22.7) & df["longitude"].between(-43.9, -43.0)].copy()
+        return df
+
     path = data_dir / "dados" / "fatores_urbanos.csv"
     df = pd.read_csv(path, low_memory=False)
     df = df.rename(columns={"coordenada_x": "latitude", "coordenada_y": "longitude"})
@@ -65,6 +108,14 @@ def load_fatores_urbanos(data_dir: Path) -> pd.DataFrame:
 
 
 def load_cameras(data_dir: Path) -> pd.DataFrame:
+    if _repo_clean_bundle(data_dir):
+        df = pd.read_parquet(data_dir / "clean" / "cameras.parquet")
+        df["lat"] = pd.to_numeric(df["latitude"], errors="coerce")
+        df["lng"] = pd.to_numeric(df["longitude"], errors="coerce")
+        df = df[df["lat"].between(-23.2, -22.7) & df["lng"].between(-43.9, -43.0)].copy()
+        df["geometry"] = df.apply(lambda r: f"POINT ({r['lng']} {r['lat']})", axis=1)
+        return df
+
     path = data_dir / "dados" / "cameras_areas_fm.csv"
     df = pd.read_csv(path, low_memory=False)
 
@@ -79,6 +130,13 @@ def load_cameras(data_dir: Path) -> pd.DataFrame:
 
 
 def load_polygons(data_dir: Path) -> gpd.GeoDataFrame:
+    gj = data_dir / "clean" / "fm_areas.geojson"
+    if gj.is_file():
+        gdf = gpd.read_file(gj).to_crs(4326)
+        gdf = gdf.rename(columns={"nome_subar": "nome_area"})
+        gdf["fid"] = pd.to_numeric(gdf["fid"], errors="coerce").fillna(0).astype(int)
+        return gdf
+
     path = data_dir / "sh_area_forca" / "areas_forca_municipal.shp"
     gdf = gpd.read_file(path).to_crs(4326)
     gdf = gdf.rename(columns={"nome_subar": "nome_area"})
@@ -87,6 +145,14 @@ def load_polygons(data_dir: Path) -> gpd.GeoDataFrame:
 
 def load_dominio(data_dir: Path) -> gpd.GeoDataFrame:
     """Carrega domínio territorial (facções) e converte WKT para geometria."""
+    gj = data_dir / "clean" / "dominio_territorial.geojson"
+    if gj.is_file():
+        gdf = gpd.read_file(gj).to_crs(4326)
+        gdf = gdf[gdf.geometry.notna()].copy()
+        b = gdf.geometry.bounds
+        gdf = gdf[b["minx"].between(-44, -43) & b["miny"].between(-23.2, -22.7)].copy()
+        return gdf
+
     path = data_dir / "dados" / "outros dados" / "dominio_territorial - Extração 1.csv"
     df = pd.read_csv(path, low_memory=False)
     from shapely import wkt as shapely_wkt
@@ -104,6 +170,16 @@ def load_dominio(data_dir: Path) -> gpd.GeoDataFrame:
 
 
 def load_psr(data_dir: Path) -> pd.DataFrame:
+    if _repo_clean_bundle(data_dir):
+        df = pd.read_parquet(data_dir / "clean" / "cpsr.parquet")
+        df = df.rename(columns={
+            "latitude": "lat",
+            "longitude": "lng",
+            "classificacao_idade": "idade_classe",
+        })
+        df = df[df["lat"].between(-23.2, -22.7) & df["lng"].between(-43.9, -43.0)].copy()
+        return df
+
     path = data_dir / "dados" / "outros dados" / "CPSR_2020_2022_2024.xlsx"
     df = pd.read_excel(path, sheet_name=0,
                        usecols=["Chave_única", "Latitude", "Longitude",
@@ -115,6 +191,43 @@ def load_psr(data_dir: Path) -> pd.DataFrame:
 
 
 def load_relints(data_dir: Path) -> dict:
+    reljson = data_dir / "clean" / "relints.json"
+    if reljson.is_file():
+        codigo_para_area = {
+            "RI_010": "Rodoviária - Terminal Gentileza - Estação Leopoldina",
+            "RI_011": "Metrô Botafogo - Rua São Clemente - Rua Voluntários da Pátria",
+            "RI_012": "Jardim de Alah",
+            "RI_013": "Campo Grande: Estação de Trem - Calçadão",
+            "RI_014": "Rio Sul",
+            "RI_015": "Praia de Botafogo - Rua Marquês de Abrantes",
+            "RI_016": "Estações São Francisco Xavier - Afonso Pena",
+            "RI_017": "Presidente Vargas - Campo de Santana - Central do Brasil - Cinelândia",
+        }
+        result = {}
+        with open(reljson, encoding="utf-8") as f:
+            items = json.load(f)
+        for entry in items:
+            fn = str(entry.get("filename", ""))
+            m = re.search(r"RI_(\d{3})", fn, flags=re.I)
+            if not m:
+                continue
+            cod = "RI_" + m.group(1)
+            nome = codigo_para_area.get(cod)
+            if not nome:
+                continue
+            full_text = str(entry.get("full_text", "") or "")
+            secs_raw = entry.get("sections") or []
+            sections = []
+            if isinstance(secs_raw, list):
+                for i in range(0, len(secs_raw) - 1, 2):
+                    sections.append({"titulo": str(secs_raw[i]), "texto": str(secs_raw[i + 1])})
+                if len(secs_raw) % 2 == 1:
+                    sections.append({"titulo": str(secs_raw[-1]), "texto": ""})
+            if not full_text.strip() and sections:
+                full_text = "\n\n".join(f"## {s['titulo']}\n{s['texto']}" for s in sections)
+            result[nome] = {"full_text": full_text, "sections": sections}
+        return result
+
     relints_dir = data_dir / "relints"
     result = {}
     try:
@@ -384,7 +497,132 @@ def get_dominio_features(dominio_gdf, area_geom):
 
 
 # ───────────────────────────────────────────────────────────────────────────
-# 5. SCORING
+# 5. CAMERA GAP ANALYSIS
+# ───────────────────────────────────────────────────────────────────────────
+
+CAMERA_COVERAGE_RADIUS_M = 50
+
+
+def compute_camera_gaps(crimes_df, cam_df, max_gaps=15):
+    """Detect blind spots: crime clusters not covered by any camera buffer."""
+    if cam_df.empty:
+        return {"n_cameras": 0, "coverage_radius_m": CAMERA_COVERAGE_RADIUS_M,
+                "cameras": [], "gaps": []}
+
+    cam_points = [{"lat": float(r.lat), "lng": float(r.lng)} for r in cam_df.itertuples()]
+
+    if crimes_df.empty:
+        return {"n_cameras": len(cam_points),
+                "coverage_radius_m": CAMERA_COVERAGE_RADIUS_M,
+                "cameras": cam_points, "gaps": []}
+
+    metric_crs = "EPSG:31983"
+    cam_gdf = gpd.GeoDataFrame(
+        cam_df, geometry=gpd.points_from_xy(cam_df["lng"], cam_df["lat"]), crs=4326
+    ).to_crs(metric_crs)
+    coverage_union = cam_gdf.buffer(CAMERA_COVERAGE_RADIUS_M).union_all()
+
+    valid = crimes_df[crimes_df["latitude"].notna() & crimes_df["longitude"].notna()]
+    if valid.empty:
+        return {"n_cameras": len(cam_points),
+                "coverage_radius_m": CAMERA_COVERAGE_RADIUS_M,
+                "cameras": cam_points, "gaps": []}
+
+    crime_gdf = gpd.GeoDataFrame(
+        valid, geometry=gpd.points_from_xy(valid["longitude"], valid["latitude"]), crs=4326
+    ).to_crs(metric_crs)
+
+    uncovered_mask = ~crime_gdf.geometry.within(coverage_union)
+    uncovered = crime_gdf[uncovered_mask]
+
+    if uncovered.empty:
+        return {"n_cameras": len(cam_points),
+                "coverage_radius_m": CAMERA_COVERAGE_RADIUS_M,
+                "cameras": cam_points, "gaps": []}
+
+    cluster_gdf = uncovered.copy()
+    cluster_gdf["cluster"] = (
+        cluster_gdf.geometry.apply(lambda g: f"{round(g.x, -1)}_{round(g.y, -1)}")
+    )
+    clusters = (
+        cluster_gdf.groupby("cluster")
+        .agg(count=("cluster", "size"),
+             x=("geometry", lambda gs: gs.iloc[0].x),
+             y=("geometry", lambda gs: gs.iloc[0].y))
+        .sort_values("count", ascending=False)
+        .head(max_gaps)
+    )
+
+    gaps = []
+    for i, (_, row) in enumerate(clusters.iterrows(), 1):
+        pt = gpd.GeoSeries([Point(row["x"], row["y"])], crs=metric_crs)
+        nearest_d = float(cam_gdf.distance(pt.iloc[0]).min())
+        pt_wgs = pt.to_crs(4326).iloc[0]
+        recommendation = "remanejar" if nearest_d <= 2 * CAMERA_COVERAGE_RADIUS_M else "instalar"
+        gaps.append({
+            "rank": i,
+            "lat": round(pt_wgs.y, 6),
+            "lng": round(pt_wgs.x, 6),
+            "uncovered_crimes": int(row["count"]),
+            "nearest_camera_m": round(nearest_d, 1),
+            "recommendation": recommendation,
+            "justification": (
+                f"{int(row['count'])} ocorrências sem cobertura; "
+                f"câmera mais próxima a {nearest_d:.0f} m"
+            ),
+        })
+
+    return {
+        "n_cameras": len(cam_points),
+        "coverage_radius_m": CAMERA_COVERAGE_RADIUS_M,
+        "cameras": cam_points,
+        "gaps": gaps,
+    }
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# 5b. BINGO / COINCIDENCE SCORING
+# ───────────────────────────────────────────────────────────────────────────
+
+
+def compute_bingo(top_trechos, fu_area, dd_area, oc_area):
+    """Detect coincidence of crime + factors + signals on each trecho."""
+    if not top_trechos:
+        return top_trechos, 0, 0
+
+    fu_logradouros = set()
+    if not fu_area.empty and "logradouro" in fu_area.columns:
+        fu_logradouros = set(fu_area["logradouro"].dropna().str.lower().str.strip())
+
+    dd_logradouros = set()
+    if not dd_area.empty and "logradouro" in dd_area.columns:
+        dd_logradouros = set(dd_area["logradouro"].dropna().str.lower().str.strip())
+
+    n_bingo = 0
+    n_triple = 0
+    for t in top_trechos:
+        name = t.get("locf_norm", "").lower().strip()
+        has_crime = t.get("total", 0) > 0
+        has_factor = any(name in fl or fl in name for fl in fu_logradouros) if name else False
+        has_signal = any(name in dl or dl in name for dl in dd_logradouros) if name else False
+
+        layers = sum([has_crime, has_factor, has_signal])
+        t["bingo_count"] = layers
+        t["bingo_layers"] = {
+            "crime": has_crime,
+            "fatores": has_factor,
+            "sinais": has_signal,
+        }
+        if layers >= 2:
+            n_bingo += 1
+        if layers >= 3:
+            n_triple += 1
+
+    return top_trechos, n_bingo, n_triple
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# 6. SCORING
 # ───────────────────────────────────────────────────────────────────────────
 
 def normalize_scores(areas_raw):
@@ -492,8 +730,13 @@ def build_areas_data(data_dir: Path) -> dict:
         cameras_points = get_cameras_pontos(cam_area)
         psr_points = get_psr_points(psr_area)
 
-        # Top trechos
+        # Top trechos + bingo coincidence scoring
         top_trechos = get_top_trechos(oc_area)
+        top_trechos, n_bingo, n_triple_bingo = compute_bingo(
+            top_trechos, fu_area, dd_area, oc_area)
+
+        # Camera gap analysis
+        camera_gaps = compute_camera_gaps(oc_area, cam_area)
 
         # Fatores por órgão
         fatores_orgao = get_fatores_por_orgao(fu_area)
@@ -529,6 +772,9 @@ def build_areas_data(data_dir: Path) -> dict:
                 "modus_operandi": modus_dist,
             },
             "top_trechos": top_trechos,
+            "n_bingo_trechos": n_bingo,
+            "n_triple_bingo": n_triple_bingo,
+            "camera_gaps": camera_gaps,
             "fatores_por_orgao": fatores_orgao,
             "relatos_sample": relatos,
             "relint_disponivel": nome in relints,
@@ -576,7 +822,11 @@ def build_areas_data(data_dir: Path) -> dict:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", default="../../compstat")
+    parser.add_argument(
+        "--data-dir",
+        default="../../data",
+        help="Pasta de dados: (1) repositório com data/clean/*.parquet ou (2) pacote legacy compstat/",
+    )
     parser.add_argument("--output", default="areas_data.json")
     args = parser.parse_args()
 
