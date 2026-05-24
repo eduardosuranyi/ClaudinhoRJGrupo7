@@ -13,6 +13,24 @@ const TOOL_LABELS: Record<string, string> = {
   show_annotation: 'Marcador adicionado',
   update_weights: 'Pesos ajustados',
   complete_investigation: 'Investigação concluída',
+  highlight_trecho: 'Rua destacada',
+  highlight_top_trechos: 'Top trechos destacados',
+  clear_highlights: 'Highlights limpos',
+  focus_bairro: 'Bairro em foco',
+  set_time_filter: 'Filtro horário aplicado',
+  show_route: 'Rota desenhada',
+  query_trechos: 'Consultando trechos',
+  query_relatos_dd: 'Consultando relatos DD',
+  query_chamados_1746: 'Consultando 1746',
+  query_fatores: 'Consultando fatores',
+  query_camera_gaps: 'Consultando pontos cegos',
+  validacao_cruzada: 'Cruzando campo × 1746',
+  get_relint_section: 'Lendo RELINT',
+  evolucao_mensal: 'Série mensal',
+  bairros_entorno: 'Bairros do entorno',
+  crimes_por_hora: 'Distribuição horária',
+  ontology_events: 'Eventos NER',
+  pause_for_user: 'Aguardando',
 }
 
 const URGENCY_COLOR: Record<string, string> = {
@@ -34,6 +52,8 @@ interface Props {
   currentArea: Area | null
   sendMessage: (msg: { text: string }) => void
   onAbort: () => void
+  isPaused: boolean
+  nextSuggestions: string[] | null
 }
 
 export default function AgentPanel({
@@ -43,6 +63,8 @@ export default function AgentPanel({
   currentArea,
   sendMessage,
   onAbort,
+  isPaused,
+  nextSuggestions,
 }: Props) {
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -188,6 +210,66 @@ export default function AgentPanel({
 
       {/* Findings panel */}
       {isComplete && findings && <FindingsSection findings={findings} />}
+
+      {/* Pause suggestions */}
+      {isPaused && !isComplete && !isRunning && (
+        <div
+          style={{
+            borderTop: '1px solid var(--border)',
+            background: 'var(--bg-1)',
+            padding: '8px 12px',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 5,
+            flexShrink: 0,
+          }}
+        >
+          {(nextSuggestions ?? []).map((s, i) => (
+            <button
+              key={i}
+              onClick={() => sendMessage({ text: s })}
+              style={{
+                background: 'var(--bg-2)',
+                border: '1px solid var(--border)',
+                borderRadius: 12,
+                padding: '4px 10px',
+                fontSize: 10,
+                color: 'var(--text-dim)',
+                cursor: 'pointer',
+                lineHeight: 1.4,
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'var(--accent-soft)'
+                e.currentTarget.style.color = 'var(--accent)'
+                e.currentTarget.style.borderColor = 'var(--accent)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'var(--bg-2)'
+                e.currentTarget.style.color = 'var(--text-dim)'
+                e.currentTarget.style.borderColor = 'var(--border)'
+              }}
+            >
+              {s}
+            </button>
+          ))}
+          <button
+            onClick={() => sendMessage({ text: 'Encerre com sumário e plano de ação por órgão.' })}
+            style={{
+              background: 'var(--bg-2)',
+              border: '1px solid var(--border)',
+              borderRadius: 12,
+              padding: '4px 10px',
+              fontSize: 10,
+              color: 'var(--blue)',
+              cursor: 'pointer',
+              lineHeight: 1.4,
+              marginLeft: 'auto',
+            }}
+          >
+            ✓ Concluir investigação
+          </button>
+        </div>
+      )}
 
       {/* Input */}
       <form

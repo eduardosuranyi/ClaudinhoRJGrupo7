@@ -219,8 +219,15 @@ describe('POST /api/agent — ToolLoopAgent configuration', () => {
     await POST(makeRequest({ messages: [], area }))
   })
 
-  it('test_agent_has_stopWhen_complete_investigation', () => {
-    expect((agentSettingsRef.current as Record<string, unknown>).stopWhen).toBeDefined()
+  it('test_agent_has_stopWhen_array_with_pause_and_complete', () => {
+    const stopWhen = (agentSettingsRef.current as Record<string, unknown>).stopWhen
+    expect(Array.isArray(stopWhen)).toBe(true)
+    expect((stopWhen as unknown[]).length).toBe(2)
+  })
+
+  it('test_agent_has_pause_for_user_tool', () => {
+    const tools = (agentSettingsRef.current as Record<string, unknown>).tools as Record<string, unknown>
+    expect(tools).toHaveProperty('pause_for_user')
   })
 
   it('test_agent_has_all_map_and_query_tools', () => {
@@ -231,6 +238,7 @@ describe('POST /api/agent — ToolLoopAgent configuration', () => {
     expect(tools).toHaveProperty('show_annotation')
     expect(tools).toHaveProperty('update_weights')
     expect(tools).toHaveProperty('complete_investigation')
+    expect(tools).toHaveProperty('pause_for_user')
     expect(tools).toHaveProperty('highlight_trecho')
     expect(tools).toHaveProperty('highlight_top_trechos')
     expect(tools).toHaveProperty('clear_highlights')

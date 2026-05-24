@@ -141,6 +141,19 @@ describe('executeMapTool — show_route', () => {
   })
 })
 
+describe('executeMapTool — pause_for_user (no-op)', () => {
+  it('test_does_not_call_any_map_method', () => {
+    executeMapTool('pause_for_user', { next_suggestions: ['Mostre top trechos'] }, makeDeps())
+    expect(mapControl.toggleLayer).not.toHaveBeenCalled()
+    expect(mapControl.zoomToArea).not.toHaveBeenCalled()
+    expect(mapControl.highlightTrecho).not.toHaveBeenCalled()
+    expect(mapControl.focusBairro).not.toHaveBeenCalled()
+    expect(mapControl.setTimeFilter).not.toHaveBeenCalled()
+    expect(mapControl.showRoute).not.toHaveBeenCalled()
+    expect(mapControl.clearHighlights).not.toHaveBeenCalled()
+  })
+})
+
 describe('executeMapTool — unknown tool', () => {
   it('test_does_not_throw_for_unknown_tool', () => {
     expect(() => executeMapTool('unknown_tool', {}, makeDeps())).not.toThrow()

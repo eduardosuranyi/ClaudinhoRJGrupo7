@@ -114,6 +114,7 @@ export function useMapAgent({
 }: UseMapAgentOptions) {
   const [currentArea, setCurrentArea] = useState<Area | null>(null)
   const [findings, setFindings] = useState<AgentFindings | null>(null)
+  const [nextSuggestions, setNextSuggestions] = useState<string[] | null>(null)
   const areaRef = useRef<Area | null>(null)
   const layerSnapshotRef = useRef<Record<AgentLayerKey, boolean> | null>(null)
   const processedToolCallIds = useRef(new Set<string>())
@@ -123,6 +124,13 @@ export function useMapAgent({
   const { messages, sendMessage: _sendMessage, stop, status, setMessages } = useChat({
     transport: transport.current,
   })
+
+  // Clear pause suggestions when the agent starts producing the next step
+  useEffect(() => {
+    if (status === 'submitted' || status === 'streaming') {
+      setNextSuggestions(null)
+    }
+  }, [status])
 
   // Wrap sendMessage to always include area in body
   const sendMessage = useCallback(
@@ -159,6 +167,11 @@ export function useMapAgent({
 
         if (toolName === 'complete_investigation') {
           if (isAgentFindings(toolInput)) setFindings(toolInput)
+        } else if (toolName === 'pause_for_user') {
+          const ns = (toolInput as { next_suggestions?: unknown }).next_suggestions
+          if (Array.isArray(ns)) {
+            setNextSuggestions(ns.filter((s): s is string => typeof s === 'string'))
+          }
         } else {
           executeMapTool(toolName, toolInput, {
             ctrl,
@@ -176,6 +189,7 @@ export function useMapAgent({
       areaRef.current = area
       setCurrentArea(area)
       setFindings(null)
+      setNextSuggestions(null)
       processedToolCallIds.current = new Set()
       setMessages([])
 
@@ -193,6 +207,7 @@ export function useMapAgent({
     setMessages([])
     setCurrentArea(null)
     setFindings(null)
+    setNextSuggestions(null)
     processedToolCallIds.current = new Set()
     areaRef.current = null
 
@@ -212,6 +227,8 @@ export function useMapAgent({
     findings,
     areaId: currentArea?.id ?? null,
     isActive: currentArea !== null,
+    isPaused: nextSuggestions !== null,
+    nextSuggestions,
     sendMessage,
     startAgent,
     abortAgent,
