@@ -46,7 +46,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true,
   })
   // Mirror of layers state accessible from refs (avoids stale closures in mapControlRef)
-  const layersRef = useRef<LayerVisibility>({ crime: false, fatores: false, cameras: false, psr: false, dominio: false })
+  const layersRef = useRef<LayerVisibility>({ crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true })
 
   // ─────────────────────────────────────────────────────────
   // 1. MAP INIT

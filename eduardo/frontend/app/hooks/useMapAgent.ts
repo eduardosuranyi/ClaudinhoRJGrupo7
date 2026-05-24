@@ -129,7 +129,7 @@ export function useMapAgent({ mapControlRef, setWeights, setSelected, getArea }:
       () => addEntry({ type: 'tool_action', content: 'reconectando…' }),
     )
 
-    const reader = resp.body.getReader()
+    const reader = resp.body!.getReader()
     const decoder = new TextDecoder()
     let buffer = ''
 

@@ -143,8 +143,8 @@ export default function AreaPanel({ area, allAreas, weights, onClose }: Props) {
         {tab === 'overview'     && <OverviewTab area={area} allAreas={allAreas} />}
         {tab === 'trechos'      && <TrechosTab area={area} />}
         {tab === 'denuncias'    && <DenunciasTab area={area} />}
-        {tab === 'inteligencia' && <InteligenciaTab area={area} />}
-        {tab === 'relatorio'    && <RelatorioTab area={area} />}
+        {tab === 'inteligencia' && <InteligenciaTab area={area} allAreas={allAreas} />}
+        {tab === 'relatorio'    && <RelatorioTab area={area} allAreas={allAreas} />}
       </div>
     </aside>
   )

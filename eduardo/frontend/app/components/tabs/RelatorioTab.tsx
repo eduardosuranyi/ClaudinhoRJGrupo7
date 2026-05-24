@@ -49,7 +49,7 @@ const RECURSO_LABEL: Record<string, string> = {
   transporte:        'Transporte',
 }
 
-export default function RelatorioTab({ area }: { area: Area }) {
+export default function RelatorioTab({ area, allAreas }: { area: Area; allAreas: Area[] }) {
   const [plan, setPlan] = useState<ActionPlan | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadingReport, setLoadingReport] = useState(false)
@@ -74,8 +74,6 @@ export default function RelatorioTab({ area }: { area: Area }) {
           top_trechos: area.top_trechos.slice(0, 5),
           fatores: area.fatores_por_orgao,
           relatos: area.relatos_sample.slice(0, 5),
-          chamados_1746: area.chamados_1746,
-          validacao_cruzada: area.validacao_cruzada,
         }),
       })
       const d = await res.json()
@@ -125,19 +123,22 @@ Prefeitura do Rio de Janeiro`)
   async function exportDocx() {
     setLoadingReport(true)
     try {
-      const res = await fetch('/api/report', {
+      const res = await fetch('/api/relint', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ area, synthesis: plan?.dinamica || '' }),
+        body: JSON.stringify({ area, allAreas }),
       })
-      if (!res.ok) throw new Error('failed')
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Erro desconhecido' }))
+        throw new Error(err.error || 'failed')
+      }
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `CompStat_${area.nome.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.docx`
+      a.download = `RELINT_${area.nome.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.docx`
       a.click()
-    } catch { alert('Erro ao gerar relatorio.') }
+    } catch (e: any) { alert('Erro ao gerar RELINT: ' + (e.message || e)) }
     setLoadingReport(false)
   }
 
@@ -242,18 +243,6 @@ Prefeitura do Rio de Janeiro`)
           </div>
         </>
       )}
-
-      {/* In-browser analytical report */}
-      <div style={{
-        borderTop: '1px solid var(--border)',
-        paddingTop: 14,
-        marginTop: 14,
-      }}>
-        <div className="label-overline" style={{ marginBottom: 8, color: 'var(--text-muted)' }}>
-          Relatório Analítico Completo
-        </div>
-        <AnalyticalReport area={area} dinamica={plan?.dinamica} />
-      </div>
     </div>
   )
 }
@@ -329,139 +318,5 @@ function Row({ label, value, dim }: { label: string; value: string; dim?: boolea
   )
 }
 
-function AnalyticalReport({ area, dinamica }: { area: Area; dinamica?: string }) {
-  function buildMarkdown(): string {
-    const lines: string[] = []
-    lines.push(`# RELATÓRIO ANALÍTICO — ${area.nome}`)
-    lines.push(`**Período:** 2020–2024 · Gerado automaticamente\n`)
-    lines.push('---\n')
-
-    lines.push('## 1. Identificação da Área\n')
-    lines.push(`| Campo | Valor |`)
-    lines.push(`|-------|-------|`)
-    lines.push(`| AISP | ${area.identificacao.aisp ?? '—'} |`)
-    lines.push(`| Base FM | ${area.identificacao.base_fm} |`)
-    lines.push(`| Subprefeitura | ${area.identificacao.subprefeitura} |`)
-    lines.push(`| Domínio principal | ${area.identificacao.dominio_principal} |\n`)
-
-    lines.push('## 2. Indicadores do Período\n')
-    lines.push(`- **Ocorrências (ISP-RJ 2020-2024):** ${fmt(area.stats.crimes_total)}`)
-    lines.push(`- **Pico horário:** ${area.stats.pico_horario}`)
-    lines.push(`- **% Noturno:** ${area.stats.pct_noturno}%`)
-    lines.push(`- **Denúncias Disque Denúncia (crime anônimo):** ${fmt(area.stats.denuncias_total)}`)
-    lines.push(`- **Fatores urbanos (observação de campo):** ${fmt(area.stats.fatores_urbanos_total)}`)
-    if (area.chamados_1746) {
-      lines.push(`- **Chamados 1746 (demanda cidadã 2020-2024):** ${fmt(area.chamados_1746.total)} (${area.chamados_1746.pct_atendido}% atendidos, ${area.chamados_1746.pct_vencido}% vencidos)`)
-    }
-    lines.push(`- **Câmeras:** ${fmt(area.stats.cameras_total)}`)
-    lines.push(`- **Pop. situação de rua:** ${fmt(area.stats.psr_total)}`)
-    lines.push(`- **Score de risco:** ${area.score.total.toFixed(1)}/100\n`)
-
-    lines.push('## 3. Distribuição por Tipo\n')
-    for (const [tipo, n] of Object.entries(area.stats.crimes_por_tipo).sort(([,a],[,b]) => b - a)) {
-      const pct = Math.round(n / Math.max(area.stats.crimes_total, 1) * 100)
-      lines.push(`- ${tipo}: ${fmt(n)} (${pct}%)`)
-    }
-    lines.push('')
-
-    lines.push('## 4. Análise Temporal\n')
-    lines.push(`- **Dia de pico:** ${Object.entries(area.stats.dia_distribution).sort(([,a],[,b]) => b - a)[0]?.[0] ?? '—'}`)
-    lines.push(`- **Hora de pico:** ${area.stats.pico_horario}\n`)
-
-    lines.push('## 5. Trechos Críticos\n')
-    for (const t of area.top_trechos.slice(0, 10)) {
-      const bingo = t.bingo_count ? ` · BINGO ${t.bingo_count}/3` : ''
-      lines.push(`**${t.locf_norm}** — ${fmt(t.total)} ocorrências${bingo}`)
-    }
-    lines.push('')
-
-    lines.push('## 6. Coincidências (Bingo)\n')
-    lines.push(`- Trechos com 2+ camadas: ${area.n_bingo_trechos}`)
-    lines.push(`- Trechos com 3/3 camadas: ${area.n_triple_bingo}\n`)
-
-    lines.push('## 7. Demandas por Órgão (validação cruzada)\n')
-    lines.push('> Fatores Urbanos = observação de campo pela equipe FM (diagnóstico qualitativo)')
-    lines.push('> Chamados 1746 = reclamações da população na Central de Atendimento (demanda quantitativa)')
-    lines.push('> Disque Denúncia = denúncias anônimas sobre CRIME (fonte separada, NÃO é infraestrutura)\n')
-    if (area.validacao_cruzada && area.validacao_cruzada.length > 0) {
-      lines.push('| Órgão | Campo (fatores) | Cidadão (1746) | % Atendidos | Vencidos | Validado |')
-      lines.push('|-------|-----------------|----------------|-------------|----------|----------|')
-      for (const v of area.validacao_cruzada) {
-        const pctAt = v.chamados_1746 > 0 ? Math.round(v.chamados_atendidos / v.chamados_1746 * 100) : 0
-        lines.push(`| ${v.orgao} | ${fmt(v.fatores_campo)} | ${fmt(v.chamados_1746)} | ${pctAt}% | ${fmt(v.chamados_vencidos)} | ${v.validado ? 'Sim' : '—'} |`)
-      }
-    } else {
-      for (const org of area.fatores_por_orgao) {
-        lines.push(`**${org.orgao}** — ${fmt(org.total)} registros de campo`)
-        for (const t of org.tipos.slice(0, 3)) {
-          lines.push(`  - ${t.tipo}: ${t.count}`)
-        }
-      }
-    }
-    lines.push('')
-
-    if (dinamica) {
-      lines.push('## 8. Dinâmica Criminal (IA)\n')
-      lines.push(dinamica + '\n')
-    }
-
-    lines.push('## 9. Câmeras e Pontos Cegos\n')
-    lines.push(`- Câmeras: ${area.camera_gaps.n_cameras}`)
-    lines.push(`- Raio de cobertura: ${area.camera_gaps.coverage_radius_m}m`)
-    lines.push(`- Pontos cegos: ${area.camera_gaps.gaps.length}\n`)
-    for (const g of area.camera_gaps.gaps.slice(0, 5)) {
-      lines.push(`- **#${g.rank}** [${g.recommendation.toUpperCase()}] ${g.justification}`)
-    }
-
-    return lines.join('\n')
-  }
-
-  const md = buildMarkdown()
-
-  function downloadFile(content: string, filename: string, mime: string) {
-    const blob = new Blob([content], { type: mime })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const slug = area.nome.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_')
-
-  return (
-    <div>
-      <div style={{
-        background: 'var(--bg-2)',
-        border: '1px solid var(--border)',
-        borderRadius: 2,
-        padding: '10px 12px',
-        maxHeight: 300,
-        overflowY: 'auto',
-        fontSize: 11,
-        color: 'var(--text-dim)',
-        lineHeight: 1.6,
-        whiteSpace: 'pre-wrap',
-        fontFamily: 'monospace',
-      }}>
-        {md}
-      </div>
-      <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-        <button onClick={() => downloadFile(md, `relatorio_${slug}.md`, 'text/markdown')} style={dlBtn}>
-          Baixar .md
-        </button>
-        <button onClick={() => {
-          const html = `<html><head><meta charset="utf-8"><style>body{font-family:sans-serif;max-width:900px;margin:auto;padding:24px;line-height:1.6;background:#0a0a0f;color:#f0f0f3}h1,h2{color:#ff6b35}table{border-collapse:collapse;width:100%}th,td{border:1px solid #2a2a35;padding:8px;text-align:left}</style></head><body>${md.replace(/\n/g, '<br>')}</body></html>`
-          downloadFile(html, `relatorio_${slug}.html`, 'text/html')
-        }} style={dlBtn}>
-          Baixar .html
-        </button>
-      </div>
-    </div>
-  )
-}
-
-const dlBtn: React.CSSProperties = { padding: '5px 10px', background: 'var(--bg-3)', border: '1px solid var(--border)', color: 'var(--text-dim)', fontSize: 10, cursor: 'pointer', borderRadius: 2 }
 const ghostBtn: React.CSSProperties = { padding: '5px 10px', background: 'none', border: '1px solid var(--border)', color: 'var(--text-dim)', fontSize: 11, cursor: 'pointer', borderRadius: 2 }
 const accentBtn: React.CSSProperties = { padding: '5px 12px', background: 'var(--accent-soft)', border: '1px solid var(--accent)', color: 'var(--accent)', fontSize: 11, fontWeight: 600, cursor: 'pointer', borderRadius: 2 }
