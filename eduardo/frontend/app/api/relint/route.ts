@@ -50,12 +50,6 @@ function calcularEscala(area: any, todasAreas: any[]) {
 // ─────────────────────────────────────────────────────────────────────
 // 2. Helpers docx
 // ─────────────────────────────────────────────────────────────────────
-const NO_BORDER = {
-  top:    { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-  bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-  left:   { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-  right:  { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-}
 const THIN_BORDER = { style: BorderStyle.SINGLE, size: 4, color: '000000' }
 
 function txt(text: string, bold = false): TextRun {

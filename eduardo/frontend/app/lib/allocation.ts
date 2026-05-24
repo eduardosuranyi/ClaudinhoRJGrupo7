@@ -85,7 +85,6 @@ export function calcularEscala(areas: Area[], weights: { mancha: number; pico: n
     const janela = `${Math.max(pico1 - 1, 0)}h–${Math.min(pico2 + 2, 23)}h`
 
     // Dias críticos
-    const diasOrder = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado', 'Domingo']
     const dias_criticos = Object.entries(area.stats.dia_distribution)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
@@ -120,7 +119,6 @@ function calcularModalidades(area: Area, total: number): Modalidade[] {
   const psr = area.stats.psr_total
   const noturno = area.stats.pct_noturno
   const nomeNorm = area.nome.toLowerCase()
-  const crimes = area.stats.crimes_total
 
   // Base: 50% pé, 25% moto, 15% viatura, 10% bicicleta
   let ratios = { pe: 50, moto: 25, viatura: 15, bicicleta: 10, social: 0 }
@@ -217,8 +215,6 @@ function calcularPosicionamentos(area: Area, modalidades: Modalidade[]): Posicio
     if (m.tipo !== 'social') modPool.push(m.tipo)
   })
 
-  // Distribuição por pico horário
-  const horaMap = area.stats.hora_distribution || {}
   const getHoraTurno = (picoH: number): string => {
     if (picoH >= 5 && picoH < 12)  return `${picoH}h–${picoH + 3}h`
     if (picoH >= 12 && picoH < 18) return `${picoH}h–${picoH + 2}h`

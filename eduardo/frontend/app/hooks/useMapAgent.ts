@@ -1,45 +1,24 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import type {
-  Area,
-  AgentState,
-  AgentCheckpointData,
-  AgentFindings,
-  TranscriptEntry,
-  MapControl,
-} from '../types'
+import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport, isToolUIPart, getToolName } from 'ai'
+import type { Area, AgentFindings, AgentLayerKey, MapControl } from '../types'
 
-function uid() {
-  return Math.random().toString(36).slice(2)
+function getString(v: unknown, field: string): string {
+  if (typeof v !== 'string') throw new Error(`Expected string for ${field}, got ${typeof v}`)
+  return v
 }
 
-class AgentError extends Error {}
-
-async function withRetry<T>(
-  fn: () => Promise<T>,
-  attempts: number,
-  onRetry: () => void,
-): Promise<T> {
-  for (let i = 0; ; i++) {
-    try { return await fn() }
-    catch (err) {
-      const retriable = err instanceof TypeError || (err as any)?.status >= 500
-      if (!retriable || i >= attempts - 1) throw err
-      onRetry()
-      await new Promise(r => setTimeout(r, 800 * (i + 1)))
-    }
-  }
+function getNumber(v: unknown, field: string): number {
+  if (typeof v !== 'number') throw new Error(`Expected number for ${field}, got ${typeof v}`)
+  return v
 }
 
-const TOOL_LABELS: Record<string, string> = {
-  toggle_layer:           'Camada do mapa alterada',
-  zoom_to_area:           'Navegando para a área',
-  show_annotation:        'Marcador adicionado',
-  update_weights:         'Pesos de score ajustados',
-  narrate:                'Narrativa',
-  checkpoint:             'Checkpoint',
-  complete_investigation: 'Investigação concluída',
+function isAgentFindings(v: unknown): v is AgentFindings {
+  if (typeof v !== 'object' || v === null) return false
+  const obj = v as Record<string, unknown>
+  return typeof obj.summary === 'string' && Array.isArray(obj.key_findings) && Array.isArray(obj.actions)
 }
 
 interface UseMapAgentOptions {
@@ -49,260 +28,192 @@ interface UseMapAgentOptions {
   getArea: (id: number) => Area | undefined
 }
 
-export function useMapAgent({ mapControlRef, setWeights, setSelected, getArea }: UseMapAgentOptions) {
-  const [agentState, setAgentState] = useState<AgentState>({
-    status: 'idle',
-    areaId: null,
-    transcript: [],
-    pendingCheckpoint: null,
-    messages: [],
-    findings: null,
-    error: null,
-    thinkingDetail: null,
+// Pure function — easy to unit test
+export function executeMapTool(
+  toolName: string,
+  input: Record<string, unknown>,
+  deps: {
+    ctrl: MapControl
+    setWeights: UseMapAgentOptions['setWeights']
+    setSelected: UseMapAgentOptions['setSelected']
+    getArea: UseMapAgentOptions['getArea']
+  },
+): void {
+  const { ctrl, setWeights, setSelected, getArea } = deps
+  switch (toolName) {
+    case 'toggle_layer':
+      ctrl.toggleLayer(getString(input.layer, 'layer') as AgentLayerKey, input.visible === true)
+      break
+    case 'zoom_to_area': {
+      const areaId = getNumber(input.area_id, 'area_id')
+      ctrl.zoomToArea(areaId)
+      const area = getArea(areaId)
+      if (area) setSelected(area)
+      break
+    }
+    case 'show_annotation':
+      ctrl.addAnnotation(
+        getNumber(input.lat, 'lat'),
+        getNumber(input.lng, 'lng'),
+        getString(input.title, 'title'),
+        getString(input.body, 'body'),
+      )
+      break
+    case 'update_weights': {
+      const defaults = { mancha: 40, pico: 15, fatores: 25, dinamica: 15 }
+      const patch: Partial<typeof defaults> = {}
+      if (typeof input.mancha === 'number') patch.mancha = input.mancha
+      if (typeof input.pico === 'number') patch.pico = input.pico
+      if (typeof input.fatores === 'number') patch.fatores = input.fatores
+      if (typeof input.dinamica === 'number') patch.dinamica = input.dinamica
+      setWeights({ ...defaults, ...patch })
+      break
+    }
+    case 'highlight_trecho': {
+      const locf = getString(input.locf_norm, 'locf_norm')
+      const color = typeof input.color === 'string' ? input.color : undefined
+      const label = typeof input.label === 'string' ? input.label : undefined
+      ctrl.highlightTrecho(locf, { color, label })
+      break
+    }
+    case 'highlight_top_trechos':
+      ctrl.highlightTopTrechos(getNumber(input.n, 'n'))
+      break
+    case 'clear_highlights':
+      ctrl.clearHighlights()
+      break
+    case 'focus_bairro':
+      ctrl.focusBairro(getString(input.nome, 'nome'))
+      break
+    case 'set_time_filter': {
+      const hi = input.hora_inicio
+      const hf = input.hora_fim
+      ctrl.setTimeFilter(
+        typeof hi === 'number' ? hi : null,
+        typeof hf === 'number' ? hf : null,
+      )
+      break
+    }
+    case 'show_route': {
+      const fromLat = getNumber(input.from_lat, 'from_lat')
+      const fromLng = getNumber(input.from_lng, 'from_lng')
+      const toLat = getNumber(input.to_lat, 'to_lat')
+      const toLng = getNumber(input.to_lng, 'to_lng')
+      const label = typeof input.label === 'string' ? input.label : undefined
+      ctrl.showRoute([fromLng, fromLat], [toLng, toLat], label)
+      break
+    }
+  }
+}
+
+export function useMapAgent({
+  mapControlRef,
+  setWeights,
+  setSelected,
+  getArea,
+}: UseMapAgentOptions) {
+  const [currentArea, setCurrentArea] = useState<Area | null>(null)
+  const [findings, setFindings] = useState<AgentFindings | null>(null)
+  const areaRef = useRef<Area | null>(null)
+  const layerSnapshotRef = useRef<Record<AgentLayerKey, boolean> | null>(null)
+  const processedToolCallIds = useRef(new Set<string>())
+
+  const transport = useRef(new DefaultChatTransport({ api: '/api/agent' }))
+
+  const { messages, sendMessage: _sendMessage, stop, status, setMessages } = useChat({
+    transport: transport.current,
   })
 
-  const agentStateRef = useRef(agentState)
-  useEffect(() => { agentStateRef.current = agentState }, [agentState])
+  // Wrap sendMessage to always include area in body
+  const sendMessage = useCallback(
+    (message: Parameters<typeof _sendMessage>[0], opts: Parameters<typeof _sendMessage>[1] = {}) => {
+      const existingBody = (opts != null && typeof opts === 'object' && 'body' in opts && typeof opts.body === 'object')
+        ? (opts.body as Record<string, unknown> ?? {})
+        : {}
+      return _sendMessage(message, {
+        ...opts,
+        body: { ...existingBody, area: areaRef.current },
+      })
+    },
+    [_sendMessage],
+  )
 
-  const layerSnapshotRef = useRef<Record<string, boolean> | null>(null)
-  const abortRef = useRef(false)
-
-  const addEntry = useCallback((entry: Omit<TranscriptEntry, 'id'>) => {
-    setAgentState(prev => ({
-      ...prev,
-      transcript: [...prev.transcript, { ...entry, id: uid() }],
-    }))
-  }, [])
-
-  // Execute a single tool call on the map (with a small visual delay)
-  const executeTool = useCallback((name: string, input: any) => {
+  // Watch messages for completed tool invocations and execute map operations
+  useEffect(() => {
     const ctrl = mapControlRef.current
     if (!ctrl) return
 
-    switch (name) {
-      case 'toggle_layer':
-        ctrl.toggleLayer(input.layer, input.visible)
-        break
-      case 'zoom_to_area':
-        ctrl.zoomToArea(input.area_id)
-        // Also sync React selected state
-        if (input.area_id) {
-          const area = getArea(input.area_id)
-          if (area) setSelected(area)
-        }
-        break
-      case 'show_annotation':
-        ctrl.addAnnotation(input.lat, input.lng, input.title, input.body)
-        break
-      case 'update_weights': {
-        const current = { mancha: 40, pico: 15, fatores: 25, dinamica: 15 }
-        setWeights({ ...current, ...input })
-        break
-      }
-    }
-  }, [mapControlRef, setWeights, setSelected, getArea])
+    for (const msg of messages) {
+      if (msg.role !== 'assistant') continue
+      // The AI SDK's message.parts type is not fully exposed; casts below are unavoidable workarounds.
+      for (const part of (msg.parts ?? []) as unknown[]) {
+        if (!isToolUIPart(part as never)) continue
+        const typedPart = part as { state: string; toolCallId: string; input?: unknown; output?: unknown }
+        if (typedPart.state !== 'output-available') continue
+        const { toolCallId } = typedPart
+        if (processedToolCallIds.current.has(toolCallId)) continue
+        processedToolCallIds.current.add(toolCallId)
 
-  const processSSEStream = useCallback(async (
-    area: Area,
-    messages: any[],
-    checkpointAnswer?: { tool_use_id: string; answer: string },
-  ) => {
-    abortRef.current = false
+        const toolName = getToolName(part as never)
+        const toolInput = (typedPart.input ?? {}) as Record<string, unknown>
 
-    const body: any = { area, messages }
-    if (checkpointAnswer) {
-      body.checkpoint_tool_use_id = checkpointAnswer.tool_use_id
-      body.checkpoint_answer = checkpointAnswer.answer
-    }
-
-    const resp = await withRetry(
-      async () => {
-        const r = await fetch('/api/agent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        })
-        if (!r.ok || !r.body) throw Object.assign(new Error(`HTTP ${r.status}`), { status: r.status })
-        return r
-      },
-      3,
-      () => addEntry({ type: 'tool_action', content: 'reconectando…' }),
-    )
-
-    const reader = resp.body!.getReader()
-    const decoder = new TextDecoder()
-    let buffer = ''
-
-    while (true) {
-      if (abortRef.current) { reader.cancel(); break }
-
-      const { done, value } = await reader.read()
-      if (done) break
-
-      buffer += decoder.decode(value, { stream: true })
-
-      // SSE lines end with \n\n
-      const parts = buffer.split('\n\n')
-      buffer = parts.pop() ?? ''
-
-      for (const part of parts) {
-        const line = part.trim()
-        if (!line.startsWith('data: ')) continue
-
-        const raw = line.slice(6)
-        let event: any
-        try { event = JSON.parse(raw) } catch { continue }
-
-        if (abortRef.current) break
-
-        switch (event.type) {
-          case 'text':
-            // Claude thinking text (usually empty with tool_use)
-            break
-
-          case 'thinking':
-            setAgentState(prev => ({ ...prev, thinkingDetail: event.detail }))
-            break
-
-          case 'tool': {
-            const { name, input } = event
-            // Execute map actions immediately
-            executeTool(name, input)
-
-            if (name === 'narrate') {
-              addEntry({ type: 'narrate', content: input.text, stepTitle: input.step_title })
-            } else if (name !== 'checkpoint' && name !== 'complete_investigation') {
-              addEntry({
-                type: 'tool_action',
-                content: TOOL_LABELS[name] || name,
-                stepTitle: input.step_title,
-              })
-            }
-            break
-          }
-
-          case 'pause': {
-            const cp: AgentCheckpointData = event.checkpoint
-            addEntry({
-              type: 'checkpoint_ask',
-              content: cp.question,
-              checkpoint: cp,
-            })
-            setAgentState(prev => ({
-              ...prev,
-              status: 'paused',
-              pendingCheckpoint: cp,
-              messages: event.messages,
-              thinkingDetail: null,
-            }))
-            break
-          }
-
-          case 'complete': {
-            const findings: AgentFindings = event.findings
-            addEntry({ type: 'complete', content: findings.summary })
-            setAgentState(prev => ({
-              ...prev,
-              status: 'complete',
-              findings,
-              pendingCheckpoint: null,
-              thinkingDetail: null,
-            }))
-            break
-          }
-
-          case 'error':
-            throw new AgentError(event.message)
-
-          case 'done':
-            // Stream closed normally
-            break
+        if (toolName === 'complete_investigation') {
+          if (isAgentFindings(toolInput)) setFindings(toolInput)
+        } else {
+          executeMapTool(toolName, toolInput, {
+            ctrl,
+            setWeights,
+            setSelected,
+            getArea,
+          })
         }
       }
     }
-  }, [executeTool, addEntry])
+  }, [messages, mapControlRef, setWeights, setSelected, getArea])
 
-  const startAgent = useCallback(async (area: Area) => {
-    const ctrl = mapControlRef.current
-    // Snapshot current layer state for restore on abort
-    if (ctrl) layerSnapshotRef.current = ctrl.snapshotLayers()
+  const startAgent = useCallback(
+    async (area: Area) => {
+      areaRef.current = area
+      setCurrentArea(area)
+      setFindings(null)
+      processedToolCallIds.current = new Set()
+      setMessages([])
 
-    setAgentState({
-      status: 'running',
-      areaId: area.id,
-      transcript: [{
-        id: uid(),
-        type: 'system',
-        content: `Iniciando investigação: ${area.nome}`,
-      }],
-      pendingCheckpoint: null,
-      messages: [],
-      findings: null,
-      error: null,
-      thinkingDetail: null,
-    })
+      const ctrl = mapControlRef.current
+      if (ctrl) layerSnapshotRef.current = ctrl.snapshotLayers()
 
-    try {
-      await processSSEStream(area, [])
-    } catch (err: any) {
-      if (abortRef.current) return
-      addEntry({ type: 'error', content: err.message })
-      setAgentState(prev => ({ ...prev, status: 'error', error: err.message }))
-    }
-  }, [mapControlRef, processSSEStream, addEntry])
+      // Send empty trigger — server will use area from body to build the real context
+      await sendMessage({ text: '' })
+    },
+    [sendMessage, mapControlRef, setMessages],
+  )
 
-  const respondToCheckpoint = useCallback(async (answer: string) => {
-    // Read state synchronously from ref BEFORE any setAgentState call.
-    // If we read from `agentState` closure or a functional updater after clearing
-    // pendingCheckpoint, React batching would already have it as null.
-    const { areaId, messages, pendingCheckpoint } = agentStateRef.current
-    if (!areaId || !pendingCheckpoint) return
+  const abortAgent = useCallback(async () => {
+    await stop()
+    setMessages([])
+    setCurrentArea(null)
+    setFindings(null)
+    processedToolCallIds.current = new Set()
+    areaRef.current = null
 
-    const area = getArea(areaId)
-    if (!area) {
-      setAgentState(prev => ({ ...prev, status: 'error', error: 'Área não encontrada' }))
-      return
-    }
-
-    // Single batch: clear checkpoint, set running, add transcript entry
-    setAgentState(prev => ({
-      ...prev,
-      status: 'running',
-      pendingCheckpoint: null,
-      thinkingDetail: null,
-      transcript: [...prev.transcript, { id: uid(), type: 'checkpoint_answer', content: answer }],
-    }))
-
-    processSSEStream(area, messages, {
-      tool_use_id: pendingCheckpoint.tool_use_id,
-      answer,
-    }).catch(err => {
-      if (abortRef.current) return
-      addEntry({ type: 'error', content: err.message })
-      setAgentState(s => ({ ...s, status: 'error', error: err.message }))
-    })
-  }, [getArea, processSSEStream, addEntry])
-
-  const abortAgent = useCallback(() => {
-    abortRef.current = true
     const ctrl = mapControlRef.current
     if (ctrl) {
       ctrl.clearAnnotations()
-      if (layerSnapshotRef.current) {
-        ctrl.restoreLayers(layerSnapshotRef.current as any)
-      }
+      ctrl.clearHighlights()
+      ctrl.setTimeFilter(null, null)
+      if (layerSnapshotRef.current) ctrl.restoreLayers(layerSnapshotRef.current)
     }
-    setAgentState({
-      status: 'idle',
-      areaId: null,
-      transcript: [],
-      pendingCheckpoint: null,
-      messages: [],
-      findings: null,
-      error: null,
-      thinkingDetail: null,
-    })
-  }, [mapControlRef])
+    layerSnapshotRef.current = null
+  }, [stop, setMessages, mapControlRef])
 
-  return { agentState, startAgent, respondToCheckpoint, abortAgent }
+  return {
+    messages,
+    status,
+    findings,
+    areaId: currentArea?.id ?? null,
+    isActive: currentArea !== null,
+    sendMessage,
+    startAgent,
+    abortAgent,
+  }
 }

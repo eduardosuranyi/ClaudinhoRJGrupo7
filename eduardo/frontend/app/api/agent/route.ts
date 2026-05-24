@@ -1,351 +1,450 @@
-import { NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import { ToolLoopAgent, createAgentUIStreamResponse, hasToolCall, tool, generateId } from 'ai'
+import { anthropic } from '@ai-sdk/anthropic'
+import { z } from 'zod'
+import { NextRequest, NextResponse } from 'next/server'
 import type { Area } from '../../types'
+import { buildAreaBrief } from '../../lib/areaBrief'
+import { loadOntologyEventsForArea } from '../../lib/ontologyEvents'
 
-const client = new Anthropic()
+const SYSTEM_PROMPT = `Você é um analista investigativo de segurança pública municipal do Rio de Janeiro guiando outro analista pelo mapa CompStat.
 
-const MAP_TOOLS: Anthropic.Tool[] = [
-  {
-    name: 'toggle_layer',
-    description: 'Exibe ou oculta uma camada de dados no mapa',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        layer: {
-          type: 'string',
-          enum: ['crime', 'fatores', 'cameras', 'psr', 'dominio'],
-          description: 'Identificador da camada',
-        },
-        visible: { type: 'boolean', description: 'true para exibir, false para ocultar' },
-      },
-      required: ['layer', 'visible'],
-    },
-  },
-  {
-    name: 'zoom_to_area',
-    description: 'Centraliza e anima o mapa para a área em análise',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        area_id: { type: 'number', description: 'ID numérico da área' },
-      },
-      required: ['area_id'],
-    },
-  },
-  {
-    name: 'show_annotation',
-    description: 'Adiciona marcador informativo temporário no mapa em coordenada específica',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        lat: { type: 'number' },
-        lng: { type: 'number' },
-        title: { type: 'string', description: 'Título curto (logradouro ou ponto de interesse)' },
-        body: { type: 'string', description: 'Observação de até 60 caracteres' },
-      },
-      required: ['lat', 'lng', 'title', 'body'],
-    },
-  },
-  {
-    name: 'narrate',
-    description: 'Mostra texto explicativo no painel. Sempre chame antes de um checkpoint.',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        step_title: { type: 'string', description: 'Título curto e simples (ex: "Crimes na área", "Ruas mais perigosas")' },
-        text: { type: 'string', description: '2-4 frases em linguagem do dia a dia, como numa conversa. Use números dos dados, mas explique de forma fácil de entender.' },
-      },
-      required: ['step_title', 'text'],
-    },
-  },
-  {
-    name: 'update_weights',
-    description: 'Ajusta pesos do score de risco para destacar a dimensão analisada',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        mancha:   { type: 'number', description: '0-60' },
-        pico:     { type: 'number', description: '0-60' },
-        fatores:  { type: 'number', description: '0-60' },
-        dinamica: { type: 'number', description: '0-60' },
-      },
-    },
-  },
-  {
-    name: 'checkpoint',
-    description: 'Pausa para o analista fazer perguntas ou continuar. Use exatamente 3 checkpoints na investigação. Sempre inclua "Continuar análise" como primeira opção.',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        question: { type: 'string', description: 'Pergunta simples e direta, resumindo o que já vimos e convidando a seguir ou tirar dúvidas (ex: "Já vimos os crimes principais da área. Quer saber mais de alguma coisa antes de continuar?")' },
-        options: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Primeira opção SEMPRE "Continuar análise". Demais opções: 2-3 perguntas curtas e fáceis de entender sobre o que o analista pode querer saber mais',
-        },
-        reasoning: { type: 'string', description: 'Resumo breve e simples do que já foi mostrado até aqui' },
-      },
-      required: ['question', 'options', 'reasoning'],
-    },
-  },
-  {
-    name: 'complete_investigation',
-    description: 'Finaliza a investigação. Chame após o último checkpoint.',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        summary: { type: 'string', description: 'Resumo simples de 2-3 frases, em linguagem natural' },
-        key_findings: {
-          type: 'array',
-          items: { type: 'string' },
-          description: '3-5 pontos principais em frases curtas e fáceis de ler, cada um com um número ou dado concreto',
-        },
-        actions: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              prioridade:    { type: 'number' },
-              urgencia:      { type: 'string', enum: ['imediata', '7_dias', '30_dias'] },
-              orgao:         { type: 'string' },
-              tipo_recurso:  { type: 'string' },
-              acao:          { type: 'string', description: 'O que fazer, em linguagem simples e direta' },
-              local:         { type: 'string' },
-              evidencia:     { type: 'string', description: 'Número ou dado concreto que explica por que essa ação faz sentido' },
-              prazo:         { type: 'string' },
-            },
-          },
-          description: '5-8 ações priorizadas',
-        },
-      },
-      required: ['summary', 'key_findings', 'actions'],
-    },
-  },
-]
+ESTILO
+- Português direto, frases curtas. "Crimes" em vez de "ocorrências", "grupos armados" em vez de "facções" em contexto público.
+- Quando citar número, explique o significado ("6 em cada 10 crimes acontecem à noite").
+- Pergunte ao analista quando útil — pause as tools e espere.
 
-function buildAreaSummary(area: Area): string {
-  const s = area.stats
-  const b = area.score.breakdown
+PRINCÍPIOS DE INVESTIGAÇÃO
+- NÃO afirme números de cor. Use as tools query_* para puxar dados específicos antes de afirmar.
+- Dirija o mapa com riqueza: destaque ruas com highlight_trecho, filtre janela horária com set_time_filter, foque bairros do entorno com focus_bairro, desenhe rotas de fuga descritas no RELINT com show_route.
+- Combine fontes: cruze top_trechos (crimes) com fatores urbanos + chamados 1746 no mesmo trecho para identificar BINGO (3 camadas coincidindo).
+- Liberdade de exploração: o usuário pode pedir qualquer coisa. Use as ferramentas criativamente. Não siga um roteiro fixo.
 
-  const crimeTypes = Object.entries(s.crimes_por_tipo)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3)
-    .map(([k, v]) => `${k}: ${v}`)
-    .join(', ')
+REGRAS FUNDAMENTAIS (do briefing CompStat)
+- Disque Denúncia (DD) ≠ Chamados 1746. NUNCA some os dois. DD = denúncia ANÔNIMA de CRIME → ação policial. 1746 = pedido de SERVIÇO PÚBLICO → ação da Prefeitura.
+- Correlação ≠ causalidade. Use "associado a", "coincide com", "pode contribuir" — nunca "causa", "provoca".
+- Os dados mostram 30-50% dos roubos (subnotificação). Mencione quando relevante.
+- Pop. flutuante: Centro/Botafogo têm muito mais pessoas do que residentes — crime per capita engana nessas áreas.
+- PSR (pessoas em situação de rua) → orientar para SMAS (assistência social), NUNCA para repressão policial.
+- RELINT e domínio territorial são CLASSIFICADOS — cite conclusões, não reproduza literalmente em saídas públicas.
 
-  const modus = Object.entries(s.modus_operandi || {})
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 4)
-    .map(([k, v]) => `${k}: ${v}%`)
-    .join(', ')
+TOOLS DE QUERY (use antes de afirmar)
+- query_trechos: ranqueia/filtra ruas críticas da área
+- query_relatos_dd: busca em relatos do Disque Denúncia (denúncia de crime)
+- query_chamados_1746: agrega chamados de serviço público
+- query_fatores: fatores urbanos de campo por órgão/tipo
+- query_camera_gaps: pontos cegos de câmera com justificativa
+- validacao_cruzada: campo × 1746 por órgão (mostra órgãos com problema crônico)
+- get_relint_section: abre seção específica do RELINT
+- evolucao_mensal: série temporal de crimes
+- bairros_entorno: contexto fora do polígono FM
+- crimes_por_hora: distribuição horária e por dia da semana
+- ontology_events: eventos criminais extraídos por NER (se disponível)
 
-  const trechos = area.top_trechos.slice(0, 8)
-    .map((t, i) => `  ${i + 1}. ${t.locf_norm} — ${t.total} ocs (pico ${t.pico_hora}h) [lat:${t.lat.toFixed(4)},lng:${t.lng.toFixed(4)}]`)
-    .join('\n')
+TOOLS DE MAPA (use para visualizar)
+- toggle_layer: liga/desliga camada (crime, fatores, cameras, psr, dominio, gaps, chamados, bairros)
+- zoom_to_area: foca polígono da área
+- show_annotation: marcador temporário com título e nota
+- highlight_trecho: pinta uma rua específica do top_trechos
+- highlight_top_trechos: pinta os top-N de uma vez
+- clear_highlights: limpa highlights/rotas/bairro foco
+- focus_bairro: destaca bairro do entorno
+- set_time_filter: filtra heatmap de crime por janela horária (use null/null para resetar)
+- show_route: desenha rota entre dois pontos (rota de fuga descrita no RELINT)
+- update_weights: ajusta sliders de score quando relevante
 
-  const dominioCount = area.dominio_territorial.reduce((acc, d) => {
-    acc[d.faccao] = (acc[d.faccao] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
-  const dominioStr = Object.entries(dominioCount)
-    .map(([f, n]) => `${f}:${n}`)
-    .join(', ')
+FINALIZAÇÃO
+- Quando o analista pedir um sumário ou após análise completa, chame complete_investigation com sumário, achados e plano de ação por órgão.`
 
-  const fatoresStr = area.fatores_por_orgao
-    .slice(0, 4)
-    .map(f => `${f.orgao}:${f.total}`)
-    .join(', ')
+const COMMON_DESC = 'Limites: até 50 resultados por chamada. Use filtros para focar.'
 
-  return `ÁREA: ${area.nome} (ID: ${area.id})
-SCORE DE RISCO: ${area.score.total} | Mancha:${b.mancha_criminal}/40, Pico:${b.pico_horario}/15, Fatores:${b.fatores_urbanos}/25, Dinâmica:${b.dinamica}/15
-
-CRIMINALIDADE (2020-2024):
-- Total: ${s.crimes_total} ocorrências
-- Tipos: ${crimeTypes}
-- Pico horário: ${s.pico_horario} | ${s.pct_noturno}% noturno
-- Modus operandi: ${modus}
-
-TOP 8 TRECHOS CRÍTICOS (com coordenadas para show_annotation):
-${trechos}
-
-DADOS COMPLEMENTARES:
-- Disque Denúncia: ${s.denuncias_total} denúncias
-- Fatores urbanos: ${s.fatores_urbanos_total} (${fatoresStr})
-- Câmeras CIVITAS: ${s.cameras_total}
-- Pop. situação de rua (PSR): ${s.psr_total}
-
-CONTROLE TERRITORIAL:
-- Domínio principal: ${area.identificacao.dominio_principal}
-- Territórios por facção: ${dominioStr || 'Nenhum mapeado'}
-
-RELINT (trecho):
-${area.relint?.full_text?.slice(0, 1800) || 'Não disponível.'}`
+// ─── Local helpers for query tools ────────────────────────────────────────────
+function clampLimit(n: number | undefined, max: number = 50): number {
+  if (typeof n !== 'number' || !Number.isFinite(n) || n <= 0) return max
+  return Math.min(Math.floor(n), max)
 }
 
-const SYSTEM_PROMPT = `Você guia um analista pelo mapa de segurança do Rio de Janeiro, mostrando os dados da área passo a passo.
+function lower(s: string | undefined | null): string {
+  return (s ?? '').trim().toLowerCase()
+}
 
-LINGUAGEM (obrigatório em narrate, checkpoint e complete_investigation):
-- Fale como numa conversa normal, em português simples e claro.
-- Use palavras do dia a dia. Evite jargão, termos técnicos e palavras difíceis.
-- Prefira "crimes" a "ocorrências", "ruas mais perigosas" a "trechos críticos", "grupos armados" a "facções", "problemas na rua" a "fatores urbanos".
-- Frases curtas e diretas. Se usar um número, explique o que ele significa ("6 em cada 10 crimes acontecem à noite").
-- Soe natural, como alguém explicando para um colega — não como um relatório formal.
+function buildAgent(area: Area) {
+  return new ToolLoopAgent({
+    model: anthropic('claude-sonnet-4-6'),
+    instructions: SYSTEM_PROMPT,
+    stopWhen: hasToolCall('complete_investigation'),
+    tools: {
+      // ═══════════════════════════ QUERY TOOLS (server-only, no client effect) ═════
+      query_trechos: tool({
+        description: `Lista trechos críticos (ruas) da área, filtráveis. ${COMMON_DESC}`,
+        inputSchema: z.object({
+          orderBy: z.enum(['total', 'bingo', 'pico_hora']).optional(),
+          limit: z.number().int().optional(),
+          bingo_only: z.boolean().optional().describe('Apenas trechos com bingo_count>=2'),
+          hora: z.number().int().min(0).max(23).optional().describe('Filtra por hora de pico'),
+          tipo: z.enum(['transeunte', 'celular', 'coletivo']).optional(),
+        }),
+        execute: async ({ orderBy = 'total', limit, bingo_only, hora, tipo }) => {
+          let rows = area.top_trechos.slice()
+          if (bingo_only) rows = rows.filter(t => (t.bingo_count ?? 0) >= 2)
+          if (typeof hora === 'number') rows = rows.filter(t => t.pico_hora === hora)
+          if (tipo === 'transeunte') rows = rows.filter(t => t.roubo_transeunte > 0)
+          if (tipo === 'celular') rows = rows.filter(t => t.roubo_celular > 0)
+          if (tipo === 'coletivo') rows = rows.filter(t => t.roubo_coletivo > 0)
+          if (orderBy === 'bingo') rows.sort((a, b) => (b.bingo_count ?? 0) - (a.bingo_count ?? 0))
+          else if (orderBy === 'pico_hora') rows.sort((a, b) => a.pico_hora - b.pico_hora)
+          else rows.sort((a, b) => b.total - a.total)
+          return {
+            total_disponivel: area.top_trechos.length,
+            retornados: rows.slice(0, clampLimit(limit)).map(t => ({
+              locf_norm: t.locf_norm,
+              total: t.total,
+              pico_hora: t.pico_hora,
+              roubo_transeunte: t.roubo_transeunte,
+              roubo_celular: t.roubo_celular,
+              roubo_coletivo: t.roubo_coletivo,
+              bingo_count: t.bingo_count ?? 0,
+              bingo_layers: t.bingo_layers,
+              lat: t.lat,
+              lng: t.lng,
+              tem_geometria_linha: !!t.line_geometry,
+            })),
+          }
+        },
+      }),
 
-ROTEIRO OBRIGATÓRIO (siga esta sequência):
-1. zoom_to_area → toggle_layer(crime, true) → narrate("Crimes na área") — total de crimes, tipo mais comum, quantos acontecem à noite
-2. show_annotation nas 3 ruas com mais crimes → narrate("Ruas mais perigosas") — top 3 com números
-3. CHECKPOINT 1: pause para o analista — resuma o que vimos sobre crimes e ofereça 2-3 opções simples de aprofundamento, sempre com "Continuar análise" como primeira opção
-4. toggle_layer(dominio, true) → narrate("Quem manda na região") — grupos presentes, pontos de tensão
-5. CHECKPOINT 2: pause para o analista — resuma o que vimos sobre o território e ofereça opções de aprofundamento
-6. toggle_layer(fatores, true) → toggle_layer(cameras, true) → narrate("Problemas na rua e câmeras") — o que falta arrumar, onde tem câmera
-7. CHECKPOINT 3: pause para o analista — resuma fatores e câmeras e ofereça opções antes de encerrar
-8. update_weights → complete_investigation
-
-REGRAS:
-- Sempre narrate antes de cada checkpoint
-- Use números dos dados em TODA narração, mas explique o que eles significam
-- Máximo 3 checkpoints, depois complete_investigation obrigatoriamente
-- Seja conciso: 2-4 frases por narrate
-- Checkpoints são pausas para o analista fazer perguntas ou seguir em frente — NÃO são testes de conhecimento
-- Quando o analista responder um checkpoint, adapte o próximo narrate à resposta dele`
-
-export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const { area, messages: savedMessages, checkpoint_tool_use_id, checkpoint_answer } = body as {
-    area: Area
-    messages: any[]
-    checkpoint_tool_use_id?: string
-    checkpoint_answer?: string
-  }
-
-  const encoder = new TextEncoder()
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      const send = (event: object) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`))
-      }
-
-      try {
-        // Build messages: either initial or resume from checkpoint
-        let messages: any[]
-
-        if (savedMessages && savedMessages.length > 0) {
-          // Resume: add tool_result for the checkpoint
-          messages = [
-            ...savedMessages,
-            {
-              role: 'user',
-              content: [{
-                type: 'tool_result',
-                tool_use_id: checkpoint_tool_use_id,
-                content: JSON.stringify({ user_answer: checkpoint_answer }),
-              }],
-            },
-          ]
-        } else {
-          // Initial: build from area data
-          messages = [
-            {
-              role: 'user',
-              content: buildAreaSummary(area),
-            },
-          ]
-        }
-
-        let continueLoop = true
-        let turn = 0
-        const MAX_TURNS = 12
-
-        while (continueLoop && turn < MAX_TURNS) {
-          turn++
-
-          console.log(`[agent] turn ${turn} — chamando Claude (${messages.length} msgs)`)
-          send({ type: 'thinking', turn, detail: `Turno ${turn} — consultando modelo…` })
-
-          const response = await client.messages.create({
-            model: 'claude-sonnet-4-6',
-            max_tokens: 2000,
-            system: SYSTEM_PROMPT,
-            tools: MAP_TOOLS,
-            tool_choice: { type: 'auto' },
-            messages,
+      query_relatos_dd: tool({
+        description: `Busca em relatos do Disque Denúncia (denúncia ANÔNIMA de crime — não confundir com 1746). ${COMMON_DESC}`,
+        inputSchema: z.object({
+          tipo: z.string().optional().describe('Filtra por substring no campo tipo (ex.: "trafico")'),
+          contains: z.string().optional().describe('Substring no texto do relato'),
+          logradouro: z.string().optional().describe('Substring no logradouro'),
+          limit: z.number().int().optional(),
+        }),
+        execute: async ({ tipo, contains, logradouro, limit }) => {
+          const t = lower(tipo)
+          const c = lower(contains)
+          const lg = lower(logradouro)
+          const rows = (area.relatos_sample ?? []).filter(r => {
+            if (t && !lower(r.tipo).includes(t)) return false
+            if (c && !lower(r.relato).includes(c)) return false
+            if (lg && !lower(r.logradouro).includes(lg)) return false
+            return true
           })
+          return {
+            total_disponivel: area.relatos_sample?.length ?? 0,
+            retornados: rows.slice(0, clampLimit(limit, 20)).map(r => ({
+              tipo: r.tipo,
+              data: r.data,
+              bairro: r.bairro,
+              logradouro: r.logradouro,
+              relato: r.relato,
+              modus: r.modus,
+              perfil_suspeito: r.perfil_suspeito,
+            })),
+          }
+        },
+      }),
 
-          const toolNames = response.content
-            .filter((b: any) => b.type === 'tool_use')
-            .map((b: any) => b.name)
-          console.log(`[agent] turn ${turn} — stop_reason: ${response.stop_reason} | tools: [${toolNames.join(', ')}]`)
+      query_chamados_1746: tool({
+        description: `Chamados de SERVIÇO PÚBLICO (1746 — não confundir com DD). Agregados por tipo/órgão. ${COMMON_DESC}`,
+        inputSchema: z.object({
+          tipo: z.string().optional(),
+          orgao: z.string().optional(),
+          vencidos_only: z.boolean().optional(),
+          limit: z.number().int().optional(),
+        }),
+        execute: async ({ tipo, orgao, vencidos_only, limit }) => {
+          const ch = area.chamados_1746
+          if (!ch) return { disponivel: false, mensagem: 'Sem dados 1746 nesta área.' }
+          let rows = ch.por_tipo.slice()
+          if (tipo) rows = rows.filter(r => lower(r.tipo).includes(lower(tipo)))
+          if (orgao) rows = rows.filter(r => lower(r.orgao).includes(lower(orgao)))
+          if (vencidos_only) rows = rows.filter(r => (r.vencidos ?? 0) > 0)
+          rows.sort((a, b) => b.total - a.total)
+          return {
+            total: ch.total,
+            pct_atendido: ch.pct_atendido,
+            pct_vencido: ch.pct_vencido,
+            com_coordenadas: ch.com_coordenadas,
+            por_tipo: rows.slice(0, clampLimit(limit, 30)),
+            evolucao_mensal_disponivel: !!ch.evolucao_mensal,
+          }
+        },
+      }),
 
-          // Add assistant turn to messages
-          messages = [...messages, { role: 'assistant', content: response.content }]
+      query_fatores: tool({
+        description: 'Fatores urbanos de campo agrupados por órgão (snapshot 2026). Use validacao_cruzada para comparar com 1746.',
+        inputSchema: z.object({
+          orgao: z.string().optional(),
+        }),
+        execute: async ({ orgao }) => {
+          let rows = area.fatores_por_orgao.slice()
+          if (orgao) rows = rows.filter(r => lower(r.orgao).includes(lower(orgao)))
+          rows.sort((a, b) => b.total - a.total)
+          return {
+            total_fatores: area.stats.fatores_urbanos_total,
+            por_orgao: rows.map(r => ({
+              orgao: r.orgao,
+              total: r.total,
+              top_tipos: r.tipos.slice(0, 5),
+            })),
+          }
+        },
+      }),
 
-          const toolResults: any[] = []
-          let hitCheckpoint = false
+      query_camera_gaps: tool({
+        description: 'Pontos cegos de câmera (lugares com crime e sem cobertura próxima).',
+        inputSchema: z.object({
+          top: z.number().int().optional(),
+        }),
+        execute: async ({ top }) => {
+          const gaps = area.camera_gaps?.gaps ?? []
+          return {
+            n_cameras_existentes: area.camera_gaps?.n_cameras ?? 0,
+            coverage_radius_m: area.camera_gaps?.coverage_radius_m ?? 0,
+            total_gaps: gaps.length,
+            top: gaps.slice(0, clampLimit(top, 20)),
+          }
+        },
+      }),
 
-          for (const block of response.content) {
-            if (block.type === 'text' && block.text.trim()) {
-              send({ type: 'text', content: block.text })
-              continue
+      validacao_cruzada: tool({
+        description: 'Por órgão: fatores observados em campo × chamados 1746 atendidos/vencidos. Identifica órgãos com problema crônico.',
+        inputSchema: z.object({
+          orgao: z.string().optional(),
+        }),
+        execute: async ({ orgao }) => {
+          const vc = area.validacao_cruzada ?? []
+          let rows = vc.slice()
+          if (orgao) rows = rows.filter(r => lower(r.orgao).includes(lower(orgao)))
+          return {
+            disponivel: vc.length > 0,
+            por_orgao: rows,
+          }
+        },
+      }),
+
+      get_relint_section: tool({
+        description: 'Retorna uma seção específica do RELINT, ou a lista de títulos se nenhum título for passado. Conteúdo classificado.',
+        inputSchema: z.object({
+          titulo: z.string().optional().describe('Substring do título da seção'),
+        }),
+        execute: async ({ titulo }) => {
+          if (!area.relint?.full_text) return { disponivel: false }
+          const sections = area.relint.sections ?? []
+          if (!titulo) {
+            return {
+              disponivel: true,
+              n_sections: sections.length,
+              titulos: sections.map(s => s.titulo),
+              full_length_chars: area.relint.full_text.length,
             }
-
-            if (block.type === 'tool_use') {
-              console.log(`[agent]   tool: ${block.name}`, JSON.stringify(block.input).slice(0, 120))
-              send({ type: 'tool', name: block.name, input: block.input, id: block.id })
-
-              if (block.name === 'checkpoint') {
-                // Pause: send messages snapshot so client can resume
-                send({
-                  type: 'pause',
-                  checkpoint: { ...(block.input as object), tool_use_id: block.id },
-                  messages,
-                })
-                hitCheckpoint = true
-                continueLoop = false
-                break
-              }
-
-              if (block.name === 'complete_investigation') {
-                send({ type: 'complete', findings: block.input })
-                continueLoop = false
-                break
-              }
-
-              // All other tools: return success so Claude can continue
-              toolResults.push({
-                type: 'tool_result',
-                tool_use_id: block.id,
-                content: JSON.stringify({ status: 'ok' }),
-              })
-            }
           }
+          const t = lower(titulo)
+          const found = sections.find(s => lower(s.titulo).includes(t))
+          if (!found) return { disponivel: true, encontrada: false, titulos: sections.map(s => s.titulo) }
+          return { disponivel: true, encontrada: true, titulo: found.titulo, texto: found.texto }
+        },
+      }),
 
-          // Add tool results for next turn (if any non-pause tools were called)
-          if (continueLoop && toolResults.length > 0) {
-            messages = [...messages, { role: 'user', content: toolResults }]
+      evolucao_mensal: tool({
+        description: 'Série temporal mensal de crimes na área.',
+        inputSchema: z.object({
+          window: z.number().int().optional().describe('Últimos N meses (default 24)'),
+        }),
+        execute: async ({ window }) => {
+          const w = clampLimit(window ?? 24, 60)
+          const series = (area.evolucao_mensal ?? []).slice(-w)
+          return {
+            total_meses: area.evolucao_mensal?.length ?? 0,
+            series,
           }
+        },
+      }),
 
-          // Natural end of conversation
-          if (response.stop_reason === 'end_turn') {
-            continueLoop = false
+      bairros_entorno: tool({
+        description: 'Bairros que envolvem o polígono FM, com população, denúncias e 1746.',
+        inputSchema: z.object({}),
+        execute: async () => {
+          const b = area.bairros_entorno ?? []
+          return {
+            disponivel: b.length > 0,
+            bairros: b.map(x => ({
+              nome: x.nome,
+              populacao: x.populacao,
+              denuncias: x.denuncias,
+              chamados_1746: x.chamados_1746,
+            })),
           }
-        }
+        },
+      }),
 
-        send({ type: 'done' })
-      } catch (err: any) {
-        send({ type: 'error', message: err.message || 'Erro interno do agente', status: (err as any).status ?? 500 })
-      } finally {
-        controller.close()
-      }
+      crimes_por_hora: tool({
+        description: 'Distribuição de crimes por hora do dia e dia da semana.',
+        inputSchema: z.object({}),
+        execute: async () => ({
+          pico_horario: area.stats.pico_horario,
+          pct_noturno: area.stats.pct_noturno,
+          por_hora: area.stats.hora_distribution,
+          por_dia_semana: area.stats.dia_distribution,
+        }),
+      }),
+
+      ontology_events: tool({
+        description: 'Eventos criminais estruturados pela ontologia Valente (extração NER). Pode estar indisponível.',
+        inputSchema: z.object({
+          limit: z.number().int().optional(),
+          contains: z.string().optional().describe('Substring em logradouro ou tipo de crime'),
+        }),
+        execute: async ({ limit, contains }) => {
+          const events = loadOntologyEventsForArea(area.nome)
+          if (events.length === 0) return { disponivel: false }
+          const c = lower(contains)
+          const filtered = c
+            ? events.filter(e => lower(e.logradouro).includes(c) || lower(e.crimeType).includes(c))
+            : events
+          return {
+            disponivel: true,
+            total: events.length,
+            retornados: filtered.slice(0, clampLimit(limit, 25)),
+          }
+        },
+      }),
+
+      // ═══════════════════════════ MAP TOOLS (client executes side-effect) ═════════
+      toggle_layer: tool({
+        description: 'Exibe/oculta camada do mapa.',
+        inputSchema: z.object({
+          layer: z.enum(['crime', 'fatores', 'cameras', 'psr', 'dominio', 'gaps', 'chamados', 'bairros']),
+          visible: z.boolean(),
+        }),
+        execute: async () => ({ status: 'ok' as const }),
+      }),
+
+      zoom_to_area: tool({
+        description: 'Centraliza o mapa na área em análise.',
+        inputSchema: z.object({ area_id: z.number().int() }),
+        execute: async () => ({ status: 'ok' as const }),
+      }),
+
+      show_annotation: tool({
+        description: 'Adiciona marcador temporário (pin) no mapa.',
+        inputSchema: z.object({
+          lat: z.number(),
+          lng: z.number(),
+          title: z.string(),
+          body: z.string().describe('Observação curta (até 80 chars)'),
+        }),
+        execute: async () => ({ status: 'ok' as const }),
+      }),
+
+      highlight_trecho: tool({
+        description: 'Pinta uma rua específica (do top_trechos). Use o locf_norm exato retornado por query_trechos.',
+        inputSchema: z.object({
+          locf_norm: z.string(),
+          color: z.string().optional().describe('Cor hex, ex.: #ef4444'),
+          label: z.string().optional(),
+        }),
+        execute: async () => ({ status: 'ok' as const }),
+      }),
+
+      highlight_top_trechos: tool({
+        description: 'Pinta os top-N trechos críticos da área.',
+        inputSchema: z.object({ n: z.number().int().min(1).max(10) }),
+        execute: async () => ({ status: 'ok' as const }),
+      }),
+
+      clear_highlights: tool({
+        description: 'Limpa todos os highlights (ruas, rotas, bairro focado).',
+        inputSchema: z.object({}),
+        execute: async () => ({ status: 'ok' as const }),
+      }),
+
+      focus_bairro: tool({
+        description: 'Destaca e dá zoom em um bairro do entorno.',
+        inputSchema: z.object({ nome: z.string() }),
+        execute: async () => ({ status: 'ok' as const }),
+      }),
+
+      set_time_filter: tool({
+        description: 'Filtra heatmap de crime por janela horária [inicio, fim). Use null/null para resetar.',
+        inputSchema: z.object({
+          hora_inicio: z.number().int().min(0).max(23).nullable(),
+          hora_fim: z.number().int().min(1).max(24).nullable(),
+        }),
+        execute: async () => ({ status: 'ok' as const }),
+      }),
+
+      show_route: tool({
+        description: 'Desenha uma rota (LineString) entre dois pontos — ex.: rota de fuga descrita no RELINT.',
+        inputSchema: z.object({
+          from_lat: z.number(),
+          from_lng: z.number(),
+          to_lat: z.number(),
+          to_lng: z.number(),
+          label: z.string().optional(),
+        }),
+        execute: async () => ({ status: 'ok' as const }),
+      }),
+
+      update_weights: tool({
+        description: 'Ajusta pesos dos sliders de score quando relevante.',
+        inputSchema: z.object({
+          mancha: z.number().min(0).max(60).optional(),
+          pico: z.number().min(0).max(60).optional(),
+          fatores: z.number().min(0).max(60).optional(),
+          dinamica: z.number().min(0).max(60).optional(),
+        }),
+        execute: async (args: Record<string, unknown>) => args,
+      }),
+
+      complete_investigation: tool({
+        description: 'Finaliza a investigação com sumário, achados e plano de ação por órgão.',
+        inputSchema: z.object({
+          summary: z.string(),
+          key_findings: z.array(z.string()),
+          actions: z.array(
+            z.object({
+              prioridade: z.number(),
+              urgencia: z.enum(['imediata', '7_dias', '30_dias']),
+              orgao: z.string(),
+              tipo_recurso: z.string(),
+              acao: z.string(),
+              local: z.string(),
+              evidencia: z.string(),
+              prazo: z.string(),
+            }),
+          ),
+        }),
+        execute: async (findings: Record<string, unknown>) => findings,
+      }),
     },
   })
+}
 
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache, no-transform',
-      'Connection': 'keep-alive',
-      'X-Accel-Buffering': 'no',
-    },
+export async function POST(req: NextRequest) {
+  const body = (await req.json()) as { messages?: unknown[]; area?: Area }
+  const { messages = [], area } = body
+
+  if (!area?.id) {
+    return NextResponse.json({ error: 'area required' }, { status: 400 })
+  }
+
+  const { text: areaContext } = buildAreaBrief(area)
+
+  const areaMessage = {
+    id: generateId(),
+    role: 'user' as const,
+    parts: [{ type: 'text' as const, text: areaContext }],
+  }
+
+  const uiMessages =
+    messages.length <= 1 ? [areaMessage] : [areaMessage, ...messages.slice(1)]
+
+  const agent = buildAgent(area)
+
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages,
   })
 }

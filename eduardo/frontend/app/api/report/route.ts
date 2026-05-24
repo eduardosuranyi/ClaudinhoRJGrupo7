@@ -5,11 +5,17 @@ import { join } from 'path'
 import { promisify } from 'util'
 import { tmpdir } from 'os'
 import { randomUUID } from 'crypto'
+import type { Area } from '../../types'
 
 const execAsync = promisify(exec)
 
+interface ReportBody {
+  area: Area
+  synthesis: unknown
+}
+
 export async function POST(req: NextRequest) {
-  const body = await req.json()
+  const body = await req.json() as ReportBody
   const { area, synthesis } = body
 
   const uid = randomUUID()
@@ -19,9 +25,10 @@ export async function POST(req: NextRequest) {
   writeFileSync(inputPath, JSON.stringify({ area, synthesis }), 'utf-8')
 
   const scriptPath = join(process.cwd(), '..', 'backend', 'generate_report.py')
+  const pythonBin = process.env.PYTHON_BIN ?? 'python3'
 
   try {
-    await execAsync(`"C:\\Users\\dudus\\anaconda3\\python.exe" "${scriptPath}" --input "${inputPath}" --output "${outputPath}"`)
+    await execAsync(`"${pythonBin}" "${scriptPath}" --input "${inputPath}" --output "${outputPath}"`)
 
     if (!existsSync(outputPath)) {
       return NextResponse.json({ error: 'Falha ao gerar relatório' }, { status: 500 })
@@ -39,7 +46,8 @@ export async function POST(req: NextRequest) {
         'Content-Disposition': `attachment; filename="CompStat_${area.nome.slice(0,30)}.docx"`,
       },
     })
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
