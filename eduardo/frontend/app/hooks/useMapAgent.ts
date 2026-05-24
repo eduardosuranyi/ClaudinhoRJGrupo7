@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import type {
   Area,
   AgentState,
@@ -12,6 +12,24 @@ import type {
 
 function uid() {
   return Math.random().toString(36).slice(2)
+}
+
+class AgentError extends Error {}
+
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  attempts: number,
+  onRetry: () => void,
+): Promise<T> {
+  for (let i = 0; ; i++) {
+    try { return await fn() }
+    catch (err) {
+      const retriable = err instanceof TypeError || (err as any)?.status >= 500
+      if (!retriable || i >= attempts - 1) throw err
+      onRetry()
+      await new Promise(r => setTimeout(r, 800 * (i + 1)))
+    }
+  }
 }
 
 const TOOL_LABELS: Record<string, string> = {
@@ -40,7 +58,11 @@ export function useMapAgent({ mapControlRef, setWeights, setSelected, getArea }:
     messages: [],
     findings: null,
     error: null,
+    thinkingDetail: null,
   })
+
+  const agentStateRef = useRef(agentState)
+  useEffect(() => { agentStateRef.current = agentState }, [agentState])
 
   const layerSnapshotRef = useRef<Record<string, boolean> | null>(null)
   const abortRef = useRef(false)
@@ -93,15 +115,19 @@ export function useMapAgent({ mapControlRef, setWeights, setSelected, getArea }:
       body.checkpoint_answer = checkpointAnswer.answer
     }
 
-    const resp = await fetch('/api/agent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-
-    if (!resp.ok || !resp.body) {
-      throw new Error(`HTTP ${resp.status}`)
-    }
+    const resp = await withRetry(
+      async () => {
+        const r = await fetch('/api/agent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        if (!r.ok || !r.body) throw Object.assign(new Error(`HTTP ${r.status}`), { status: r.status })
+        return r
+      },
+      3,
+      () => addEntry({ type: 'tool_action', content: 'reconectando…' }),
+    )
 
     const reader = resp.body.getReader()
     const decoder = new TextDecoder()
@@ -134,6 +160,10 @@ export function useMapAgent({ mapControlRef, setWeights, setSelected, getArea }:
             // Claude thinking text (usually empty with tool_use)
             break
 
+          case 'thinking':
+            setAgentState(prev => ({ ...prev, thinkingDetail: event.detail }))
+            break
+
           case 'tool': {
             const { name, input } = event
             // Execute map actions immediately
@@ -163,6 +193,7 @@ export function useMapAgent({ mapControlRef, setWeights, setSelected, getArea }:
               status: 'paused',
               pendingCheckpoint: cp,
               messages: event.messages,
+              thinkingDetail: null,
             }))
             break
           }
@@ -175,12 +206,13 @@ export function useMapAgent({ mapControlRef, setWeights, setSelected, getArea }:
               status: 'complete',
               findings,
               pendingCheckpoint: null,
+              thinkingDetail: null,
             }))
             break
           }
 
           case 'error':
-            throw new Error(event.message)
+            throw new AgentError(event.message)
 
           case 'done':
             // Stream closed normally
@@ -207,6 +239,7 @@ export function useMapAgent({ mapControlRef, setWeights, setSelected, getArea }:
       messages: [],
       findings: null,
       error: null,
+      thinkingDetail: null,
     })
 
     try {
@@ -219,37 +252,36 @@ export function useMapAgent({ mapControlRef, setWeights, setSelected, getArea }:
   }, [mapControlRef, processSSEStream, addEntry])
 
   const respondToCheckpoint = useCallback(async (answer: string) => {
-    setAgentState(prev => {
-      if (!prev.pendingCheckpoint) return prev
-      return {
-        ...prev,
-        status: 'running',
-        pendingCheckpoint: null,
-      }
+    // Read state synchronously from ref BEFORE any setAgentState call.
+    // If we read from `agentState` closure or a functional updater after clearing
+    // pendingCheckpoint, React batching would already have it as null.
+    const { areaId, messages, pendingCheckpoint } = agentStateRef.current
+    if (!areaId || !pendingCheckpoint) return
+
+    const area = getArea(areaId)
+    if (!area) {
+      setAgentState(prev => ({ ...prev, status: 'error', error: 'Área não encontrada' }))
+      return
+    }
+
+    // Single batch: clear checkpoint, set running, add transcript entry
+    setAgentState(prev => ({
+      ...prev,
+      status: 'running',
+      pendingCheckpoint: null,
+      thinkingDetail: null,
+      transcript: [...prev.transcript, { id: uid(), type: 'checkpoint_answer', content: answer }],
+    }))
+
+    processSSEStream(area, messages, {
+      tool_use_id: pendingCheckpoint.tool_use_id,
+      answer,
+    }).catch(err => {
+      if (abortRef.current) return
+      addEntry({ type: 'error', content: err.message })
+      setAgentState(s => ({ ...s, status: 'error', error: err.message }))
     })
-
-    addEntry({ type: 'checkpoint_answer', content: answer })
-
-    // We need current agentState values — use functional update via ref trick
-    setAgentState(prev => {
-      const { areaId, messages, pendingCheckpoint } = prev
-      if (!areaId || !pendingCheckpoint) return prev
-
-      const area = getArea(areaId)
-      if (!area) return { ...prev, status: 'error', error: 'Área não encontrada' }
-
-      processSSEStream(area, messages, {
-        tool_use_id: pendingCheckpoint.tool_use_id,
-        answer,
-      }).catch(err => {
-        if (abortRef.current) return
-        addEntry({ type: 'error', content: err.message })
-        setAgentState(s => ({ ...s, status: 'error', error: err.message }))
-      })
-
-      return prev
-    })
-  }, [addEntry, processSSEStream, getArea])
+  }, [getArea, processSSEStream, addEntry])
 
   const abortAgent = useCallback(() => {
     abortRef.current = true
@@ -268,6 +300,7 @@ export function useMapAgent({ mapControlRef, setWeights, setSelected, getArea }:
       messages: [],
       findings: null,
       error: null,
+      thinkingDetail: null,
     })
   }, [mapControlRef])
 

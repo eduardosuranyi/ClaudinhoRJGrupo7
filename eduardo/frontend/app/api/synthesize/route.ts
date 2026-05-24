@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
   const modus_txt = Object.entries(stats.modus_operandi || {}).slice(0,5)
     .map(([k,v]) => `${k}:${v}`).join(', ')
 
-  const prompt = `Você é analista-chefe do CompStat Municipal do Rio de Janeiro.
-Com base nos dados abaixo, gere um PLANO DE AÇÃO EXECUTIVO para a área "${nome}".
+  const prompt = `Você monta um plano de ação prático para melhorar a segurança na área "${nome}".
+Use linguagem simples e direta — como se estivesse explicando para um colega, sem jargão nem palavras difíceis.
 
 DADOS:
 - Crimes (2020-2024): ${stats.crimes_total} | Pico: ${stats.pico_horario} | ${stats.pct_noturno}% noturno
@@ -50,14 +50,14 @@ Retorne APENAS um objeto JSON válido, sem markdown, sem backticks, sem texto an
 O JSON deve ter exatamente esta estrutura:
 
 {
-  "dinamica": "Parágrafo único de 80-100 palavras descrevendo o padrão criminal dominante, com dados específicos.",
+  "dinamica": "Parágrafo único de 80-100 palavras, em linguagem simples e natural, descrevendo como os crimes acontecem na área, com dados concretos.",
   "acoes": [
     {
       "prioridade": 1,
       "urgencia": "imediata",
       "orgao": "GM-Rio",
       "tipo_recurso": "patrulha_moto",
-      "acao": "Título curto da ação (máx 60 chars)",
+      "acao": "Título curto e claro da ação, em linguagem simples (máx 60 chars)",
       "local": "Logradouro específico ou trecho",
       "evidencia": "Dado concreto que justifica (número, %, horário)",
       "prazo": "Esta semana"
@@ -66,6 +66,7 @@ O JSON deve ter exatamente esta estrutura:
 }
 
 Regras:
+- Escreva tudo em português simples, como numa conversa — sem jargão policial ou burocrático
 - Gere entre 5 e 8 ações
 - urgencia: "imediata" | "7_dias" | "30_dias"  
 - orgao: apenas um destes: "GM-Rio" | "RioLuz" | "Comlurb" | "SEOP" | "SECONSERVA" | "SMAS" | "CET-Rio" | "SMTR"
@@ -80,7 +81,7 @@ Regras:
 
   try {
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 1500,
       messages: [{ role: 'user', content: prompt }],
     })

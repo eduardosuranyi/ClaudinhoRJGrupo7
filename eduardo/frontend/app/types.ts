@@ -233,6 +233,7 @@ export interface AgentState {
   messages: any[]
   findings: AgentFindings | null
   error: string | null
+  thinkingDetail: string | null
 }
 
 export interface MapControl {

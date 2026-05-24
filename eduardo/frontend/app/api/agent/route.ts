@@ -48,12 +48,12 @@ const MAP_TOOLS: Anthropic.Tool[] = [
   },
   {
     name: 'narrate',
-    description: 'Exibe narrativa analítica no painel. Sempre chame antes de um checkpoint.',
+    description: 'Mostra texto explicativo no painel. Sempre chame antes de um checkpoint.',
     input_schema: {
       type: 'object' as const,
       properties: {
-        step_title: { type: 'string', description: 'Título da etapa (ex: "Análise de Criminalidade")' },
-        text: { type: 'string', description: '2-4 frases descrevendo achados com números específicos dos dados' },
+        step_title: { type: 'string', description: 'Título curto e simples (ex: "Crimes na área", "Ruas mais perigosas")' },
+        text: { type: 'string', description: '2-4 frases em linguagem do dia a dia, como numa conversa. Use números dos dados, mas explique de forma fácil de entender.' },
       },
       required: ['step_title', 'text'],
     },
@@ -73,17 +73,17 @@ const MAP_TOOLS: Anthropic.Tool[] = [
   },
   {
     name: 'checkpoint',
-    description: 'Pausa para verificar entendimento com o analista. Use exatamente 3 checkpoints na investigação.',
+    description: 'Pausa para o analista fazer perguntas ou continuar. Use exatamente 3 checkpoints na investigação. Sempre inclua "Continuar análise" como primeira opção.',
     input_schema: {
       type: 'object' as const,
       properties: {
-        question: { type: 'string', description: 'Pergunta objetiva ao analista' },
+        question: { type: 'string', description: 'Pergunta simples e direta, resumindo o que já vimos e convidando a seguir ou tirar dúvidas (ex: "Já vimos os crimes principais da área. Quer saber mais de alguma coisa antes de continuar?")' },
         options: {
           type: 'array',
           items: { type: 'string' },
-          description: '3-4 opções de resposta',
+          description: 'Primeira opção SEMPRE "Continuar análise". Demais opções: 2-3 perguntas curtas e fáceis de entender sobre o que o analista pode querer saber mais',
         },
-        reasoning: { type: 'string', description: 'Por que esta pergunta importa neste momento' },
+        reasoning: { type: 'string', description: 'Resumo breve e simples do que já foi mostrado até aqui' },
       },
       required: ['question', 'options', 'reasoning'],
     },
@@ -94,11 +94,11 @@ const MAP_TOOLS: Anthropic.Tool[] = [
     input_schema: {
       type: 'object' as const,
       properties: {
-        summary: { type: 'string', description: 'Resumo executivo de 2-3 frases' },
+        summary: { type: 'string', description: 'Resumo simples de 2-3 frases, em linguagem natural' },
         key_findings: {
           type: 'array',
           items: { type: 'string' },
-          description: '3-5 achados principais, cada um com um dado concreto',
+          description: '3-5 pontos principais em frases curtas e fáceis de ler, cada um com um número ou dado concreto',
         },
         actions: {
           type: 'array',
@@ -109,9 +109,9 @@ const MAP_TOOLS: Anthropic.Tool[] = [
               urgencia:      { type: 'string', enum: ['imediata', '7_dias', '30_dias'] },
               orgao:         { type: 'string' },
               tipo_recurso:  { type: 'string' },
-              acao:          { type: 'string' },
+              acao:          { type: 'string', description: 'O que fazer, em linguagem simples e direta' },
               local:         { type: 'string' },
-              evidencia:     { type: 'string' },
+              evidencia:     { type: 'string', description: 'Número ou dado concreto que explica por que essa ação faz sentido' },
               prazo:         { type: 'string' },
             },
           },
@@ -182,24 +182,31 @@ RELINT (trecho):
 ${area.relint?.full_text?.slice(0, 1800) || 'Não disponível.'}`
 }
 
-const SYSTEM_PROMPT = `Você é um agente investigativo do CompStat Municipal do Rio de Janeiro.
-Conduza uma análise passo a passo da área, controlando o mapa interativo para guiar o analista.
+const SYSTEM_PROMPT = `Você guia um analista pelo mapa de segurança do Rio de Janeiro, mostrando os dados da área passo a passo.
+
+LINGUAGEM (obrigatório em narrate, checkpoint e complete_investigation):
+- Fale como numa conversa normal, em português simples e claro.
+- Use palavras do dia a dia. Evite jargão, termos técnicos e palavras difíceis.
+- Prefira "crimes" a "ocorrências", "ruas mais perigosas" a "trechos críticos", "grupos armados" a "facções", "problemas na rua" a "fatores urbanos".
+- Frases curtas e diretas. Se usar um número, explique o que ele significa ("6 em cada 10 crimes acontecem à noite").
+- Soe natural, como alguém explicando para um colega — não como um relatório formal.
 
 ROTEIRO OBRIGATÓRIO (siga esta sequência):
-1. zoom_to_area → toggle_layer(crime, true) → narrate("Visão Geral") — criminalidade total, top crime, % noturno
-2. show_annotation nos 3 trechos mais críticos → narrate("Trechos Críticos") — top 3 com números
-3. CHECKPOINT 1: "Os locais críticos coincidem com as rotas de patrulha da FM?"
-4. toggle_layer(dominio, true) → narrate("Domínio Territorial") — facções presentes, fronteiras de tensão
-5. CHECKPOINT 2: "A dinâmica territorial reflete o modelo de emprego atual?"
-6. toggle_layer(fatores, true) → toggle_layer(cameras, true) → narrate("Fatores Urbanos e Câmeras") — órgãos, cobertura
-7. CHECKPOINT 3: "O turno da FM cobre o pico horário identificado?"
+1. zoom_to_area → toggle_layer(crime, true) → narrate("Crimes na área") — total de crimes, tipo mais comum, quantos acontecem à noite
+2. show_annotation nas 3 ruas com mais crimes → narrate("Ruas mais perigosas") — top 3 com números
+3. CHECKPOINT 1: pause para o analista — resuma o que vimos sobre crimes e ofereça 2-3 opções simples de aprofundamento, sempre com "Continuar análise" como primeira opção
+4. toggle_layer(dominio, true) → narrate("Quem manda na região") — grupos presentes, pontos de tensão
+5. CHECKPOINT 2: pause para o analista — resuma o que vimos sobre o território e ofereça opções de aprofundamento
+6. toggle_layer(fatores, true) → toggle_layer(cameras, true) → narrate("Problemas na rua e câmeras") — o que falta arrumar, onde tem câmera
+7. CHECKPOINT 3: pause para o analista — resuma fatores e câmeras e ofereça opções antes de encerrar
 8. update_weights → complete_investigation
 
 REGRAS:
 - Sempre narrate antes de cada checkpoint
-- Cite números específicos dos dados em TODA narração
+- Use números dos dados em TODA narração, mas explique o que eles significam
 - Máximo 3 checkpoints, depois complete_investigation obrigatoriamente
 - Seja conciso: 2-4 frases por narrate
+- Checkpoints são pausas para o analista fazer perguntas ou seguir em frente — NÃO são testes de conhecimento
 - Quando o analista responder um checkpoint, adapte o próximo narrate à resposta dele`
 
 export async function POST(req: NextRequest) {
@@ -253,14 +260,22 @@ export async function POST(req: NextRequest) {
         while (continueLoop && turn < MAX_TURNS) {
           turn++
 
+          console.log(`[agent] turn ${turn} — chamando Claude (${messages.length} msgs)`)
+          send({ type: 'thinking', turn, detail: `Turno ${turn} — consultando modelo…` })
+
           const response = await client.messages.create({
-            model: 'claude-sonnet-4-5',
+            model: 'claude-sonnet-4-6',
             max_tokens: 2000,
             system: SYSTEM_PROMPT,
             tools: MAP_TOOLS,
             tool_choice: { type: 'auto' },
             messages,
           })
+
+          const toolNames = response.content
+            .filter((b: any) => b.type === 'tool_use')
+            .map((b: any) => b.name)
+          console.log(`[agent] turn ${turn} — stop_reason: ${response.stop_reason} | tools: [${toolNames.join(', ')}]`)
 
           // Add assistant turn to messages
           messages = [...messages, { role: 'assistant', content: response.content }]
@@ -275,6 +290,7 @@ export async function POST(req: NextRequest) {
             }
 
             if (block.type === 'tool_use') {
+              console.log(`[agent]   tool: ${block.name}`, JSON.stringify(block.input).slice(0, 120))
               send({ type: 'tool', name: block.name, input: block.input, id: block.id })
 
               if (block.name === 'checkpoint') {
@@ -317,7 +333,7 @@ export async function POST(req: NextRequest) {
 
         send({ type: 'done' })
       } catch (err: any) {
-        send({ type: 'error', message: err.message || 'Erro interno do agente' })
+        send({ type: 'error', message: err.message || 'Erro interno do agente', status: (err as any).status ?? 500 })
       } finally {
         controller.close()
       }

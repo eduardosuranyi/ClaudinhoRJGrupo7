@@ -222,8 +222,11 @@ export default function AgentPanel({ agentState, onRespond, onAbort }: Props) {
               width: 5, height: 5, borderRadius: '50%',
               background: 'var(--green)',
               animation: 'pulse-accent 1s ease-in-out infinite',
+              flexShrink: 0,
             }} />
-            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>analisando…</span>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+              {agentState.thinkingDetail ?? 'analisando…'}
+            </span>
           </div>
         )}
 
