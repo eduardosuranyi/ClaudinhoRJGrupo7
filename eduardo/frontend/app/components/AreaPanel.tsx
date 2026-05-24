@@ -52,7 +52,7 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div style={{ flex: 1, paddingRight: 12 }}>
-            <span className="label-overline" style={{ color: 'var(--accent)', fontSize: 9 }}>Área FM</span>
+            <span className="label-overline" style={{ color: 'var(--accent)', fontSize: 10 }}>Área FM</span>
             <h2 style={{ fontSize: 13, fontWeight: 600, margin: '2px 0 6px', color: 'var(--text)', lineHeight: 1.35 }}>
               {area.nome}
             </h2>
@@ -72,7 +72,7 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 4 }}>
                 {area.identificacao.bairros.map(b => (
                   <span key={b} style={{
-                    fontSize: 9,
+                    fontSize: 10,
                     padding: '1px 5px',
                     background: 'rgba(74,144,226,0.1)',
                     border: '1px solid rgba(74,144,226,0.25)',
@@ -87,7 +87,7 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
             <div style={{ textAlign: 'right' }}>
-              <span className="label-overline" style={{ fontSize: 8, display: 'block' }}>SCORE</span>
+              <span className="label-overline" style={{ fontSize: 10, display: 'block' }}>SCORE</span>
               <span className="mono tnum" style={{
                 fontSize: 26, fontWeight: 500, color: scoreColor(area.score.total), lineHeight: 1,
               }}>
@@ -125,7 +125,7 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
             <span>{t.label}</span>
             {t.badge && (
               <span className="mono" style={{
-                fontSize: 8,
+                fontSize: 10,
                 background: tab === t.id
                   ? t.highlight ? 'var(--amber-soft)' : 'var(--accent-soft)'
                   : 'var(--bg-3)',
@@ -160,7 +160,7 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
 function IdChip({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 2, border: color ? `1px solid ${color}` : '1px solid var(--border)' }}>
-      <span style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.06em' }}>{label}</span>
+      <span style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.06em' }}>{label}</span>
       <span className="mono tnum" style={{ fontSize: 10, color: color || 'var(--text)', fontWeight: 500 }}>{value}</span>
     </div>
   )
@@ -169,10 +169,10 @@ function IdChip({ label, value, color }: { label: string; value: string; color?:
 function BreakdownPill({ label, value, max }: { label: string; value: number; max: number }) {
   return (
     <div style={{ flex: 1, background: 'var(--bg-3)', padding: '5px 7px', borderRadius: 2, border: '1px solid var(--border-dim)' }}>
-      <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+      <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginTop: 1 }}>
         <span className="mono tnum" style={{ fontSize: 12, color: 'var(--text)', fontWeight: 500 }}>{value.toFixed(0)}</span>
-        <span className="mono tnum" style={{ fontSize: 8, color: 'var(--text-muted)' }}>/{max}</span>
+        <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-muted)' }}>/{max}</span>
       </div>
       <div style={{ height: 2, background: 'var(--border-dim)', marginTop: 3, borderRadius: 1 }}>
         <div style={{ height: '100%', width: `${(value/max)*100}%`, background: 'var(--accent)', borderRadius: 1 }} />
@@ -197,7 +197,7 @@ function InspectedPointCard({ point, onClose }: { point: InspectedPoint; onClose
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ fontSize: 9, color: accent, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
+          <span style={{ fontSize: 10, color: accent, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
             {label}
           </span>
           <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginTop: 3, lineHeight: 1.35 }}>
@@ -213,13 +213,13 @@ function InspectedPointCard({ point, onClose }: { point: InspectedPoint; onClose
       <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: 11 }}>
         {point.properties.orgao && (
           <div>
-            <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Órgão</div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Órgão</div>
             <div style={{ color: 'var(--text-dim)', fontWeight: 500, marginTop: 1 }}>{point.properties.orgao}</div>
           </div>
         )}
         {point.properties.logradouro && (
           <div style={{ flex: 1, minWidth: 80 }}>
-            <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Logradouro</div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Logradouro</div>
             <div style={{ color: 'var(--text-dim)', fontWeight: 500, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {point.properties.logradouro}
             </div>
@@ -227,7 +227,7 @@ function InspectedPointCard({ point, onClose }: { point: InspectedPoint; onClose
         )}
       </div>
 
-      <div className="mono" style={{ marginTop: 6, fontSize: 9, color: 'var(--text-muted)' }}>
+      <div className="mono" style={{ marginTop: 6, fontSize: 10, color: 'var(--text-muted)' }}>
         {point.lat.toFixed(5)}, {point.lng.toFixed(5)}
       </div>
     </div>

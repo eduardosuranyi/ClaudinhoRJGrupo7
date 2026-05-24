@@ -114,7 +114,7 @@ export default function ComparativoPage({ data, weights }: Props) {
             >
               <XAxis
                 type="number"
-                tick={{ fontSize: 9, fill: '#4a4a55' }}
+                tick={{ fontSize: 10, fill: '#4a4a55' }}
                 tickLine={false}
                 axisLine={{ stroke: '#2a2a35' }}
               />
@@ -171,7 +171,7 @@ export default function ComparativoPage({ data, weights }: Props) {
               />
               <PolarRadiusAxis
                 domain={[0, 1]}
-                tick={{ fontSize: 8, fill: '#4a4a55' }}
+                tick={{ fontSize: 10, fill: '#4a4a55' }}
                 axisLine={false}
                 tickCount={5}
               />
@@ -214,7 +214,7 @@ export default function ComparativoPage({ data, weights }: Props) {
                     style={{
                       padding: '8px 10px',
                       textAlign: col === 'Área' ? 'left' : 'right',
-                      fontSize: 9,
+                      fontSize: 10,
                       fontWeight: 400,
                       color: 'var(--text-muted)',
                     }}
@@ -278,7 +278,7 @@ function ToggleBtn({ active, label, onClick }: { active: boolean; label: string;
   return (
     <button onClick={onClick} style={{
       padding: '3px 10px',
-      fontSize: 9,
+      fontSize: 10,
       fontWeight: active ? 600 : 400,
       background: active ? 'var(--accent-soft)' : 'var(--bg-1)',
       color: active ? 'var(--accent)' : 'var(--text-muted)',

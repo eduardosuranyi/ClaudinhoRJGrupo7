@@ -71,7 +71,7 @@ export default function EscalaTab({ area, weights, allAreas }: Props) {
                 background: critico ? nrc.bg : 'var(--bg-3)',
                 border: `1px solid ${critico ? nrc.color : 'var(--border-dim)'}`,
               }}>
-                <span style={{ fontSize: 9, color: critico ? nrc.color : 'var(--text-muted)', fontWeight: critico ? 700 : 400 }}>
+                <span style={{ fontSize: 10, color: critico ? nrc.color : 'var(--text-muted)', fontWeight: critico ? 700 : 400 }}>
                   {short}
                 </span>
               </div>
@@ -141,7 +141,7 @@ export default function EscalaTab({ area, weights, allAreas }: Props) {
             gap: 8,
           }}>
             {['#','Trecho','Ag.','Modal.','Turno'].map(h => (
-              <span key={h} className="label-overline" style={{ fontSize: 8 }}>{h}</span>
+              <span key={h} className="label-overline" style={{ fontSize: 10 }}>{h}</span>
             ))}
           </div>
 
@@ -161,7 +161,7 @@ export default function EscalaTab({ area, weights, allAreas }: Props) {
                   <div style={{ fontSize: 11, color: 'var(--text)', fontWeight: 500, textTransform: 'capitalize', lineHeight: 1.3, marginBottom: 2 }}>
                     {pos.trecho.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}
                   </div>
-                  <div style={{ fontSize: 9, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', fontStyle: 'italic' }}>
                     Foco: {pos.foco}
                   </div>
                 </div>
@@ -172,10 +172,10 @@ export default function EscalaTab({ area, weights, allAreas }: Props) {
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, paddingTop: 2 }}>
                   <span style={{ fontSize: 11 }}>{cfg.emoji}</span>
-                  <span style={{ fontSize: 9, color: cfg.cor }}>{pos.modalidade}</span>
+                  <span style={{ fontSize: 10, color: cfg.cor }}>{pos.modalidade}</span>
                 </div>
 
-                <div className="mono" style={{ fontSize: 9, color: 'var(--amber)', paddingTop: 3 }}>
+                <div className="mono" style={{ fontSize: 10, color: 'var(--amber)', paddingTop: 3 }}>
                   {pos.turno}
                 </div>
               </div>
@@ -199,7 +199,7 @@ export default function EscalaTab({ area, weights, allAreas }: Props) {
                 border: isThis ? '1px solid var(--border)' : '1px solid transparent',
                 borderRadius: 2,
               }}>
-                <span className="mono tnum" style={{ fontSize: 9, color: 'var(--text-muted)', minWidth: 20 }}>
+                <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-muted)', minWidth: 20 }}>
                   {String(todas.indexOf(e)+1).padStart(2,'0')}
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -225,7 +225,7 @@ export default function EscalaTab({ area, weights, allAreas }: Props) {
                 <span className="mono tnum" style={{ fontSize: 12, color: isThis ? nrc2.color : 'var(--text-dim)', fontWeight: 600, minWidth: 28, textAlign: 'right' }}>
                   {e.agentes_por_turno}
                 </span>
-                <span style={{ fontSize: 9, color: 'var(--text-muted)', minWidth: 36, textAlign: 'right' }}>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', minWidth: 36, textAlign: 'right' }}>
                   /turno
                 </span>
               </div>

@@ -29,7 +29,7 @@ export default function TrechosTab({ area, highlightedTrechos, onToggleTrecho }:
         ({Math.round(totalCrimes / area.stats.crimes_total * 100)}% do total da área).
       </p>
       {onToggleTrecho && (
-        <p style={{ fontSize: 9, color: 'var(--text-muted)', marginBottom: 10, fontStyle: 'italic' }}>
+        <p style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 10, fontStyle: 'italic' }}>
           Clique para selecionar no mapa{hlSet.size > 0 ? ` · ${hlSet.size} selecionado${hlSet.size > 1 ? 's' : ''}` : ''}
         </p>
       )}
@@ -95,7 +95,7 @@ function TrechoRow({ rank, trecho, maxTotal, highlighted, onClick }: {
           }}>
             {cap(trecho.locf_norm)}
           </div>
-          <div style={{ display: 'flex', gap: 10, marginTop: 4, fontSize: 9, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 4, fontSize: 10, flexWrap: 'wrap' }}>
             <ChipBreak label="transeunte" value={trecho.roubo_transeunte} color="#ff6b35" />
             <ChipBreak label="celular" value={trecho.roubo_celular} color="#fbb040" />
             <ChipBreak label="coletivo" value={trecho.roubo_coletivo} color="#a855f7" />
@@ -106,7 +106,7 @@ function TrechoRow({ rank, trecho, maxTotal, highlighted, onClick }: {
               <span style={{
                 padding: '1px 5px',
                 borderRadius: 2,
-                fontSize: 8,
+                fontSize: 10,
                 fontWeight: 700,
                 background: trecho.bingo_count >= 3 ? 'rgba(239,68,68,0.15)' : 'rgba(251,176,64,0.15)',
                 border: `1px solid ${trecho.bingo_count >= 3 ? '#ef4444' : '#fbb040'}`,
@@ -137,7 +137,7 @@ function TrechoRow({ rank, trecho, maxTotal, highlighted, onClick }: {
 function LayerPill({ label, bg, color }: { label: string; bg: string; color: string }) {
   return (
     <span style={{
-      fontSize: 7,
+      fontSize: 10,
       padding: '0px 3px',
       background: bg,
       color,

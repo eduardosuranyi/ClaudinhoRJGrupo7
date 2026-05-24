@@ -216,13 +216,13 @@ Prefeitura do Rio de Janeiro`)
                   background: cfg.bg, border: `1px solid ${cfg.color}`,
                 }}>
                   <div className="mono tnum" style={{ fontSize: 20, color: cfg.color, fontWeight: 600, lineHeight: 1 }}>{count}</div>
-                  <div style={{ fontSize: 9, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 3 }}>{cfg.label}</div>
+                  <div style={{ fontSize: 10, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 3 }}>{cfg.label}</div>
                 </div>
               )
             })}
             <div style={{ flex: 1, padding: '8px 10px', borderRadius: 2, textAlign: 'center', background: 'var(--bg-2)', border: '1px solid var(--border)' }}>
               <div className="mono tnum" style={{ fontSize: 20, color: 'var(--text)', fontWeight: 600, lineHeight: 1 }}>{plan.acoes.length}</div>
-              <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 3 }}>Total</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 3 }}>Total</div>
             </div>
           </div>
 
@@ -272,15 +272,15 @@ function AcaoCard({ acao, idx, dispatched, onDespachar }: {
           {acao.prioridade}
         </span>
         <div style={{ padding: '2px 7px', background: `${orgColor}18`, border: `1px solid ${orgColor}55`, borderRadius: 2, whiteSpace: 'nowrap' }}>
-          <span className="mono" style={{ fontSize: 9, color: orgColor, fontWeight: 600 }}>{acao.orgao}</span>
+          <span className="mono" style={{ fontSize: 10, color: orgColor, fontWeight: 600 }}>{acao.orgao}</span>
         </div>
         <span style={{ fontSize: 11.5, color: 'var(--text)', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {acao.acao}
         </span>
         <div style={{ padding: '2px 7px', background: urg.bg, border: `1px solid ${urg.color}`, borderRadius: 2, whiteSpace: 'nowrap' }}>
-          <span style={{ fontSize: 9, color: urg.color, fontWeight: 600 }}>{urg.label}</span>
+          <span style={{ fontSize: 10, color: urg.color, fontWeight: 600 }}>{urg.label}</span>
         </div>
-        <span style={{ fontSize: 9, color: 'var(--text-muted)', transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none', display: 'inline-block' }}>▾</span>
+        <span style={{ fontSize: 10, color: 'var(--text-muted)', transition: 'transform 0.15s', transform: expanded ? 'rotate(180deg)' : 'none', display: 'inline-block' }}>▾</span>
       </div>
 
       {expanded && (
@@ -312,7 +312,7 @@ function AcaoCard({ acao, idx, dispatched, onDespachar }: {
 function Row({ label, value, dim }: { label: string; value: string; dim?: boolean }) {
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-      <span style={{ fontSize: 9, color: 'var(--text-muted)', minWidth: 40, paddingTop: 2, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
+      <span style={{ fontSize: 10, color: 'var(--text-muted)', minWidth: 40, paddingTop: 2, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
       <span style={{ fontSize: 11, color: dim ? 'var(--text-dim)' : 'var(--text)', fontStyle: dim ? 'italic' : 'normal', lineHeight: 1.5 }}>{value}</span>
     </div>
   )

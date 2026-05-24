@@ -46,6 +46,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   const popupRef = useRef<any>(null)
   const annotationsRef = useRef<any[]>([])
   const [mapReady, setMapReady] = useState(false)
+  const [layerPanelOpen, setLayerPanelOpen] = useState(false)
   const [layers, setLayers] = useState<LayerVisibility>({
     crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true,
   })
@@ -561,27 +562,27 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         .setLngLat(e.lngLat)
         .setHTML(`
           <div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:200px">
-            <div style="font-size:9px;color:#ff6b35;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Área FM</div>
+            <div style="font-size:10px;color:#ff6b35;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Área FM</div>
             <div style="font-size:12px;font-weight:600;margin-bottom:8px;line-height:1.35">${area.nome.split(' - ').slice(0, 2).join(' · ')}</div>
             <div style="display:flex;gap:12px;font-size:11px">
               <div>
-                <div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Score</div>
+                <div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Score</div>
                 <div style="color:${scoreCol};font-size:16px;font-weight:600;font-variant-numeric:tabular-nums">${score}</div>
               </div>
               <div>
-                <div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Crimes</div>
+                <div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Crimes</div>
                 <div style="font-size:14px;font-weight:500;font-variant-numeric:tabular-nums">${area.stats.crimes_total.toLocaleString('pt-BR')}</div>
               </div>
               <div>
-                <div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Pico</div>
+                <div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Pico</div>
                 <div style="font-size:14px;font-weight:500">${area.stats.pico_horario}</div>
               </div>
             </div>
             <div style="margin-top:8px;padding-top:6px;border-top:1px solid #2a2a35;font-size:10px;color:#8a8a95">
               ${area.stats.fatores_urbanos_total} fatores · ${area.stats.cameras_total} câmeras · ${area.stats.psr_total} PSR
             </div>
-            ${area.relint_disponivel ? '<div style="margin-top:4px;font-size:9px;color:#ff6b35">● RELINT disponível</div>' : ''}
-            <div style="margin-top:6px;font-size:9px;color:#4a4a55;font-style:italic">Clique para analisar →</div>
+            ${area.relint_disponivel ? '<div style="margin-top:4px;font-size:10px;color:#ff6b35">● RELINT disponível</div>' : ''}
+            <div style="margin-top:6px;font-size:10px;color:#4a4a55;font-style:italic">Clique para analisar →</div>
           </div>
         `)
         .addTo(map)
@@ -608,12 +609,12 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       popupRef.current
         .setLngLat(e.lngLat)
         .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:180px">
-          <div style="font-size:9px;color:#38bdf8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Bairro do Entorno</div>
+          <div style="font-size:10px;color:#38bdf8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Bairro do Entorno</div>
           <div style="font-size:13px;font-weight:600;margin-bottom:6px">${p.nome}</div>
           <div style="display:flex;gap:14px;font-size:11px">
-            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Populacao</div><div style="font-weight:500;font-variant-numeric:tabular-nums">${pop > 0 ? pop.toLocaleString('pt-BR') : '—'}</div></div>
-            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Denuncias</div><div style="font-weight:500;font-variant-numeric:tabular-nums">${dd > 0 ? dd.toLocaleString('pt-BR') : '—'}</div></div>
-            ${ch > 0 ? `<div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">1746</div><div style="font-weight:500;font-variant-numeric:tabular-nums">${ch.toLocaleString('pt-BR')}</div></div>` : ''}
+            <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Populacao</div><div style="font-weight:500;font-variant-numeric:tabular-nums">${pop > 0 ? pop.toLocaleString('pt-BR') : '—'}</div></div>
+            <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Denuncias</div><div style="font-weight:500;font-variant-numeric:tabular-nums">${dd > 0 ? dd.toLocaleString('pt-BR') : '—'}</div></div>
+            ${ch > 0 ? `<div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">1746</div><div style="font-weight:500;font-variant-numeric:tabular-nums">${ch.toLocaleString('pt-BR')}</div></div>` : ''}
           </div>
         </div>`)
         .addTo(map)
@@ -635,13 +636,13 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       popupRef.current
         .setLngLat(e.lngLat)
         .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:190px;max-width:240px">
-          <div style="font-size:9px;color:#fbb040;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">#${p.rank} Trecho Crítico${bingo >= 2 ? ' · BINGO' : ''}</div>
+          <div style="font-size:10px;color:#fbb040;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">#${p.rank} Trecho Crítico${bingo >= 2 ? ' · BINGO' : ''}</div>
           <div style="font-size:12px;font-weight:600;margin-bottom:6px;text-transform:capitalize">${p.name}</div>
           <div style="display:flex;gap:10px;font-size:11px;flex-wrap:wrap">
-            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Total</div><div style="font-weight:600;font-variant-numeric:tabular-nums;color:#fbb040">${Number(p.total).toLocaleString('pt-BR')}</div></div>
-            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Transeunte</div><div style="font-variant-numeric:tabular-nums">${Number(p.transeunte).toLocaleString('pt-BR')}</div></div>
-            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Celular</div><div style="font-variant-numeric:tabular-nums">${Number(p.celular).toLocaleString('pt-BR')}</div></div>
-            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Coletivo</div><div style="font-variant-numeric:tabular-nums">${Number(p.coletivo).toLocaleString('pt-BR')}</div></div>
+            <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Total</div><div style="font-weight:600;font-variant-numeric:tabular-nums;color:#fbb040">${Number(p.total).toLocaleString('pt-BR')}</div></div>
+            <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Transeunte</div><div style="font-variant-numeric:tabular-nums">${Number(p.transeunte).toLocaleString('pt-BR')}</div></div>
+            <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Celular</div><div style="font-variant-numeric:tabular-nums">${Number(p.celular).toLocaleString('pt-BR')}</div></div>
+            <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Coletivo</div><div style="font-variant-numeric:tabular-nums">${Number(p.coletivo).toLocaleString('pt-BR')}</div></div>
           </div>
           <div style="margin-top:5px;font-size:10px;color:#8a8a95">Pico: ${picoH}h · Clique para selecionar</div>
         </div>`)
@@ -668,13 +669,13 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       popupRef.current
         .setLngLat(e.lngLat)
         .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:180px;max-width:240px">
-          <div style="font-size:9px;color:#36c476;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Fator Urbano</div>
+          <div style="font-size:10px;color:#36c476;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Fator Urbano</div>
           <div style="font-size:12px;font-weight:600;margin-bottom:5px">${p.tipo || '—'}</div>
           <div style="display:flex;gap:10px;font-size:11px;flex-wrap:wrap">
-            ${p.orgao ? `<div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Órgão</div><div style="font-weight:500">${p.orgao}</div></div>` : ''}
-            ${p.logradouro ? `<div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Local</div><div style="font-weight:500;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.logradouro}</div></div>` : ''}
+            ${p.orgao ? `<div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Órgão</div><div style="font-weight:500">${p.orgao}</div></div>` : ''}
+            ${p.logradouro ? `<div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Local</div><div style="font-weight:500;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.logradouro}</div></div>` : ''}
           </div>
-          <div style="margin-top:5px;font-size:9px;color:#4a4a55;font-style:italic">Clique para detalhar →</div>
+          <div style="margin-top:5px;font-size:10px;color:#4a4a55;font-style:italic">Clique para detalhar →</div>
         </div>`)
         .addTo(map)
     })
@@ -704,10 +705,10 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       popupRef.current
         .setLngLat(e.lngLat)
         .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:180px;max-width:240px">
-          <div style="font-size:9px;color:#f59e0b;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Chamado 1746</div>
+          <div style="font-size:10px;color:#f59e0b;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Chamado 1746</div>
           <div style="font-size:12px;font-weight:600;margin-bottom:5px">${p.tipo || '—'}</div>
-          ${p.orgao ? `<div style="font-size:11px"><span style="color:#4a4a55;font-size:9px;text-transform:uppercase">Órgão</span> <span style="font-weight:500">${p.orgao}</span></div>` : ''}
-          <div style="margin-top:5px;font-size:9px;color:#4a4a55;font-style:italic">Clique para detalhar →</div>
+          ${p.orgao ? `<div style="font-size:11px"><span style="color:#4a4a55;font-size:10px;text-transform:uppercase">Órgão</span> <span style="font-weight:500">${p.orgao}</span></div>` : ''}
+          <div style="margin-top:5px;font-size:10px;color:#4a4a55;font-style:italic">Clique para detalhar →</div>
         </div>`)
         .addTo(map)
     })
@@ -736,7 +737,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       popupRef.current
         .setLngLat(e.lngLat)
         .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;max-width:220px">
-          <div style="font-size:9px;color:${f.recommendation === 'instalar' ? '#ef4444' : '#fbb040'};text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">#${f.rank} ${f.recommendation}</div>
+          <div style="font-size:10px;color:${f.recommendation === 'instalar' ? '#ef4444' : '#fbb040'};text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">#${f.rank} ${f.recommendation}</div>
           <div style="font-size:11px;margin-bottom:4px">${f.uncovered_crimes} ocorrências sem cobertura</div>
           <div style="font-size:10px;color:#8a8a95">${f.justification}</div>
         </div>`)
@@ -945,43 +946,93 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   const totalDominio = data.areas.reduce((s, a) => s + a.dominio_territorial.length, 0)
   const totalGaps    = data.areas.reduce((s, a) => s + a.camera_gaps.gaps.length, 0)
   const totalBairros = selected?.bairros_entorno?.length ?? 0
+  const activeLayerCount = Object.values(layers).filter(Boolean).length
 
   return (
     <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
       {/* Map container */}
       <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
 
-      {/* Layer controls */}
-      <div style={{
-        position: 'absolute', top: 12, right: 12,
-        background: 'rgba(7,7,10,0.88)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        border: '1px solid rgba(42,42,53,0.9)',
-        borderRadius: 3,
-        padding: '10px 12px',
-        minWidth: 190,
-        pointerEvents: 'auto',
-      }}>
-        <div className="label-overline" style={{ marginBottom: 8 }}>Camadas</div>
-        <LayerBtn label="Mancha Criminal"       color="#ff6b35" active={layers.crime}   n={totalCrime}   onClick={() => toggleLayer('crime')} />
-        <LayerBtn label="Fatores Urbanos"       color="#36c476" active={layers.fatores} n={totalFatores} onClick={() => toggleLayer('fatores')} />
-        <LayerBtn label="Câmeras CIVITAS"       color="#4a90e2" active={layers.cameras} n={totalCameras} onClick={() => toggleLayer('cameras')} />
-        <LayerBtn label="Pop. Situação de Rua"  color="#a855f7" active={layers.psr}     n={totalPSR}     onClick={() => toggleLayer('psr')} />
-        {totalChamados > 0 && <LayerBtn label="Chamados 1746"  color="#f59e0b" active={layers.chamados} n={totalChamados} onClick={() => toggleLayer('chamados')} />}
-        <LayerBtn label="Domínio Territorial"   color="#fbb040" active={layers.dominio} n={totalDominio} onClick={() => toggleLayer('dominio')} />
-        <LayerBtn label="Pontos Cegos"          color="#ef4444" active={layers.gaps}    n={totalGaps}    onClick={() => toggleLayer('gaps')} />
-        {selected && <LayerBtn label="Bairros Entorno" color="#38bdf8" active={layers.bairros} n={totalBairros} onClick={() => toggleLayer('bairros')} />}
+      {/* Layer controls — collapsible */}
+      <div style={{ position: 'absolute', top: 12, right: 12, pointerEvents: 'auto' }}>
+        {/* Toggle button */}
+        <button
+          onClick={() => setLayerPanelOpen(o => !o)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 7,
+            background: 'rgba(7,7,10,0.88)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(42,42,53,0.9)',
+            borderRadius: 3,
+            padding: '8px 12px',
+            cursor: 'pointer',
+            color: 'var(--text-dim)',
+            fontSize: 11,
+            fontWeight: 500,
+            transition: 'border-color 0.2s',
+            borderColor: layerPanelOpen ? 'rgba(255,107,53,0.4)' : 'rgba(42,42,53,0.9)',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2" />
+            <polyline points="2 17 12 22 22 17" />
+            <polyline points="2 12 12 17 22 12" />
+          </svg>
+          <span>Camadas</span>
+          {activeLayerCount > 0 && (
+            <span className="mono tnum" style={{
+              fontSize: 10, fontWeight: 600,
+              color: 'var(--accent)',
+              background: 'var(--accent-soft)',
+              padding: '1px 5px',
+              borderRadius: 2,
+              lineHeight: 1.3,
+            }}>
+              {activeLayerCount}
+            </span>
+          )}
+          <span style={{
+            fontSize: 10,
+            transition: 'transform 0.2s',
+            transform: layerPanelOpen ? 'rotate(180deg)' : 'none',
+            display: 'inline-block',
+            marginLeft: 2,
+          }}>▾</span>
+        </button>
 
-        <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(42,42,53,0.7)' }}>
-          <div className="label-overline" style={{ marginBottom: 5 }}>Legenda Facções</div>
-          {[['CV','#ef4444'],['TCP','#a855f7'],['ADA','#4a90e2'],['Milícia','#fbb040']].map(([f, c]) => (
-            <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-              <div style={{ width: 8, height: 8, borderRadius: 1, background: c }} />
-              <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{f}</span>
+        {/* Dropdown panel */}
+        {layerPanelOpen && (
+          <div style={{
+            marginTop: 4,
+            background: 'rgba(7,7,10,0.92)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(42,42,53,0.9)',
+            borderRadius: 3,
+            padding: '10px 12px',
+            minWidth: 210,
+          }}>
+            <LayerBtn label="Mancha Criminal"       color="#ff6b35" active={layers.crime}   n={totalCrime}   onClick={() => toggleLayer('crime')} />
+            <LayerBtn label="Fatores Urbanos"       color="#36c476" active={layers.fatores} n={totalFatores} onClick={() => toggleLayer('fatores')} />
+            <LayerBtn label="Câmeras CIVITAS"       color="#4a90e2" active={layers.cameras} n={totalCameras} onClick={() => toggleLayer('cameras')} />
+            <LayerBtn label="Pop. Situação de Rua"  color="#a855f7" active={layers.psr}     n={totalPSR}     onClick={() => toggleLayer('psr')} />
+            {totalChamados > 0 && <LayerBtn label="Chamados 1746"  color="#f59e0b" active={layers.chamados} n={totalChamados} onClick={() => toggleLayer('chamados')} />}
+            <LayerBtn label="Domínio Territorial"   color="#fbb040" active={layers.dominio} n={totalDominio} onClick={() => toggleLayer('dominio')} />
+            <LayerBtn label="Pontos Cegos"          color="#ef4444" active={layers.gaps}    n={totalGaps}    onClick={() => toggleLayer('gaps')} />
+            {selected && <LayerBtn label="Bairros Entorno" color="#38bdf8" active={layers.bairros} n={totalBairros} onClick={() => toggleLayer('bairros')} />}
+
+            <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(42,42,53,0.7)' }}>
+              <div className="label-overline" style={{ marginBottom: 5 }}>Legenda Facções</div>
+              {[['CV','#ef4444'],['TCP','#a855f7'],['ADA','#4a90e2'],['Milícia','#fbb040']].map(([f, c]) => (
+                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 1, background: c }} />
+                  <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{f}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Score legend */}
@@ -1001,7 +1052,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 3 }}>
           {['0', '25', '50', '75', '100'].map(v => (
-            <span key={v} className="mono" style={{ fontSize: 8, color: 'var(--text-muted)' }}>{v}</span>
+            <span key={v} className="mono" style={{ fontSize: 10, color: 'var(--text-muted)' }}>{v}</span>
           ))}
         </div>
       </div>
@@ -1078,7 +1129,7 @@ function LayerBtn({ label, color, active, n, onClick }: {
           {label}
         </span>
       </div>
-      <span className="mono" style={{ fontSize: 9, color: 'var(--text-muted)' }}>
+      <span className="mono" style={{ fontSize: 10, color: 'var(--text-muted)' }}>
         {n.toLocaleString('pt-BR')}
       </span>
     </button>

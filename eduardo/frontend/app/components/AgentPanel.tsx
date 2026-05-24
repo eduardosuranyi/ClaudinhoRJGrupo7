@@ -87,7 +87,7 @@ export default function AgentPanel({ agentState, onRespond, onAbort }: Props) {
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', letterSpacing: '0.03em' }}>
             Investigação Agêntica
           </span>
-          <span className="label-overline" style={{ fontSize: 9 }}>
+          <span className="label-overline" style={{ fontSize: 10 }}>
             {isRunning ? 'em andamento' : isPaused ? 'aguardando resposta' : isComplete ? 'concluída' : 'erro'}
           </span>
         </div>
@@ -257,7 +257,7 @@ function FindingsSection({ findings }: { findings: AgentFindings }) {
           <div key={i} style={{
             display: 'flex', gap: 7, alignItems: 'flex-start', marginBottom: 5,
           }}>
-            <span className="mono" style={{ fontSize: 9, color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}>
+            <span className="mono" style={{ fontSize: 10, color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}>
               {String(i + 1).padStart(2, '0')}
             </span>
             <span style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>{f}</span>
@@ -279,7 +279,7 @@ function FindingsSection({ findings }: { findings: AgentFindings }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
               <span style={{ fontSize: 11, color: 'var(--text)', fontWeight: 500 }}>{a.acao}</span>
               <span style={{
-                fontSize: 9, color: URGENCY_COLOR[a.urgencia] || 'var(--text-muted)',
+                fontSize: 10, color: URGENCY_COLOR[a.urgencia] || 'var(--text-muted)',
                 background: `${URGENCY_COLOR[a.urgencia]}1a`,
                 padding: '1px 5px', borderRadius: 2,
                 flexShrink: 0, marginLeft: 6,

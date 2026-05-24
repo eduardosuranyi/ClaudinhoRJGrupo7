@@ -94,7 +94,7 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
         <div style={{ height: 80 }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={horaData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
-              <XAxis dataKey="hora" tick={{ fontSize: 9, fill: '#4a4a55' }} interval={3} tickLine={false} axisLine={{ stroke: '#2a2a35' }} />
+              <XAxis dataKey="hora" tick={{ fontSize: 10, fill: '#4a4a55' }} interval={3} tickLine={false} axisLine={{ stroke: '#2a2a35' }} />
               <Tooltip
                 contentStyle={{ background: '#14141a', border: '1px solid #2a2a35', fontSize: 10, padding: '6px 8px' }}
                 labelStyle={{ color: '#8a8a95' }}
@@ -130,8 +130,8 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
                   }}>
                     <div style={{ height: `${pct}%`, background: 'var(--accent)' }} />
                   </div>
-                  <div style={{ fontSize: 8, color: 'var(--text-muted)', marginTop: 3 }}>{d.slice(0, 3)}</div>
-                  <div className="mono tnum" style={{ fontSize: 9, color: 'var(--text-dim)' }}>{fmt(v)}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>{d.slice(0, 3)}</div>
+                  <div className="mono tnum" style={{ fontSize: 10, color: 'var(--text-dim)' }}>{fmt(v)}</div>
                 </div>
               )
             })}
@@ -142,7 +142,7 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
       {/* Modus operandi (das denúncias) */}
       {modusEntries.length > 0 && (
         <div>
-          <SectionLabel>Modus Operandi <span style={{ color: 'var(--text-muted)', fontSize: 9, marginLeft: 4 }}>(extraído das denúncias)</span></SectionLabel>
+          <SectionLabel>Modus Operandi <span style={{ color: 'var(--text-muted)', fontSize: 10, marginLeft: 4 }}>(extraído das denúncias)</span></SectionLabel>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {modusEntries.map(([k, v]) => {
               const pct = Math.round((v / modusTotal) * 100)
@@ -165,7 +165,7 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
       {/* Validação Cruzada: Campo × 1746 */}
       {area.validacao_cruzada && area.validacao_cruzada.length > 0 ? (
         <div>
-          <SectionLabel>Demandas por Órgão <span style={{ color: 'var(--text-muted)', fontSize: 9, marginLeft: 4 }}>(campo 2026 × 1746 2020-2024)</span></SectionLabel>
+          <SectionLabel>Demandas por Órgão <span style={{ color: 'var(--text-muted)', fontSize: 10, marginLeft: 4 }}>(campo 2026 × 1746 2020-2024)</span></SectionLabel>
           <div style={{ fontSize: 10, color: 'var(--text-dim)', marginBottom: 8 }}>
             Fatores = observação de campo. Chamados = reclamações da população.
           </div>
@@ -189,7 +189,7 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
                     </div>
                   </div>
                   {vc.chamados_1746 > 0 && (
-                    <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 1 }}>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>
                       {atdPct}% atendidos · {fmt(vc.chamados_vencidos)} vencidos
                     </div>
                   )}
@@ -223,7 +223,7 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
       {/* Chamados 1746 — evolução mensal */}
       {area.chamados_1746 && (
         <div>
-          <SectionLabel>Chamados 1746 <span style={{ color: 'var(--text-muted)', fontSize: 9, marginLeft: 4 }}>(Central de Atendimento · 2020-2024)</span></SectionLabel>
+          <SectionLabel>Chamados 1746 <span style={{ color: 'var(--text-muted)', fontSize: 10, marginLeft: 4 }}>(Central de Atendimento · 2020-2024)</span></SectionLabel>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginBottom: 10 }}>
             <KPI label="Chamados" value={fmt(area.chamados_1746.total)} hint="na área FM" />
             {area.chamados_1746.pct_atendido != null && (
@@ -239,8 +239,8 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
               <div style={{ height: 60 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={area.chamados_1746.evolucao_mensal.slice(-24)} margin={{ top: 4, right: 0, left: -25, bottom: 0 }}>
-                    <XAxis dataKey="mes" tick={{ fontSize: 7, fill: '#4a4a55' }} interval={Math.max(0, Math.floor(area.chamados_1746.evolucao_mensal.slice(-24).length / 4))} tickLine={false} axisLine={{ stroke: '#2a2a35' }} />
-                    <YAxis tick={{ fontSize: 9, fill: '#4a4a55' }} tickLine={false} axisLine={false} />
+                    <XAxis dataKey="mes" tick={{ fontSize: 10, fill: '#4a4a55' }} interval={Math.max(0, Math.floor(area.chamados_1746.evolucao_mensal.slice(-24).length / 4))} tickLine={false} axisLine={{ stroke: '#2a2a35' }} />
+                    <YAxis tick={{ fontSize: 10, fill: '#4a4a55' }} tickLine={false} axisLine={false} />
                     <Tooltip contentStyle={{ background: '#14141a', border: '1px solid #2a2a35', fontSize: 10 }} labelStyle={{ color: '#8a8a95' }} itemStyle={{ color: '#f0f0f3' }} />
                     <Line type="monotone" dataKey="total" stroke="#f59e0b" strokeWidth={1.5} dot={false} />
                   </LineChart>
@@ -258,8 +258,8 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
           <div style={{ height: 70 }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={evol} margin={{ top: 4, right: 0, left: -25, bottom: 0 }}>
-                <XAxis dataKey="mes" tick={{ fontSize: 8, fill: '#4a4a55' }} interval={Math.max(0, Math.floor(evol.length / 4))} tickLine={false} axisLine={{ stroke: '#2a2a35' }} />
-                <YAxis tick={{ fontSize: 9, fill: '#4a4a55' }} tickLine={false} axisLine={false} />
+                <XAxis dataKey="mes" tick={{ fontSize: 10, fill: '#4a4a55' }} interval={Math.max(0, Math.floor(evol.length / 4))} tickLine={false} axisLine={{ stroke: '#2a2a35' }} />
+                <YAxis tick={{ fontSize: 10, fill: '#4a4a55' }} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={{ background: '#14141a', border: '1px solid #2a2a35', fontSize: 10 }} labelStyle={{ color: '#8a8a95' }} itemStyle={{ color: '#f0f0f3' }} />
                 <Line type="monotone" dataKey="total" stroke="#ff6b35" strokeWidth={1.5} dot={false} />
               </LineChart>
@@ -285,9 +285,9 @@ function KPI({ label, value, hint }: { label: string; value: string; hint?: stri
       padding: '8px 10px',
       borderRadius: 2,
     }}>
-      <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>{label}</div>
+      <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>{label}</div>
       <div className="mono tnum" style={{ fontSize: 14, color: 'var(--text)', fontWeight: 500, lineHeight: 1 }}>{value}</div>
-      {hint && <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 3 }}>{hint}</div>}
+      {hint && <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>{hint}</div>}
     </div>
   )
 }

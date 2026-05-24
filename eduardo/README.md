@@ -34,6 +34,7 @@ O analista abre o dashboard, clica na área FM, vê o diagnóstico completo com 
 
 | O que faz | Como funciona |
 |---|---|
+| **Agente Investigativo com Tool Use** | Claude navega o mapa ao vivo, liga camadas, marca trechos críticos e narra os achados — com checkpoints para o analista interagir |
 | **Motor de Coincidências ("Bingo")** | Cruza crime + fatores urbanos + denúncias por trecho. Sinaliza Bingo 2/3 e 3/3 — onde as camadas se sobrepõem, a ação é prioritária |
 | **Scoring com pesos ajustáveis** | 4 componentes (mancha 40, pico 15, fatores 25, dinâmica 15) + bônus RELINT. Sliders recoloram o mapa em tempo real |
 | **Síntese IA (Claude)** | Gera dinâmica criminal + plano de ação com 5-8 ações priorizadas por órgão, com evidência concreta dos dados |
@@ -47,15 +48,33 @@ O analista abre o dashboard, clica na área FM, vê o diagnóstico completo com 
 
 ## Diferenciais
 
-### 1. Cruzamento real das 3 camadas — não apenas dashboards
+### 1. Agente investigativo com tool use — IA que navega o mapa
+
+O analista clica "Investigar" e o Claude **assume o controle do mapa**: liga camadas, dá zoom na área, marca as ruas mais perigosas com anotações, narra o que encontra em linguagem simples e **pausa em checkpoints para o analista fazer perguntas ou redirecionar a análise**. No final, gera achados principais + plano de ação priorizado.
+
+**7 tools que o agente usa em tempo real:**
+
+| Tool | O que faz no mapa |
+|---|---|
+| `zoom_to_area` | Centraliza e anima o mapa na área selecionada |
+| `toggle_layer` | Liga/desliga camadas (crime, fatores, câmeras, PSR, domínio territorial) |
+| `show_annotation` | Marca pontos no mapa com título e observação (ex: rua mais perigosa) |
+| `update_weights` | Ajusta os pesos do score para destacar a dimensão sendo analisada |
+| `narrate` | Mostra texto explicativo no painel lateral com dados concretos |
+| `checkpoint` | Pausa e pergunta ao analista — com opções pré-definidas ou texto livre |
+| `complete_investigation` | Finaliza com achados-chave + plano de ação por órgão |
+
+O fluxo é streaming via SSE, com **human-in-the-loop**: o agente faz 3 pausas (checkpoints) onde o analista pode pedir mais detalhes, mudar o foco ou seguir em frente. Não é um chatbot genérico — é um **roteiro investigativo guiado** que usa os dados reais da área.
+
+### 2. Cruzamento real das 3 camadas — não apenas dashboards
 
 Sistemas de BI convencionais mostram cada camada separada. Nossa plataforma **cruza por trecho**: identifica onde crime + fator urbano + denúncia coincidem no mesmo logradouro e gera a ação com responsável. O "bingo" é operacionalizado, não apenas visualizado.
 
-### 2. IA onde agrega valor de verdade
+### 3. IA para síntese, não para decoração
 
-Não usamos IA para mostrar gráfico bonito. Usamos para o que o analista leva horas: **sintetizar RELINT + Disque Denúncia em um parágrafo de dinâmica criminal** e **gerar plano de ação com órgão, local, evidência e prazo**. O score e o cruzamento geoespacial são determinísticos e auditáveis.
+Não usamos IA para mostrar gráfico bonito. Usamos para o que o analista leva horas: **sintetizar RELINT + Disque Denúncia em dinâmica criminal** e **gerar plano de ação com órgão, local, evidência e prazo**. Score e cruzamento geoespacial são determinísticos e auditáveis.
 
-### 3. 12 fontes integradas (não apenas as 5 obrigatórias)
+### 4. 12 fontes integradas (não apenas as 5 obrigatórias)
 
 Além das 5 fontes oficiais, integramos:
 
@@ -66,7 +85,7 @@ Além das 5 fontes oficiais, integramos:
 | **Bairros data.rio** | Contexto geográfico: cada área FM fica dentro de 1-8 bairros com população e subprefeitura |
 | **Logradouros CadLog** (132k trechos) | Gazetteer para geoparsing de denúncias e resolução de trechos |
 
-### 4. Do dado bruto ao email para o órgão — ciclo completo
+### 5. Do dado bruto ao email para o órgão — ciclo completo
 
 ```
 Dado bruto → Pipeline Python → Scoring → Dashboard → Síntese IA → Relatório .docx → Email para o órgão
@@ -74,7 +93,7 @@ Dado bruto → Pipeline Python → Scoring → Dashboard → Síntese IA → Rel
 
 Não paramos no dashboard. O gestor gera o relatório `.docx` com um clique e despacha cada fator urbano para o órgão responsável com email pré-preenchido contendo endereço, score e prazo.
 
-### 5. Tudo determinístico e testável
+### 6. Tudo determinístico e testável
 
 51 testes (32 backend + 19 frontend). Score é fórmula aberta, não caixa-preta. IA é usada apenas para síntese textual. O gestor pode ajustar os pesos dos componentes ao vivo e ver o ranking mudar — transparência total.
 
@@ -109,7 +128,7 @@ Não paramos no dashboard. O gestor gera o relatório `.docx` com um clique e de
 |---|---|
 | Pipeline | Python · Pandas · GeoPandas · Shapely |
 | Frontend | Next.js 16 · TypeScript · Tailwind v4 · MapLibre GL · Recharts |
-| IA | Claude Sonnet 4.5 (`@anthropic-ai/sdk`) |
+| IA | Claude Sonnet 4.5 (síntese) · Claude Sonnet 4.6 (agente investigativo com tool use) |
 | Relatório | python-docx |
 | Testes | pytest (32) · Vitest (19) |
 
@@ -122,7 +141,7 @@ Não paramos no dashboard. O gestor gera o relatório `.docx` com um clique e de
 | [data/README.md](data/README.md) | Pipeline de dados: limpeza, enriquecimento, spatial joins, validação cruzada 1746 |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitetura, fluxo de dados, decisões técnicas, mapeamento ao briefing |
 | [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md) | Schema completo do `areas_data.json` |
-| [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | Rotas `/api/synthesize` e `/api/report` |
+| [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | Rotas `/api/synthesize`, `/api/report` e `/api/agent` (SSE) |
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Como estender (novas camadas, tabs, métricas) |
 
 ---
