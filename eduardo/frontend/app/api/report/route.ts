@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   const scriptPath = join(process.cwd(), '..', 'backend', 'generate_report.py')
 
   try {
-    await execAsync(`python3 ${scriptPath} --input ${inputPath} --output ${outputPath}`)
+    await execAsync(`"C:\\Users\\dudus\\anaconda3\\python.exe" "${scriptPath}" --input "${inputPath}" --output "${outputPath}"`)
 
     if (!existsSync(outputPath)) {
       return NextResponse.json({ error: 'Falha ao gerar relatório' }, { status: 500 })
