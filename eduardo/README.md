@@ -1,337 +1,130 @@
-# CompStat Municipal RJ — Plataforma de Inteligência Criminal
+# CompStat Municipal RJ — Grupo 7
 
-**Hackathon Claude Impact Lab Rio · Grupo 7 · Maio 2026**
+**Claude Impact Lab Rio · Maio 2026**
 
-Plataforma de inteligência criminal desenvolvida para o CompStat Municipal da Prefeitura do Rio de Janeiro. Integra **12 fontes de dados** (9 oficiais + 3 externas), cruza automaticamente mancha criminal, fatores urbanos e dinâmica criminal, identifica **coincidências de alto risco** e gera o **Relatório Analítico de Área** em `.docx` — reduzindo de horas para minutos a preparação das reuniões semanais do CompStat.
-
----
-
-## O Desafio
-
-O **CompStat Municipal** é o modelo de gestão de segurança pública da Prefeitura do Rio de Janeiro. Inspirado no CompStat do NYPD e adaptado à realidade municipal, opera sobre **cinco eixos**:
-
-1. **Mapeamento sistemático** de furtos e roubos por segmento de rua, horário e padrão
-2. **22 áreas prioritárias** (polígonos) com maior concentração de incidência criminal
-3. **Emprego estratégico da Força Municipal (FM)** — patrulhamento preventivo com câmeras corporais, GPS e monitoramento em tempo real
-4. **Atuação sobre fatores urbanos** — iluminação, vegetação, obstrução de calçada, desordem urbana, PSR, com envolvimento dos órgãos municipais (Comlurb, SEOP, CET-Rio, SMAS, SMS, RioLuz, Seconserva)
-5. **Reuniões semanais de responsabilização** e tomada de decisão integrada entre órgãos
-
-### O Problema
-
-Os dados operacionais vivem em **silos distintos** — ocorrências georreferenciadas, denúncias qualitativas do Disque Denúncia, relatórios de inteligência (RELINTs), fatores urbanos e polígonos de atuação — sem cruzamento automatizado. A produção de cada Relatório Analítico de Área que subsidia a reunião semanal demanda **horas de trabalho manual** de compilação, análise e formatação.
-
-O problema tem três dimensões:
-
-| Dimensão | Descrição |
-|---|---|
-| **Volume e heterogeneidade** | Dados quantitativos (CSV com lat/long), qualitativos (DOCX, texto livre), geoespaciais (SHP) e de fatores urbanos em silos distintos |
-| **Ausência de cruzamento** | Não existe mecanismo que sobreponha mancha criminal aos fatores urbanos e dinâmica qualitativa para identificar onde múltiplos fatores de risco coincidem |
-| **Dependência de esforço manual** | O tempo em compilação subtrai capacidade analítica das equipes, que deveriam focar na interpretação e tomada de decisão |
-
-### A Solução
-
-Esta plataforma endereça as três dimensões simultaneamente:
-
-1. **Integra automaticamente** as 5 fontes de dados do CompStat (ocorrências, Disque Denúncia, RELINTs, fatores urbanos, polígonos FM) + 4 fontes de enriquecimento
-2. **Cruza a mancha criminal** (quantitativa) com fatores urbanos e dinâmica criminal (qualitativa) para identificar **coincidências de alto risco** — o "bingo" — onde crime, fator ambiental e padrão de horário se sobrepõem
-3. **Gera automaticamente** os Relatórios Analíticos de Área em `.docx`, seguindo o formato oficial do CompStat
-4. **Utiliza IA** (Claude Sonnet 4.5) para sintetizar dinâmica criminal, responder as 4 perguntas norteadoras e sugerir cobertura da FM e resolução de fatores urbanos pelos órgãos
-
----
-
-## As 4 Perguntas Norteadoras
-
-O relatório do CompStat é organizado em torno de perguntas que a equipe responde para cada área. A plataforma responde automaticamente com base nos dados:
-
-| Pergunta | Como a plataforma responde |
-|---|---|
-| **Locais de maior incidência criminal estão coincidindo com a rota da FM?** | Top trechos críticos ranqueados por volume, com coordenadas e sobreposição sobre polígonos FM |
-| **Horário de maior incidência criminal coincide com o QMD (horário de cobertura)?** | Análise temporal com pico horário, percentual noturno e distribuição por dia da semana |
-| **Dinâmica criminal coincide com o modelo de emprego da FM?** | Síntese qualitativa via IA dos RELINTs e Disque Denúncia — identifica se roubos são a pé, moto ou em grupo para sugerir modalidade de patrulha |
-| **Fatores urbanos relevantes estão sendo resolvidos pelos órgãos?** | Fatores agrupados por órgão responsável com despacho por email pré-preenchido |
-
----
-
-## O Motor de Coincidências ("Bingo")
-
-O conceito central da plataforma é a **identificação automática de coincidências entre camadas de análise**. Quando dois ou mais indicadores de risco coincidem em um mesmo trecho, a plataforma sinaliza o "bingo":
-
-| Camada | Indicadores |
-|---|---|
-| **Mancha Criminal** | Alta densidade de roubos/furtos; pico horário definido; logradouro no topo do ranking |
-| **Fator Urbano** | Iluminação deficiente; vegetação encobrindo postes; obstrução de calçada; PSR; pontos cegos de câmera |
-| **Dinâmica Criminal** | Crime noturno oportunista; área de receptação; fuga para comunidade adjacente; uso de ambulantes como cobertura |
-
-- **Bingo 2/3** — duas camadas convergentes
-- **Bingo 3/3** — convergência total (máxima prioridade de ação)
-
-**Exemplo prático** (extraído do briefing): Em Bangu, dados quantitativos mostram 70 roubos com pico às 21h-22h. O RELINT descreve criminalidade oportunista com ponto de receptação na entrada lateral do Shopping. Fatores urbanos registram vegetação encobrindo iluminação e ambulantes irregulares. O cruzamento gera a ação: **poda urgente (Comlurb) + reforço FM noturno + operação SEOP**.
-
----
-
-## Stack Tecnológica
-
-| Camada | Tecnologia | Papel |
-|---|---|---|
-| **Pipeline de dados** | Python 3.10+ · Pandas · GeoPandas · Shapely | Ingestão de 12 fontes, joins espaciais, scoring, geração de JSON |
-| **Frontend** | Next.js 16 (App Router) · TypeScript · Tailwind v4 | Dashboard operacional com mapa interativo |
-| **Mapas** | MapLibre GL | 6 camadas toggleáveis com polígonos coloridos por score |
-| **Gráficos** | Recharts | Radar, barras, distribuições temporais |
-| **IA** | Anthropic Claude Sonnet 4.5 | Síntese qualitativa da dinâmica criminal e plano de ação |
-| **Relatório** | python-docx | Geração do `.docx` no formato oficial CompStat |
-| **Testes** | pytest (32 testes) · Vitest (19 testes) | Cobertura do pipeline e componentes |
-
----
-
-## Estrutura do Projeto
-
-```
-eduardo/
-├── README.md                          # Este documento
-├── CHANGELOG.md                       # Histórico de alterações
-├── docs/
-│   ├── ARCHITECTURE.md                # Arquitetura detalhada e decisões técnicas
-│   ├── API_REFERENCE.md               # Documentação das rotas de API
-│   ├── CONTRIBUTING.md                # Guia de contribuição e extensão
-│   └── DATA_DICTIONARY.md            # Schema completo do areas_data.json
-├── data/                              # Datasets integrados (12 fontes)
-│   ├── clean/                         # 8 datasets oficiais limpos (Parquet/GeoJSON/JSON)
-│   ├── external/                      # 7 fontes públicas de enriquecimento
-│   ├── processed/                     # KPIs e spatial joins intermediários
-│   ├── artifacts/                     # Pacotes CompStat por área (10 × 7 arquivos)
-│   ├── config/                        # area_registry.json (backbone de junção)
-│   └── README.md                      # Documentação completa dos dados
-├── backend/
-│   ├── data_pipeline.py               # 12 fontes → spatial joins → scoring → JSON
-│   ├── generate_report.py             # Gerador de relatório .docx (formato CompStat)
-│   ├── requirements.txt               # Dependências Python
-│   ├── areas_data.json                # Output do pipeline (artefato principal)
-│   └── tests/                         # 32 testes pytest (métricas, bingo, scoring, gaps)
-└── frontend/
-    ├── app/
-    │   ├── page.tsx                    # Orquestrador principal do dashboard
-    │   ├── types.ts                    # Interfaces TypeScript centralizadas
-    │   ├── lib/                        # helpers.ts, allocation.ts (escala FM)
-    │   ├── components/
-    │   │   ├── TopHeader.tsx           # KPIs globais consolidados
-    │   │   ├── Sidebar.tsx             # Ranking de áreas + sliders de peso
-    │   │   ├── MapView.tsx             # MapLibre + 6 camadas toggleáveis
-    │   │   ├── AreaPanel.tsx           # Painel detalhado com 6 tabs
-    │   │   ├── RiskSignals.tsx         # 8 regras de detecção automática de risco
-    │   │   └── tabs/                   # Escala, Dados, Trechos, Denúncias, Intel, Relatório
-    │   └── api/
-    │       ├── synthesize/route.ts     # Claude sintetiza dinâmica criminal
-    │       └── report/route.ts         # Python gera .docx via subprocess
-    ├── public/areas_data.json          # Dados servidos estaticamente ao browser
-    └── __tests__/                      # 19 testes Vitest
-```
+Dashboard operacional que integra **12 fontes de dados**, cruza automaticamente as 3 camadas do CompStat (mancha criminal + fatores urbanos + dinâmica criminal), e gera o Relatório Analítico de Área em `.docx` — **de horas para minutos**.
 
 ---
 
 ## Como Rodar
 
-### Pré-requisitos
-
-| Ferramenta | Versão | Observação |
-|---|---|---|
-| Python | 3.10+ | Pipeline de dados e gerador de relatório |
-| Node.js | 20+ | Frontend Next.js |
-| Chave Anthropic | — | Em `frontend/.env.local`: `ANTHROPIC_API_KEY=sk-ant-...` |
-
-### Dados
-
-Os dados já estão incluídos em `data/` dentro deste projeto. O pipeline aceita **duas estruturas** via `--data-dir`:
-
-| Layout | Caminho | Formato | Quando usar |
-|---|---|---|---|
-| **Dados integrados** (padrão) | `../data` | Parquet em `data/clean/` | Dados já incluídos neste projeto |
-| **Pacote legacy** | `../../compstat` | CSV/XLSX/SHP/DOCX originais | Clone do `claude_impact_lab_compstat_rio` |
-
-### Backend
-
 ```bash
+# Backend
 cd eduardo/backend
-python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-
-# Usando dados incluídos no projeto (padrão)
 python data_pipeline.py --data-dir ../data --output areas_data.json
-
-# Ou usando pacote CSV original do hackathon
-# python data_pipeline.py --data-dir ../../compstat --output areas_data.json
-
 cp areas_data.json ../frontend/public/areas_data.json
-```
 
-### Frontend
-
-```bash
+# Frontend
 cd eduardo/frontend
 npm install
-echo "ANTHROPIC_API_KEY=sk-ant-..." > .env.local  # sua chave Anthropic
-npm run dev
-# Abrir http://localhost:3000
+echo "ANTHROPIC_API_KEY=sk-ant-..." > .env.local
+npm run dev   # http://localhost:3000
 ```
 
 ---
 
-## Funcionalidades
+## O que entregamos
 
-### Mapa Interativo
+**Um sistema completo, end-to-end, pronto para uso na reunião semanal do CompStat.**
 
-- Polígonos das 8 áreas FM coloridos dinamicamente pelo score
-- **6 camadas toggleáveis**: mancha criminal (heatmap), fatores urbanos (por órgão), câmeras CIVITAS, censo PSR, domínio territorial (por facção), pontos cegos
-- Marcadores numerados dos trechos críticos ao selecionar uma área
-- Click em polígono abre painel completo de análise
+O analista abre o dashboard, clica na área FM, vê o diagnóstico completo com trechos críticos, bingos, fatores por órgão e dinâmica criminal — e com um clique gera o relatório `.docx` no formato oficial e despacha ações por email para cada órgão responsável.
 
-### Painel de Análise (6 Tabs)
+### Funcionalidades-chave
 
-| Tab | Conteúdo | Correspondência no Briefing |
-|---|---|---|
-| **Escala** | Alocação sugerida de 600 GM por turno, janelas horárias por área | Pergunta 3: modelo de emprego da FM |
-| **Dados** | 12 KPIs + tipos de crime + distribuição horária/diária + modus operandi + fatores por órgão + evolução mensal | Seções 1-3 do Relatório Analítico |
-| **Trechos** | Top 10 logradouros com breakdown por tipo, pico horário e badges de bingo (2/3, 3/3) | Seção 5: Painel de Coincidências |
-| **Denúncias** | DD por bairro + relatos com modus operandi e perfil de suspeito + cenas de drogas | Seção 4.1: dados qualitativos |
-| **Inteligência** | Domínio territorial (CV/TCP/ADA/Milícia) + RELINT estruturado | Seção 2: Dinâmica Criminal |
-| **Relatório** | Síntese via Claude + plano de ação por órgão + despacho por email + export `.docx` | Seção 6: Relatório Analítico completo |
-
-### Score Determinístico com Pesos Ajustáveis
-
-4 componentes ponderáveis em tempo real via sliders:
-
-| Componente | Peso padrão | O que mede |
-|---|---|---|
-| **Mancha criminal** | 40 | Volume absoluto de ocorrências ISP |
-| **Pico horário** | 15 | Concentração temporal nas 3 horas de pico |
-| **Fatores urbanos** | 25 | Pendências ambientais por resolver |
-| **Dinâmica criminal** | 15 | Volume de denúncias do Disque Denúncia |
-| **Bônus RELINT** | +5 | Disponibilidade de relatório de inteligência |
-
-O mapa recolore instantaneamente ao ajustar os pesos, permitindo que gestores priorizem diferentes dimensões conforme a pauta da reunião.
-
-### Botão Despachar
-
-Cada fator urbano gera **email pré-preenchido** para o órgão responsável (Comlurb, RioLuz, SEOP, Seconserva, SMAS, CET-Rio, GM-Rio, SMTR) com endereço do trecho, score de prioridade e solicitação de prazo — operacionalizando diretamente as ações do plano.
-
-### Relatório `.docx` Automático
-
-Formato oficial do CompStat com todas as seções do Relatório Analítico de Área:
-
-1. Identificação da Área (AISP, DP, BPM, domínio territorial, base FM, subprefeitura)
-2. Indicadores do Período (volume, ranking, evolução)
-3. Distribuição por Tipo de Ocorrência
-4. Análise Temporal (hora/dia, período predominante)
-5. Dinâmica Criminal (síntese qualitativa gerada por IA)
-6. Fatores de Incidência Criminal (por órgão responsável)
-7. Painel de Coincidências (cruzamento automático)
-8. Plano de Ação e Responsabilização (gerado por IA, validado na reunião)
-
----
-
-## Fontes de Dados
-
-### Oficiais do Hackathon
-
-| # | Fonte | Volume | Tipo | Uso na Plataforma |
-|---|---|---|---|---|
-| 1 | Ocorrências ISP 2020-2024 | 115.318 | Quantitativo | Score, distribuições, mapa de calor, trechos críticos |
-| 2 | Disque Denúncia 2025 | 8.770 (R/F) + 9.168 (drogas) | Qualitativo — dinâmica criminal | Relatos, modus operandi, dinâmica, fator SMAS |
-| 3 | Fatores Urbanos 2026 | 2.085 | Qualitativo — fatores urbanos | Score, despacho por órgão, camada no mapa |
-| 4 | Câmeras CIVITAS | 985 | Operacional | KPI, camada no mapa, gap analysis |
-| 5 | Polígonos Área FM | 8 | Geoespacial — operacional | Spatial join, delimitação de áreas |
-| 6 | RELINTs | 8 | Qualitativo — inteligência | Síntese IA, bônus de score, contexto operacional |
-| 7 | Domínio Territorial | 1.260 | Geoespacial | Camada no mapa, identificação de facções |
-| 8 | Censo PSR | 23.332 | Social | KPI, camada no mapa, fator de incidência |
-
-### Externas (Enriquecimento)
-
-| # | Fonte | Arquivo | Volume | Uso |
-|---|---|---|---|---|
-| 9 | Bairros (data.rio) | `data/external/bairros_rio.geojson` | 166 | Contexto geográfico, subprefeitura |
-| 10 | Censo 2022 (data.rio) | `data/external/censo_2022_bairros.geojson` | 165 | População residente, crimes per capita |
-| 11 | Central 1746 (BigQuery) | `data/external/chamados_1746_fm.csv` | Opcional | Validação de fatores por demanda cidadã |
-
----
-
-## Funcionalidades Avançadas
-
-| Funcionalidade | Descrição | Referência no Briefing |
-|---|---|---|
-| **Camera Gap Analysis** | Detecta áreas sem cobertura de câmeras (buffer 50m), classifica entre `instalar` e `remanejar` | Desafio 4: Otimização de Cobertura de Câmeras |
-| **Bingo / Coincidência de Camadas** | Trechos com sobreposição crime + fatores + sinais, com badges 2/3 e 3/3 | Seção 5: Lógica de Análise |
-| **Comparativo Cross-Area** | Radar multidimensional, ranking com gradiente, bar chart Absoluto/Per Capita | Painel de gestão consolidado (seção 10.5) |
-| **Sinais de Risco Automatizados** | 8 regras de detecção (alto volume, sem câmeras, % noturno, ORCRIM, etc.) | Coincidências de alto risco (seção 3) |
-| **Relatório In-Browser** | 9 seções completas visualizáveis no dashboard, download em `.md` e `.html` | Seção 6.1: Estrutura do Relatório |
-| **Enriquecimento com Censo 2022** | População residente, crimes per capita por 1.000 hab | Normalização per capita para comparação justa |
-| **Perfil de Suspeito** | Extraído dos envolvidos do Disque Denúncia (sexo, idade, pele) | Seção 7.1: Síntese qualitativa |
-| **Marcadores de Trechos** | Top trechos aparecem como marcadores numerados ao selecionar área | Seção 6: Mapa de Calor |
-| **Escala FM** | Modelo de alocação de 600 agentes com distribuição proporcional ao score | Seção 7.3: Perguntas norteadoras |
-
----
-
-## Testes
-
-```bash
-# Backend (32 testes: métricas, modus, scoring, bingo, camera gaps)
-cd eduardo/backend
-python -m pytest tests/ -v
-
-# Frontend (19 testes: scoring, helpers, componentes)
-cd eduardo/frontend
-npm run test:run
-```
-
----
-
-## Documentação
-
-| Documento | Conteúdo |
+| O que faz | Como funciona |
 |---|---|
-| [Dados](data/README.md) | O que fizemos com os dados: limpeza, enriquecimento, spatial joins, pacotes CompStat |
-| [Arquitetura](docs/ARCHITECTURE.md) | Fluxo de dados, componentes, decisões técnicas, mapeamento ao briefing |
-| [Dicionário de Dados](docs/DATA_DICTIONARY.md) | Schema completo do `areas_data.json`, fontes de entrada, modus operandi |
-| [Referência da API](docs/API_REFERENCE.md) | Rotas `/api/synthesize` e `/api/report` com exemplos cURL |
-| [Guia de Contribuição](docs/CONTRIBUTING.md) | Setup, convenções, como adicionar camadas/tabs/métricas |
-| [Changelog](CHANGELOG.md) | Histórico detalhado de alterações por versão |
+| **Motor de Coincidências ("Bingo")** | Cruza crime + fatores urbanos + denúncias por trecho. Sinaliza Bingo 2/3 e 3/3 — onde as camadas se sobrepõem, a ação é prioritária |
+| **Scoring com pesos ajustáveis** | 4 componentes (mancha 40, pico 15, fatores 25, dinâmica 15) + bônus RELINT. Sliders recoloram o mapa em tempo real |
+| **Síntese IA (Claude)** | Gera dinâmica criminal + plano de ação com 5-8 ações priorizadas por órgão, com evidência concreta dos dados |
+| **Relatório .docx automático** | Formato oficial CompStat com todas as 8 seções, incluindo plano de ação e responsabilização |
+| **Botão Despachar** | Email pré-preenchido por órgão (Comlurb, RioLuz, SEOP, SMAS, CET-Rio, GM-Rio, Seconserva, SMTR) |
+| **Camera Gap Analysis** | Detecta pontos cegos (buffer 50m), classifica entre instalar e remanejar — **Desafio 4** |
+| **Escala FM** | Modelo de alocação de 600 agentes proporcional ao score, com sugestão de modalidade (moto/pé/viatura) |
+| **Comparativo Cross-Area** | Radar, ranking e bar chart com toggle Absoluto/Per Capita |
 
 ---
 
-## Fluxo Operacional
+## Diferenciais
 
-A plataforma se integra ao ciclo semanal do CompStat conforme definido no briefing:
+### 1. Cruzamento real das 3 camadas — não apenas dashboards
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  1. ATUALIZAÇÃO        Dados de ocorrências, fatores urbanos,   │
-│     (automática)       Disque Denúncia são atualizados          │
-│                                  ↓                              │
-│  2. PROCESSAMENTO      data_pipeline.py cruza as camadas,       │
-│     (plataforma)       calcula scores, identifica bingos        │
-│                                  ↓                              │
-│  3. SÍNTESE IA         Claude sintetiza dinâmica criminal,      │
-│     (plataforma)       responde perguntas norteadoras           │
-│                                  ↓                              │
-│  4. REVISÃO            Equipe CompStat valida análises,         │
-│     (analista)         adiciona contexto não capturado          │
-│                                  ↓                              │
-│  5. REUNIÃO            Relatório apresentado, ações cobradas,   │
-│     (gestores)         compromissos formalizados para o ciclo   │
-│                                  ↓                              │
-│  6. EXECUÇÃO           FM patrulha, órgãos resolvem fatores,    │
-│     (campo)            status atualizado na plataforma          │
-└─────────────────────────────────────────────────────────────────┘
-```
+Sistemas de BI convencionais mostram cada camada separada. Nossa plataforma **cruza por trecho**: identifica onde crime + fator urbano + denúncia coincidem no mesmo logradouro e gera a ação com responsável. O "bingo" é operacionalizado, não apenas visualizado.
 
----
+### 2. IA onde agrega valor de verdade
 
-## Impacto Esperado
+Não usamos IA para mostrar gráfico bonito. Usamos para o que o analista leva horas: **sintetizar RELINT + Disque Denúncia em um parágrafo de dinâmica criminal** e **gerar plano de ação com órgão, local, evidência e prazo**. O score e o cruzamento geoespacial são determinísticos e auditáveis.
 
-| Para quem | Impacto |
+### 3. 12 fontes integradas (não apenas as 5 obrigatórias)
+
+Além das 5 fontes oficiais, integramos:
+
+| Fonte extra | O que trouxe |
 |---|---|
-| **Gestão CompStat** | Redução do tempo de relatório de horas para minutos; cobertura de todas as 22 áreas; decisões baseadas em dados cruzados |
-| **Força Municipal** | Ajuste de QMD baseado em evidência de pico criminal; priorização de trechos por score; modelo de emprego (moto/pé/viatura) alinhado à dinâmica |
-| **Órgãos Municipais** | Priorização objetiva de intervenções (poda, iluminação, ordenamento) baseada na sobreposição com a mancha criminal; ciclo de prestação de contas |
+| **Central 1746** (902k chamados via BigQuery) | Valida fatores de campo com demanda cidadã — "equipe viu poste apagado E cidadão reclama há 3 anos" |
+| **Censo 2022** (IBGE) | Normalização per capita — Pres. Vargas tem 107 crimes/1000 hab, Campo Grande tem 0,8 |
+| **Bairros data.rio** | Contexto geográfico: cada área FM fica dentro de 1-8 bairros com população e subprefeitura |
+| **Logradouros CadLog** (132k trechos) | Gazetteer para geoparsing de denúncias e resolução de trechos |
+
+### 4. Do dado bruto ao email para o órgão — ciclo completo
+
+```
+Dado bruto → Pipeline Python → Scoring → Dashboard → Síntese IA → Relatório .docx → Email para o órgão
+```
+
+Não paramos no dashboard. O gestor gera o relatório `.docx` com um clique e despacha cada fator urbano para o órgão responsável com email pré-preenchido contendo endereço, score e prazo.
+
+### 5. Tudo determinístico e testável
+
+51 testes (32 backend + 19 frontend). Score é fórmula aberta, não caixa-preta. IA é usada apenas para síntese textual. O gestor pode ajustar os pesos dos componentes ao vivo e ver o ranking mudar — transparência total.
 
 ---
 
-*CompStat Municipal RJ · Claude Impact Lab Rio · Grupo 7 · 24/05/2026*
+## Insights dos Dados
+
+| Insight | Evidência |
+|---|---|
+| **Presidente Vargas é 130x mais perigoso per capita que Campo Grande** | 107 vs 0,8 crimes/1000 hab — o número absoluto engana porque o Centro tem 500k pedestres/dia e 37k residentes |
+| **Rodoviária é outlier em roubo em coletivo** | 34% das ocorrências são em ônibus — todas as outras áreas são dominadas por roubo a transeunte (60-71%) |
+| **Metrô Botafogo tem pico às 23h** — mais tardio que todas as demais | Área de lazer noturno — QMD deve cobrir até madrugada, não apenas até 22h |
+| **RioLuz tem 118k chamados 1746 nos bairros FM** | Iluminação é o fator mais validado pela população — poste apagado é recorrente e crônico |
+| **Campo Grande opera sob dinâmica de milícia** | Contexto completamente diferente das áreas da Zona Sul/Centro — modelo de emprego e abordagem devem ser distintos |
+| **Apenas 9,1% dos crimes caem nos polígonos FM** | 10.500 de 115.354 — micro-áreas concentram alta incidência, mas 91% do crime está fora; migração (Desafio 2) é real |
+
+---
+
+## Desafios Extras Endereçados
+
+| Desafio | Como abordamos |
+|---|---|
+| **Desafio 4 — Otimização de Câmeras** | Camera Gap Analysis com buffer 50m, classificação instalar/remanejar, camada no mapa |
+| **Desafio 2 — Migração do Crime** | Dados de bairros do entorno (20 bairros) + evolução mensal permitem detectar deslocamento |
+| **Desafio 3 — Permanência Operacional** | Série temporal de 24 meses por área para avaliar tendência |
+
+---
+
+## Stack
+
+| Camada | Tecnologia |
+|---|---|
+| Pipeline | Python · Pandas · GeoPandas · Shapely |
+| Frontend | Next.js 16 · TypeScript · Tailwind v4 · MapLibre GL · Recharts |
+| IA | Claude Sonnet 4.5 (`@anthropic-ai/sdk`) |
+| Relatório | python-docx |
+| Testes | pytest (32) · Vitest (19) |
+
+---
+
+## Documentação Detalhada
+
+| Doc | O que contém |
+|---|---|
+| [data/README.md](data/README.md) | Pipeline de dados: limpeza, enriquecimento, spatial joins, validação cruzada 1746 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitetura, fluxo de dados, decisões técnicas, mapeamento ao briefing |
+| [docs/DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md) | Schema completo do `areas_data.json` |
+| [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | Rotas `/api/synthesize` e `/api/report` |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Como estender (novas camadas, tabs, métricas) |
+
+---
+
+*Grupo 7 · Claude Impact Lab Rio · 24/05/2026*
