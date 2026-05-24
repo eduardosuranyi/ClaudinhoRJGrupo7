@@ -9,9 +9,11 @@ interface Props {
   weights: { mancha: number; pico: number; fatores: number; dinamica: number }
   setWeights: (w: { mancha: number; pico: number; fatores: number; dinamica: number }) => void
   onSelectArea: (area: Area) => void
+  onInvestigate?: (area: Area) => void
+  agentActiveAreaId?: number | null
 }
 
-export default function Sidebar({ data, selected, weights, setWeights, onSelectArea }: Props) {
+export default function Sidebar({ data, selected, weights, setWeights, onSelectArea, onInvestigate, agentActiveAreaId }: Props) {
   const totalW = weights.mancha + weights.pico + weights.fatores + weights.dinamica
   // Recompute weighted score
   const areasWithScore = data.areas.map(a => {
@@ -55,7 +57,9 @@ export default function Sidebar({ data, selected, weights, setWeights, onSelectA
             rank={i + 1}
             score={area._weighted}
             selected={selected?.id === area.id}
+            agentActive={agentActiveAreaId === area.id}
             onClick={() => onSelectArea(area)}
+            onInvestigate={onInvestigate ? () => onInvestigate(area) : undefined}
           />
         ))}
       </div>
@@ -103,54 +107,81 @@ export default function Sidebar({ data, selected, weights, setWeights, onSelectA
   )
 }
 
-function AreaRow({ area, rank, score, selected, onClick }: {
-  area: Area; rank: number; score: number; selected: boolean; onClick: () => void
+function AreaRow({ area, rank, score, selected, agentActive, onClick, onInvestigate }: {
+  area: Area; rank: number; score: number; selected: boolean; agentActive?: boolean
+  onClick: () => void; onInvestigate?: () => void
 }) {
   return (
-    <button onClick={onClick} style={{
-      display: 'grid', gridTemplateColumns: '20px 1fr 56px 36px',
-      gap: 8,
-      width: '100%', padding: '8px 16px',
-      alignItems: 'center',
-      background: selected ? 'var(--bg-3)' : 'transparent',
+    <div style={{
+      position: 'relative',
       borderBottom: '1px solid var(--border-dim)',
-      border: 'none',
-      borderLeft: selected ? '2px solid var(--accent)' : '2px solid transparent',
-      cursor: 'pointer', textAlign: 'left',
-      transition: 'background 0.1s',
-    }}
-    onMouseEnter={e => { if (!selected) e.currentTarget.style.background = 'var(--bg-2)' }}
-    onMouseLeave={e => { if (!selected) e.currentTarget.style.background = 'transparent' }}
-    >
-      <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-        {String(rank).padStart(2, '0')}
-      </span>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 12, color: selected ? 'var(--text)' : 'var(--text-dim)', fontWeight: selected ? 500 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {shortName(area.nome)}
-        </div>
-        <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
-          {area.identificacao.aisp && (
-            <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>AISP {area.identificacao.aisp}</span>
-          )}
-          {area.relint_disponivel && (
-            <span style={{ fontSize: 9, color: 'var(--accent)' }}>· RELINT</span>
-          )}
-        </div>
-      </div>
-      <span className="mono tnum" style={{ fontSize: 11, textAlign: 'right', color: 'var(--text-dim)' }}>
-        {fmt(area.stats.crimes_total)}
-      </span>
-      <div style={{ textAlign: 'right' }}>
-        <span className="mono tnum" style={{
-          fontSize: 12,
-          color: scoreColor(score),
-          fontWeight: 600,
-        }}>
-          {score.toFixed(0)}
+      borderLeft: agentActive ? '2px solid var(--amber)' : selected ? '2px solid var(--accent)' : '2px solid transparent',
+    }}>
+      <button onClick={onClick} style={{
+        display: 'grid', gridTemplateColumns: '20px 1fr 56px 36px',
+        gap: 8,
+        width: '100%', padding: '8px 16px',
+        alignItems: 'center',
+        background: agentActive ? 'rgba(251,176,64,0.06)' : selected ? 'var(--bg-3)' : 'transparent',
+        border: 'none',
+        cursor: 'pointer', textAlign: 'left',
+        transition: 'background 0.1s',
+      }}
+      onMouseEnter={e => { if (!selected && !agentActive) e.currentTarget.style.background = 'var(--bg-2)' }}
+      onMouseLeave={e => { if (!selected && !agentActive) e.currentTarget.style.background = 'transparent' }}
+      >
+        <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+          {String(rank).padStart(2, '0')}
         </span>
-      </div>
-    </button>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 12, color: selected || agentActive ? 'var(--text)' : 'var(--text-dim)', fontWeight: selected || agentActive ? 500 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {shortName(area.nome)}
+          </div>
+          <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
+            {area.identificacao.aisp && (
+              <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>AISP {area.identificacao.aisp}</span>
+            )}
+            {area.relint_disponivel && (
+              <span style={{ fontSize: 9, color: 'var(--accent)' }}>· RELINT</span>
+            )}
+            {agentActive && (
+              <span style={{ fontSize: 9, color: 'var(--amber)' }}>· IA ativa</span>
+            )}
+          </div>
+        </div>
+        <span className="mono tnum" style={{ fontSize: 11, textAlign: 'right', color: 'var(--text-dim)' }}>
+          {fmt(area.stats.crimes_total)}
+        </span>
+        <div style={{ textAlign: 'right' }}>
+          <span className="mono tnum" style={{
+            fontSize: 12,
+            color: scoreColor(score),
+            fontWeight: 600,
+          }}>
+            {score.toFixed(0)}
+          </span>
+        </div>
+      </button>
+
+      {/* Investigate button — appears on hover of the row */}
+      {onInvestigate && !agentActive && (
+        <button
+          onClick={e => { e.stopPropagation(); onInvestigate() }}
+          title="Investigar com IA"
+          style={{
+            position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+            background: 'var(--bg-4)', border: '1px solid var(--border)',
+            borderRadius: 2, padding: '3px 7px',
+            fontSize: 9, color: 'var(--text-muted)',
+            cursor: 'pointer', opacity: 0,
+            transition: 'opacity 0.12s',
+          }}
+          className="investigate-btn"
+        >
+          IA ↗
+        </button>
+      )}
+    </div>
   )
 }
 

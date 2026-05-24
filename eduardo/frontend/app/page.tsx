@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import type { AreasData, Area } from './types'
+import { useState, useEffect, useRef } from 'react'
+import type { AreasData, Area, MapControl } from './types'
 import TopHeader from './components/TopHeader'
 import Sidebar from './components/Sidebar'
 import MapView from './components/MapView'
 import AreaPanel from './components/AreaPanel'
 import ComparativoPage from './components/tabs/ComparativoPage'
+import AgentPanel from './components/AgentPanel'
+import { useMapAgent } from './hooks/useMapAgent'
 
 export default function Home() {
   const [data, setData] = useState<AreasData | null>(null)
@@ -19,6 +21,9 @@ export default function Home() {
     mancha: 40, pico: 15, fatores: 25, dinamica: 15,
   })
 
+  // Map control ref (populated by MapView when map is ready)
+  const mapControlRef = useRef<MapControl | null>(null)
+
   useEffect(() => {
     fetch('/areas_data.json')
       .then(r => r.json())
@@ -27,6 +32,15 @@ export default function Home() {
         setLoading(false)
       })
   }, [])
+
+  const { agentState, startAgent, respondToCheckpoint, abortAgent } = useMapAgent({
+    mapControlRef,
+    setWeights,
+    setSelected,
+    getArea: (id) => data?.areas.find(a => a.id === id),
+  })
+
+  const agentIsActive = agentState.status !== 'idle'
 
   if (loading || !data) {
     return (
@@ -77,6 +91,8 @@ export default function Home() {
             weights={weights}
             setWeights={setWeights}
             onSelectArea={setSelected}
+            onInvestigate={agentIsActive ? undefined : startAgent}
+            agentActiveAreaId={agentState.areaId}
           />
 
           <MapView
@@ -84,16 +100,23 @@ export default function Home() {
             selected={selected}
             weights={weights}
             onSelectArea={setSelected}
+            mapControlRef={mapControlRef}
           />
 
-          {selected && (
+          {agentIsActive ? (
+            <AgentPanel
+              agentState={agentState}
+              onRespond={respondToCheckpoint}
+              onAbort={abortAgent}
+            />
+          ) : selected ? (
             <AreaPanel
               area={selected}
               allAreas={data.areas}
               weights={weights}
               onClose={() => setSelected(null)}
             />
-          )}
+          ) : null}
         </div>
       )}
     </div>

@@ -116,6 +116,12 @@ button:focus { outline: none; }
   border: 2px solid var(--bg);
 }
 
+/* Investigate button visible on row hover */
+div:hover > .investigate-btn,
+div:focus-within > .investigate-btn {
+  opacity: 1 !important;
+}
+
 /* Subtle pulse for accent dot */
 @keyframes pulse-accent {
   0%, 100% { opacity: 1; }

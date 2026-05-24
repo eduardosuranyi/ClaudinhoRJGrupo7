@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import type { Area, AreasData } from '../types'
+import type { Area, AreasData, MapControl, AgentLayerKey } from '../types'
 import { fmt, scoreColor, faccaoColor } from '../lib/helpers'
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
   selected: Area | null
   weights: { mancha: number; pico: number; fatores: number; dinamica: number }
   onSelectArea: (area: Area | null) => void
+  mapControlRef?: React.MutableRefObject<MapControl | null>
 }
 
 interface LayerVisibility {
@@ -33,14 +34,17 @@ function computeScore(area: Area, w: Props['weights']): number {
   )) / 10
 }
 
-export default function MapView({ data, selected, weights, onSelectArea }: Props) {
+export default function MapView({ data, selected, weights, onSelectArea, mapControlRef }: Props) {
   const mapRef   = useRef<HTMLDivElement>(null)
   const mapInst  = useRef<any>(null)
   const popupRef = useRef<any>(null)
+  const annotationsRef = useRef<any[]>([])
   const [mapReady, setMapReady] = useState(false)
   const [layers, setLayers] = useState<LayerVisibility>({
     crime: false, fatores: false, cameras: false, psr: false, dominio: false, gaps: false,
   })
+  // Mirror of layers state accessible from refs (avoids stale closures in mapControlRef)
+  const layersRef = useRef<LayerVisibility>({ crime: false, fatores: false, cameras: false, psr: false, dominio: false })
 
   // ─────────────────────────────────────────────────────────
   // 1. MAP INIT
@@ -458,24 +462,96 @@ export default function MapView({ data, selected, weights, onSelectArea }: Props
   // ─────────────────────────────────────────────────────────
   // 5. LAYER TOGGLE
   // ─────────────────────────────────────────────────────────
-  function toggleLayer(key: keyof LayerVisibility) {
-    const next = { ...layers, [key]: !layers[key] }
-    setLayers(next)
+  const LAYER_IDS: Record<string, string[]> = {
+    crime:   ['crime-heat', 'crime-dot'],
+    fatores: ['fatores-dot'],
+    cameras: ['cameras-dot'],
+    psr:     ['psr-dot'],
+    dominio: ['dominio-fill', 'dominio-stroke'],
+    gaps:    ['gaps-dot'],
+  }
+
+  function setLayerVisible(key: keyof LayerVisibility, visible: boolean) {
+    setLayers(prev => {
+      const next = { ...prev, [key]: visible }
+      layersRef.current = next
+      return next
+    })
     if (!mapInst.current) return
-    const map = mapInst.current
-    const layerIds: Record<string, string[]> = {
-      crime:   ['crime-heat', 'crime-dot'],
-      fatores: ['fatores-dot'],
-      cameras: ['cameras-dot'],
-      psr:     ['psr-dot'],
-      dominio: ['dominio-fill', 'dominio-stroke'],
-      gaps:    ['gaps-dot'],
-    }
-    layerIds[key].forEach(id => map.setLayoutProperty(id, 'visibility', next[key] ? 'visible' : 'none'))
+    LAYER_IDS[key]?.forEach(id =>
+      mapInst.current.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none')
+    )
+  }
+
+  function toggleLayer(key: keyof LayerVisibility) {
+    setLayerVisible(key, !layersRef.current[key])
   }
 
   // ─────────────────────────────────────────────────────────
-  // 6. RENDER
+  // 6. EXPOSE MAP CONTROL REF (for agent)
+  // ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!mapReady || !mapControlRef) return
+
+    mapControlRef.current = {
+      toggleLayer: (layer: AgentLayerKey, visible: boolean) => {
+        setLayerVisible(layer, visible)
+      },
+
+      zoomToArea: (areaId: number) => {
+        const area = data.areas.find(a => a.id === areaId)
+        if (!area || !mapInst.current) return
+        const bounds = geomBounds(area.geometry as any)
+        if (bounds) {
+          mapInst.current.fitBounds(bounds, {
+            padding: { top: 80, bottom: 80, left: 80, right: 80 },
+            maxZoom: 14,
+            duration: 900,
+            easing: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+          })
+        }
+        mapInst.current.setFilter('areas-selected', ['==', ['get', 'id'], areaId])
+      },
+
+      addAnnotation: (lat: number, lng: number, title: string, body: string) => {
+        import('maplibre-gl').then(({ default: maplibregl }) => {
+          if (!mapInst.current) return
+          const el = document.createElement('div')
+          el.style.cssText = [
+            'width:10px', 'height:10px', 'border-radius:50%',
+            'background:#fbb040', 'border:2px solid #07070a',
+            'cursor:pointer', 'box-shadow:0 0 6px rgba(251,176,64,0.5)',
+          ].join(';')
+          const popup = new maplibregl.Popup({ closeButton: false, offset: 8, maxWidth: '200px' })
+            .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3">
+              <div style="font-size:10px;font-weight:600;margin-bottom:2px">${title}</div>
+              <div style="font-size:10px;color:#8a8a95">${body}</div>
+            </div>`)
+          const marker = new maplibregl.Marker({ element: el })
+            .setLngLat([lng, lat])
+            .setPopup(popup)
+            .addTo(mapInst.current)
+          annotationsRef.current.push(marker)
+        })
+      },
+
+      clearAnnotations: () => {
+        annotationsRef.current.forEach(m => m.remove())
+        annotationsRef.current = []
+      },
+
+      snapshotLayers: () => ({ ...layersRef.current }),
+
+      restoreLayers: (snapshot: Record<AgentLayerKey, boolean>) => {
+        Object.entries(snapshot).forEach(([key, visible]) => {
+          setLayerVisible(key as AgentLayerKey, visible)
+        })
+      },
+    }
+  }, [mapReady, mapControlRef, data])
+
+  // ─────────────────────────────────────────────────────────
+  // 7. RENDER
   // ─────────────────────────────────────────────────────────
   const totalCrime   = data.areas.reduce((s, a) => s + a.map_layers.crime_points.length, 0)
   const totalFatores = data.areas.reduce((s, a) => s + a.map_layers.fatores_points.length, 0)

@@ -188,3 +188,58 @@ export interface AreasData {
     periodo_denuncias: string
   }
 }
+
+// ─── Agent types ─────────────────────────────────────────────────────────────
+
+export type AgentStatus = 'idle' | 'running' | 'paused' | 'complete' | 'error'
+
+export type AgentLayerKey = 'crime' | 'fatores' | 'cameras' | 'psr' | 'dominio'
+
+export interface AgentCheckpointData {
+  question: string
+  options: string[]
+  reasoning: string
+  tool_use_id: string
+}
+
+export interface TranscriptEntry {
+  id: string
+  type: 'system' | 'narrate' | 'tool_action' | 'checkpoint_ask' | 'checkpoint_answer' | 'complete' | 'error'
+  content: string
+  stepTitle?: string
+  checkpoint?: AgentCheckpointData
+}
+
+export interface AgentFindings {
+  summary: string
+  key_findings: string[]
+  actions: Array<{
+    prioridade: number
+    urgencia: 'imediata' | '7_dias' | '30_dias'
+    orgao: string
+    tipo_recurso: string
+    acao: string
+    local: string
+    evidencia: string
+    prazo: string
+  }>
+}
+
+export interface AgentState {
+  status: AgentStatus
+  areaId: number | null
+  transcript: TranscriptEntry[]
+  pendingCheckpoint: AgentCheckpointData | null
+  messages: any[]
+  findings: AgentFindings | null
+  error: string | null
+}
+
+export interface MapControl {
+  toggleLayer: (layer: AgentLayerKey, visible: boolean) => void
+  zoomToArea: (areaId: number) => void
+  addAnnotation: (lat: number, lng: number, title: string, body: string) => void
+  clearAnnotations: () => void
+  snapshotLayers: () => Record<AgentLayerKey, boolean>
+  restoreLayers: (snapshot: Record<AgentLayerKey, boolean>) => void
+}
