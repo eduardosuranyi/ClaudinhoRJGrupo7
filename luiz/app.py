@@ -150,7 +150,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-if not gerar_btn:
+if gerar_btn:
+    st.session_state["analise_executada"] = True
+    st.session_state["analise_area"] = area_selecionada
+
+if not st.session_state.get("analise_executada"):
     st.info("Selecione uma área FM na barra lateral e clique em **Gerar Análise**.")
     st.stop()
 
