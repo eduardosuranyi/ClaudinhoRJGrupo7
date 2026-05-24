@@ -13,7 +13,9 @@ __pycache__/
 # Full unfiltered logradouros backup (exceeds GitHub 100 MB limit)
 data/external/logradouros_rio.full.geojson
 
-# BigQuery 1746 extractions — large CSVs (up to 225 MB), reproduce via queries_1746.sql
+# BigQuery 1746 raw extractions — large CSVs (up to 225 MB)
+# The compressed version (chamados_1746_fm.csv.gz, ~29 MB) IS tracked.
+# Pipeline reads .csv.gz natively via pandas.
 data/external/chamados_1746_fm.csv
 data/external/query2_result.csv
 data/external/query2new_results.csv

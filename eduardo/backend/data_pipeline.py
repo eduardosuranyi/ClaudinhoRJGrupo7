@@ -311,7 +311,10 @@ def load_censo(data_dir: Path) -> gpd.GeoDataFrame:
 
 def load_chamados_1746(data_dir: Path) -> pd.DataFrame:
     path = data_dir / "external" / "chamados_1746_fm.csv"
-    if not path.is_file():
+    gz_path = path.with_suffix(".csv.gz")
+    if gz_path.is_file():
+        path = gz_path
+    elif not path.is_file():
         return pd.DataFrame()
     usecols = [
         "id_chamado", "data_inicio", "data_fim", "id_bairro",
