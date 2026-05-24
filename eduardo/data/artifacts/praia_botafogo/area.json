@@ -1,0 +1,185 @@
+{
+  "area_id": "praia_botafogo",
+  "display_name": "Praia de Botafogo – Rua Marquês de Abrantes",
+  "polygon_source": "shapefile",
+  "coverage": {
+    "has_polygon": true,
+    "has_relint": true,
+    "has_cameras": true
+  },
+  "identificacao": {
+    "aisp": "2",
+    "bairro": "Botafogo",
+    "area_orcrim": "sob domínio direto de CV; 8 território(s) sob influência nas proximidades"
+  },
+  "indicadores": {
+    "periodo": "2023-2024",
+    "total_ocorrencias": 566,
+    "por_tipo": {
+      "Roubo a transeunte": 330,
+      "Roubo de aparelho celular": 203,
+      "Roubo em coletivo": 33
+    },
+    "ranking": {
+      "posicao": 4,
+      "de": 10,
+      "share_pct": 11.7
+    },
+    "n_trechos_criticos": 2
+  },
+  "trechos": [
+    {
+      "cells": [
+        "8aa8a078a65ffff",
+        "8aa8a078a647fff",
+        "8aa8a078a66ffff",
+        "8aa8a078a297fff",
+        "8aa8a078a2b7fff",
+        "8aa8a078a287fff",
+        "8aa8a078a28ffff",
+        "8aa8a06a4927fff",
+        "8aa8a06a4907fff",
+        "8aa8a06a4917fff",
+        "8aa8a06a4937fff",
+        "8aa8a078a29ffff",
+        "8aa8a078a64ffff",
+        "8aa8a06a49a7fff",
+        "8aa8a06a49b7fff",
+        "8aa8a078a74ffff",
+        "8aa8a078a76ffff",
+        "8aa8a078a397fff",
+        "8aa8a078a75ffff",
+        "8aa8a078a677fff",
+        "8aa8a078a657fff"
+      ],
+      "logradouro": "Rua Marques De Abrantes",
+      "n_cells": 21,
+      "crime_total": 145,
+      "max_bingo_count": 3,
+      "score": 15.8504,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz",
+        "SEOP",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Calçada estreita forçando pedestres à pista",
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Estacionamento irregular forçando pedestres à pista",
+        "Mobiliário abandonado servindo de esconderijo",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Sem ocorrência",
+        "Tapumes servindo de esconderijo",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Veículos de grande porte obstruindo a visibilidade",
+        "Vãos ou cavidades usados como esconderijo",
+        "Área mal iluminada com circulação de pedestres",
+        "Área mal iluminada com parada de veículos"
+      ],
+      "rank": 1
+    },
+    {
+      "cells": [
+        "8aa8a078aaf7fff",
+        "8aa8a078aa1ffff",
+        "8aa8a078aa0ffff",
+        "8aa8a078aae7fff",
+        "8aa8a078aaaffff",
+        "8aa8a078aa17fff",
+        "8aa8a078aa8ffff",
+        "8aa8a078aad7fff",
+        "8aa8a078a32ffff",
+        "8aa8a078a30ffff",
+        "8aa8a078a31ffff",
+        "8aa8a078a307fff",
+        "8aa8a078a327fff",
+        "8aa8a078a317fff",
+        "8aa8a078a3affff"
+      ],
+      "logradouro": "Praia De Botafogo",
+      "n_cells": 15,
+      "crime_total": 120,
+      "max_bingo_count": 3,
+      "score": 10.5739,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz",
+        "SEOP",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Mobiliário abandonado servindo de esconderijo",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Praças e Parques",
+        "Sem ocorrência",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Vãos ou cavidades usados como esconderijo",
+        "Área mal iluminada com circulação de pedestres",
+        "Área mal iluminada com parada de veículos"
+      ],
+      "rank": 2
+    }
+  ],
+  "orcrim": {
+    "intersecting": [
+      {
+        "territorio": "MORRO DO AZUL",
+        "orcrim": "CV"
+      }
+    ],
+    "nearby": [
+      {
+        "territorio": "FAVELA JULIO OTONI",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DONA MARTA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "SANTO AMARO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DA FALLET",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO PEREIRÃO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "FAVELA FUNDÃO DA BALANÇA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "LADEIRA DOS TABAJARAS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "FAVELA TAVARES BASTOS",
+        "orcrim": "CV"
+      }
+    ],
+    "factions": [
+      "CV"
+    ],
+    "summary": "sob domínio direto de CV; 8 território(s) sob influência nas proximidades"
+  },
+  "n_bingo_cells": 36,
+  "n_triple_bingo": 11
+}

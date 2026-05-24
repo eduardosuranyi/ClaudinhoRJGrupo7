@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import type { AreasData, Area, MapControl } from './types'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import type { AreasData, Area, MapControl, InspectedPoint } from './types'
 import TopHeader from './components/TopHeader'
 import Sidebar from './components/Sidebar'
 import MapView from './components/MapView'
@@ -16,13 +16,25 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [showComparativo, setShowComparativo] = useState(false)
 
-  // Scoring weights (default matches backend default)
   const [weights, setWeights] = useState({
     mancha: 40, pico: 15, fatores: 25, dinamica: 15,
   })
 
-  // Map control ref (populated by MapView when map is ready)
   const mapControlRef = useRef<MapControl | null>(null)
+
+  const [highlightedTrechos, setHighlightedTrechos] = useState<number[]>([])
+  const [inspectedPoint, setInspectedPoint] = useState<InspectedPoint | null>(null)
+
+  useEffect(() => {
+    setHighlightedTrechos([])
+    setInspectedPoint(null)
+  }, [selected])
+
+  const toggleTrecho = useCallback((idx: number) => {
+    setHighlightedTrechos(prev =>
+      prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
+    )
+  }, [])
 
   useEffect(() => {
     fetch('/areas_data.json')
@@ -101,6 +113,10 @@ export default function Home() {
             weights={weights}
             onSelectArea={setSelected}
             mapControlRef={mapControlRef}
+            highlightedTrechos={highlightedTrechos}
+            onToggleTrecho={toggleTrecho}
+            onSetHighlightedTrechos={setHighlightedTrechos}
+            onInspectPoint={setInspectedPoint}
           />
 
           {agentIsActive ? (
@@ -115,6 +131,10 @@ export default function Home() {
               allAreas={data.areas}
               weights={weights}
               onClose={() => setSelected(null)}
+              highlightedTrechos={highlightedTrechos}
+              onToggleTrecho={toggleTrecho}
+              inspectedPoint={inspectedPoint}
+              onCloseInspect={() => setInspectedPoint(null)}
             />
           ) : null}
         </div>

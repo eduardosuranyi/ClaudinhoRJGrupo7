@@ -47,7 +47,7 @@ class LLMExtractor:
         api_key: Optional[str] = None,
         model: str = DEFAULT_MODEL,
         max_tokens: int = 2048,
-        temperature: float = 0.0,
+        temperature: float = 0.0,        # aceito mas ignorado (Opus 4.7 removeu sampling params)
     ):
         try:
             from anthropic import Anthropic
@@ -59,7 +59,6 @@ class LLMExtractor:
         self._client = Anthropic(api_key=api_key) if api_key else Anthropic()
         self.model = model
         self.max_tokens = max_tokens
-        self.temperature = temperature
         self._system_prompt = build_system_prompt()
 
     def extract(self, source: RawSource) -> Optional[CrimeEvent]:
@@ -83,7 +82,7 @@ class LLMExtractor:
             resp = self._client.messages.create(
                 model=self.model,
                 max_tokens=self.max_tokens,
-                temperature=self.temperature,
+                # Sem `temperature` — Opus 4.7 removeu sampling parameters.
                 system=[
                     {
                         "type": "text",

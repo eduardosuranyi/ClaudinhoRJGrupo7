@@ -1,0 +1,252 @@
+{
+  "orgaos": [
+    {
+      "orgao": "SEOP",
+      "total": 21,
+      "fatores": [
+        {
+          "fator": "Comércio irregular obstruindo a visibilidade do passeio",
+          "count": 11,
+          "exemplos": [
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Equipe verificou que existe comércio irregular obstruindo a visibilidade do passeio."
+            },
+            {
+              "logradouro": "Rua Aurélio de Figueiredo",
+              "obs": "Foi verificado vários comerciantes irregulares no local."
+            }
+          ]
+        },
+        {
+          "fator": "Veículos de grande porte obstruindo a visibilidade",
+          "count": 8,
+          "exemplos": [
+            {
+              "logradouro": "Rua Aurélio de Figueiredo",
+              "obs": "Na calçada, em frente ao n° 40, havia uma barraca de caldo de cana e ao lado desta barraca haviam 3 kombis (LOU0G50 - KNY7886 - DEM0I78) estacionadas irregularmente."
+            },
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "No dia em que a equipe esteve no local, foi verificado que vans utilizam a área destinada aos ônibus, para fazerem ponto de vans. E emitem sinais sonoros indicar o destino."
+            }
+          ]
+        },
+        {
+          "fator": "Estacionamento irregular forçando pedestres à pista",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Equipe verificou que existe ponto de mototaxista estacionados na calçada."
+            },
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Data: 05/02/2026 Horário: 16h Estacionamento irregular Na Rua Gianerini, foi constatada a presença de vans irregulares nos pontos de ônibus, bem como a utilização indevida das calçadas e por veículos estacionados ao longo de todo o dia, pre"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "CET-Rio",
+      "total": 15,
+      "fatores": [
+        {
+          "fator": "Ponto de retenção do tráfego",
+          "count": 15,
+          "exemplos": [
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Trânsito total parado pelo motivo de veículos parados e estavionados na via."
+            },
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Trânsito total parado pelo motivo de veículos parados e estavionados na via."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SMTR",
+      "total": 12,
+      "fatores": [
+        {
+          "fator": "Ponto de ônibus com histórico de vandalismo",
+          "count": 12,
+          "exemplos": [
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "ponto final linha 798"
+            },
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "ponto final linha 850"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Comlurb",
+      "total": 9,
+      "fatores": [
+        {
+          "fator": "Vegetação encobrindo iluminação pública",
+          "count": 8,
+          "exemplos": [
+            {
+              "logradouro": "Rua Amaral Costa",
+              "obs": "Data: 05/02/2026 Horário: 16h Fator de Incidência Criminal: Vegetação - Iluminação Na Rua Amaral Costa, foi observada vegetação densa em proximidade com a fiação, além de obstruir a visualização das placas de orientação"
+            },
+            {
+              "logradouro": "Rua Viúva Dantas",
+              "obs": "trecho com luminárias encobertas"
+            }
+          ]
+        },
+        {
+          "fator": "Vegetação obstruindo a visibilidade do passeio",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Amaral Costa",
+              "obs": "os vegetais ao longo do trecho, estão atrapalhando a circulação de pedestres."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Seconserva",
+      "total": 9,
+      "fatores": [
+        {
+          "fator": "Mobiliário urbano desviando pedestres para a pista",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Rua Gianerini",
+              "obs": "Data: 05/02/2026 Horário: 16h Fator: Desordem Urbana Na Rua Gianerini, foi constatada obstrução ao longo de todo o passeio público, causando prejuízos à mobilidade dos pedestres e dificultando a visualização para eventuais atuações dos agen"
+            },
+            {
+              "logradouro": "Rua Iaçu",
+              "obs": "Data: 05/02/2026 Horário: 16h No trecho compreendido até a entrada do túnel que dá acesso à Rua Campo Grande, verificou-se ainda a existência de uma loja de vestuário ocupando irregularmente o espaço público. A desordem observada favorece a"
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário abandonado servindo de esconderijo",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Rua Aurélio de Figueiredo",
+              "obs": "Imobiliário abandonado, fazendo de esconderijo para pequenos furtos."
+            },
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Banca de jornal fechada, com moradores de rua ao lado"
+            }
+          ]
+        },
+        {
+          "fator": "Calçada estreita forçando pedestres à pista",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Veículo efetuando carga e descarga no passeio público, obrigando os pedestres a utilizarem a via."
+            }
+          ]
+        },
+        {
+          "fator": "Tapumes servindo de esconderijo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Buraco em baixo da passarela , tampado por tapume , servindo de esconderijo para moradores de rua"
+            }
+          ]
+        },
+        {
+          "fator": "Vãos ou cavidades usados como esconderijo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Amaral Costa",
+              "obs": "Data: 05/02/2026 Horário: 16h Fator de Incidência Criminal: Infraestrutura Vandalismo nas grades da igreja, que pode ser usado como uma espécie de rota de fuga ou para adentrar de forma irregular no interior do estabelecimento da Paróquia N"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SMAS",
+      "total": 8,
+      "fatores": [
+        {
+          "fator": "Pessoas em situação de rua",
+          "count": 8,
+          "exemplos": [
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Equipe verificou quatro pessoas em situação de rua, dormindo embaixo da marquise."
+            },
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Equipe verificou que existem pessoas em situação de rua dormindo embaixo da marquise."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "GM-Rio",
+      "total": 7,
+      "fatores": [
+        {
+          "fator": "Motocicletas trafegando no passeio",
+          "count": 7,
+          "exemplos": [
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Motos transitam sobre a calçada em ambos os lados da via, fato que possibilita furtos de celulares."
+            },
+            {
+              "logradouro": "Rua Amaral Costa",
+              "obs": "Motos transitando sobre a calçada em ambos os lados da via. Em dias de audiência no Fórum, o número de pedestres aumenta significativamente gerando oportunidades para furtos."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "RioLuz",
+      "total": 6,
+      "fatores": [
+        {
+          "fator": "Área mal iluminada com circulação de pedestres",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Cesário de Melo",
+              "obs": "Iluminação pública ruim"
+            },
+            {
+              "logradouro": "Rua Campo Grande",
+              "obs": "Poste com luminária apagada"
+            }
+          ]
+        },
+        {
+          "fator": "Área mal iluminada com parada de veículos",
+          "count": 2,
+          "exemplos": []
+        }
+      ]
+    }
+  ],
+  "total_fatores": 87
+}

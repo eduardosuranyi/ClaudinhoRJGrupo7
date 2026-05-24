@@ -25,11 +25,20 @@ from valente_ontology.enums import SourceKind
 from valente_ontology.loaders.base import RawSource
 
 
-# Palavras-chave de pré-filtro. Não pretende ser exaustivo — é só um
-# coador grosso para evitar gastar tokens em tweets obviamente irrelevantes.
+# Palavras-chave de pré-filtro alinhadas ao escopo: roubo, furto e fatores
+# urbanos que influenciem nesses crimes. NÃO inclui violência sem caráter
+# patrimonial (tiroteio, esfaqueamento) — esses são filtrados antes do
+# LLM caro. O classificador de relevância (extractors/relevance.py) faz
+# a decisão fina; este filtro só economiza tokens nos casos óbvios.
 _KW_RE = re.compile(
-    r"\b(roubo|roubad[ao]|assalt|furto|furtad|arrast[aã]o|sequestr|"
-    r"levaram|atira|tiroteio|invad|esfaqu)",
+    r"\b("
+    r"roub|assalt|furt|levaram|arrast[aã]o|abord(a|aram|ou)|"
+    r"perd[ie]u (a |o |meu |minha )?(celular|carteira|bolsa|mochila|carro|moto)|"
+    # fatores urbanos que costumam aparecer em contexto de
+    # roubo/furto (calçada, iluminação, abandono):
+    r"poste apagado|sem ilumin|rua escura|terreno baldio|caland[ãa]o|"
+    r"ponto cego|sem c[âa]mera|abandonad[ao]"
+    r")",
     re.IGNORECASE,
 )
 

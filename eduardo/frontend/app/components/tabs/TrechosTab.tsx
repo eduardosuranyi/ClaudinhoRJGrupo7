@@ -3,7 +3,13 @@
 import type { Area } from '../../types'
 import { fmt, cap } from '../../lib/helpers'
 
-export default function TrechosTab({ area }: { area: Area }) {
+interface TrechosTabProps {
+  area: Area
+  highlightedTrechos?: number[]
+  onToggleTrecho?: (idx: number) => void
+}
+
+export default function TrechosTab({ area, highlightedTrechos, onToggleTrecho }: TrechosTabProps) {
   if (area.top_trechos.length === 0) {
     return (
       <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
@@ -13,14 +19,20 @@ export default function TrechosTab({ area }: { area: Area }) {
   }
 
   const totalCrimes = area.top_trechos.reduce((s, t) => s + t.total, 0)
+  const hlSet = new Set(highlightedTrechos ?? [])
 
   return (
     <div style={{ padding: '12px 16px' }}>
       <div className="label-overline" style={{ marginBottom: 6 }}>Top trechos por incidência</div>
-      <p style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 12 }}>
+      <p style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4 }}>
         Top {area.top_trechos.length} concentram <span className="mono" style={{ color: 'var(--text-dim)' }}>{fmt(totalCrimes)}</span> ocorrências
         ({Math.round(totalCrimes / area.stats.crimes_total * 100)}% do total da área).
       </p>
+      {onToggleTrecho && (
+        <p style={{ fontSize: 9, color: 'var(--text-muted)', marginBottom: 10, fontStyle: 'italic' }}>
+          Clique para selecionar no mapa{hlSet.size > 0 ? ` · ${hlSet.size} selecionado${hlSet.size > 1 ? 's' : ''}` : ''}
+        </p>
+      )}
 
       <div style={{
         background: 'var(--bg-1)',
@@ -28,33 +40,48 @@ export default function TrechosTab({ area }: { area: Area }) {
         borderRadius: 2,
       }}>
         {area.top_trechos.map((t, i) => (
-          <TrechoRow key={i} rank={i + 1} trecho={t} maxTotal={area.top_trechos[0].total} />
+          <TrechoRow
+            key={i}
+            rank={i + 1}
+            trecho={t}
+            maxTotal={area.top_trechos[0].total}
+            highlighted={hlSet.has(i)}
+            onClick={onToggleTrecho ? () => onToggleTrecho(i) : undefined}
+          />
         ))}
       </div>
     </div>
   )
 }
 
-function TrechoRow({ rank, trecho, maxTotal }: { rank: number; trecho: any; maxTotal: number }) {
+function TrechoRow({ rank, trecho, maxTotal, highlighted, onClick }: {
+  rank: number; trecho: any; maxTotal: number; highlighted?: boolean; onClick?: () => void
+}) {
   const pct = (trecho.total / maxTotal) * 100
-  const totalTrecho = trecho.roubo_transeunte + trecho.roubo_celular + trecho.roubo_coletivo
 
   return (
-    <div style={{
-      padding: '10px 12px',
-      borderBottom: '1px solid var(--border-dim)',
-      position: 'relative',
-    }}>
+    <div
+      onClick={onClick}
+      style={{
+        padding: '10px 12px',
+        borderBottom: '1px solid var(--border-dim)',
+        position: 'relative',
+        cursor: onClick ? 'pointer' : 'default',
+        borderLeft: highlighted ? '3px solid #fbb040' : '3px solid transparent',
+        background: highlighted ? 'rgba(251,176,64,0.08)' : 'transparent',
+        transition: 'background 0.15s, border-color 0.15s',
+      }}
+    >
       {/* Background bar */}
       <div style={{
         position: 'absolute', top: 0, left: 0, bottom: 0,
         width: `${pct}%`,
-        background: 'rgba(255,107,53,0.06)',
+        background: highlighted ? 'rgba(251,176,64,0.06)' : 'rgba(255,107,53,0.06)',
         pointerEvents: 'none',
       }} />
 
       <div style={{ display: 'grid', gridTemplateColumns: '22px 1fr 50px', gap: 10, alignItems: 'center', position: 'relative' }}>
-        <span className="mono tnum" style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'right' }}>
+        <span className="mono tnum" style={{ fontSize: 11, color: highlighted ? '#fbb040' : 'var(--text-muted)', textAlign: 'right' }}>
           {String(rank).padStart(2, '0')}
         </span>
         <div style={{ minWidth: 0 }}>

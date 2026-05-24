@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import type { Area, AreasData, MapControl, AgentLayerKey } from '../types'
+import type { Area, AreasData, MapControl, AgentLayerKey, InspectedPoint } from '../types'
 import { fmt, scoreColor, faccaoColor } from '../lib/helpers'
 
 interface Props {
@@ -10,6 +10,10 @@ interface Props {
   weights: { mancha: number; pico: number; fatores: number; dinamica: number }
   onSelectArea: (area: Area | null) => void
   mapControlRef?: React.MutableRefObject<MapControl | null>
+  highlightedTrechos?: number[]
+  onToggleTrecho?: (idx: number) => void
+  onSetHighlightedTrechos?: (indices: number[]) => void
+  onInspectPoint?: (point: InspectedPoint | null) => void
 }
 
 interface LayerVisibility {
@@ -36,7 +40,7 @@ function computeScore(area: Area, w: Props['weights']): number {
   )) / 10
 }
 
-export default function MapView({ data, selected, weights, onSelectArea, mapControlRef }: Props) {
+export default function MapView({ data, selected, weights, onSelectArea, mapControlRef, highlightedTrechos, onToggleTrecho, onSetHighlightedTrechos, onInspectPoint }: Props) {
   const mapRef   = useRef<HTMLDivElement>(null)
   const mapInst  = useRef<any>(null)
   const popupRef = useRef<any>(null)
@@ -45,8 +49,10 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   const [layers, setLayers] = useState<LayerVisibility>({
     crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true,
   })
-  // Mirror of layers state accessible from refs (avoids stale closures in mapControlRef)
   const layersRef = useRef<LayerVisibility>({ crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true })
+
+  const cbRef = useRef({ onToggleTrecho, onInspectPoint, onSetHighlightedTrechos })
+  useEffect(() => { cbRef.current = { onToggleTrecho, onInspectPoint, onSetHighlightedTrechos } })
 
   // ─────────────────────────────────────────────────────────
   // 1. MAP INIT
@@ -408,7 +414,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       },
     })
 
-    // ── Top trechos — line segments from gazetteer ──
+    // ── Top trechos — line segments from gazetteer (clipped to FM area) ──
     map.addSource('trechos-lines', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
     map.addLayer({
       id: 'trechos-line',
@@ -416,8 +422,8 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       source: 'trechos-lines',
       paint: {
         'line-color': '#fbb040',
-        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 2.5, 15, 5],
-        'line-opacity': 0.85,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 1.5, 15, 3],
+        'line-opacity': 0.4,
       },
     })
     map.addLayer({
@@ -426,24 +432,71 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       source: 'trechos-lines',
       paint: {
         'line-color': '#fbb040',
-        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 8, 15, 14],
-        'line-opacity': 0.15,
-        'line-blur': 4,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 5, 15, 9],
+        'line-opacity': 0.08,
+        'line-blur': 3,
       },
     })
 
-    // ── Top trechos — numbered point markers at centroids ──
+    // ── Highlighted trecho lines (bright overlay for selected trechos) ──
+    map.addSource('trechos-hl-lines', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'trechos-hl-line-glow',
+      type: 'line',
+      source: 'trechos-hl-lines',
+      paint: {
+        'line-color': '#fbb040',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 10, 15, 18],
+        'line-opacity': 0.2,
+        'line-blur': 5,
+      },
+    })
+    map.addLayer({
+      id: 'trechos-hl-line',
+      type: 'line',
+      source: 'trechos-hl-lines',
+      paint: {
+        'line-color': '#ffffff',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 2.5, 15, 4.5],
+        'line-opacity': 0.75,
+      },
+    })
+
+    // ── Nearly-invisible interaction layer for area clicks ──
+    map.addLayer({
+      id: 'areas-interact',
+      type: 'fill',
+      source: 'areas',
+      paint: {
+        'fill-color': '#000000',
+        'fill-opacity': 0.01,
+      },
+    })
+
+    // ── Top trechos — numbered point markers (ABOVE areas-interact for hover) ──
     map.addSource('trechos', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
     map.addLayer({
       id: 'trechos-circle',
       type: 'circle',
       source: 'trechos',
       paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 6, 15, 12],
-        'circle-color': '#fbb040',
+        'circle-radius': ['interpolate', ['linear'], ['zoom'],
+          11, ['case', ['==', ['get', 'highlighted'], 1], 9, 6],
+          15, ['case', ['==', ['get', 'highlighted'], 1], 15, 12],
+        ],
+        'circle-color': [
+          'case', ['==', ['get', 'highlighted'], 1],
+          '#ffffff', '#fbb040',
+        ],
         'circle-opacity': 0.9,
-        'circle-stroke-color': '#07070a',
-        'circle-stroke-width': 1.5,
+        'circle-stroke-color': [
+          'case', ['==', ['get', 'highlighted'], 1],
+          '#fbb040', '#07070a',
+        ],
+        'circle-stroke-width': [
+          'case', ['==', ['get', 'highlighted'], 1],
+          2.5, 1.5,
+        ],
       },
     })
     map.addLayer({
@@ -457,25 +510,26 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         'text-allow-overlap': true,
       },
       paint: {
-        'text-color': '#07070a',
-      },
-    })
-
-    // ── Nearly-invisible interaction layer on top of everything ──
-    // fill-opacity must be > 0 for MapLibre to fire mouse/click events
-    map.addLayer({
-      id: 'areas-interact',
-      type: 'fill',
-      source: 'areas',
-      paint: {
-        'fill-color': '#000000',
-        'fill-opacity': 0.01,
+        'text-color': [
+          'case', ['==', ['get', 'highlighted'], 1],
+          '#fbb040', '#07070a',
+        ],
       },
     })
 
     // ── Interactions ─────────────────────────────────────
-    // Click area (uses the top-most invisible layer)
+
+    const interactiveLayers = ['trechos-circle', 'fatores-dot', 'chamados-dot']
+    function hitsInteractive(point: any) {
+      for (const l of interactiveLayers) {
+        if (map.queryRenderedFeatures(point, { layers: [l] }).length > 0) return true
+      }
+      return false
+    }
+
+    // Click area (skip if a more specific layer was hit)
     map.on('click', 'areas-interact', (e: any) => {
+      if (hitsInteractive(e.point)) return
       const id = e.features[0].properties.id
       const area = data.areas.find(a => a.id === id) ?? null
       if (!area) return
@@ -572,6 +626,110 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       popupRef.current?.remove()
     })
 
+    // Hover on trecho markers
+    map.on('mouseenter', 'trechos-circle', (e: any) => {
+      map.getCanvas().style.cursor = 'pointer'
+      const p = e.features[0].properties
+      const picoH = Number(p.pico) || 0
+      const bingo = Number(p.bingo) || 0
+      popupRef.current
+        .setLngLat(e.lngLat)
+        .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:190px;max-width:240px">
+          <div style="font-size:9px;color:#fbb040;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">#${p.rank} Trecho Crítico${bingo >= 2 ? ' · BINGO' : ''}</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px;text-transform:capitalize">${p.name}</div>
+          <div style="display:flex;gap:10px;font-size:11px;flex-wrap:wrap">
+            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Total</div><div style="font-weight:600;font-variant-numeric:tabular-nums;color:#fbb040">${Number(p.total).toLocaleString('pt-BR')}</div></div>
+            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Transeunte</div><div style="font-variant-numeric:tabular-nums">${Number(p.transeunte).toLocaleString('pt-BR')}</div></div>
+            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Celular</div><div style="font-variant-numeric:tabular-nums">${Number(p.celular).toLocaleString('pt-BR')}</div></div>
+            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Coletivo</div><div style="font-variant-numeric:tabular-nums">${Number(p.coletivo).toLocaleString('pt-BR')}</div></div>
+          </div>
+          <div style="margin-top:5px;font-size:10px;color:#8a8a95">Pico: ${picoH}h · Clique para selecionar</div>
+        </div>`)
+        .addTo(map)
+    })
+    map.on('mousemove', 'trechos-circle', (e: any) => {
+      popupRef.current?.setLngLat(e.lngLat)
+    })
+    map.on('mouseleave', 'trechos-circle', () => {
+      map.getCanvas().style.cursor = ''
+      popupRef.current?.remove()
+    })
+
+    // Click on trecho marker → toggle highlight
+    map.on('click', 'trechos-circle', (e: any) => {
+      const idx = Number(e.features[0].properties.idx)
+      if (!isNaN(idx)) cbRef.current.onToggleTrecho?.(idx)
+    })
+
+    // ── Fatores Urbanos hover + click ──
+    map.on('mouseenter', 'fatores-dot', (e: any) => {
+      map.getCanvas().style.cursor = 'pointer'
+      const p = e.features[0].properties
+      popupRef.current
+        .setLngLat(e.lngLat)
+        .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:180px;max-width:240px">
+          <div style="font-size:9px;color:#36c476;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Fator Urbano</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:5px">${p.tipo || '—'}</div>
+          <div style="display:flex;gap:10px;font-size:11px;flex-wrap:wrap">
+            ${p.orgao ? `<div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Órgão</div><div style="font-weight:500">${p.orgao}</div></div>` : ''}
+            ${p.logradouro ? `<div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Local</div><div style="font-weight:500;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.logradouro}</div></div>` : ''}
+          </div>
+          <div style="margin-top:5px;font-size:9px;color:#4a4a55;font-style:italic">Clique para detalhar →</div>
+        </div>`)
+        .addTo(map)
+    })
+    map.on('mousemove', 'fatores-dot', (e: any) => {
+      popupRef.current?.setLngLat(e.lngLat)
+    })
+    map.on('mouseleave', 'fatores-dot', () => {
+      map.getCanvas().style.cursor = ''
+      popupRef.current?.remove()
+    })
+    map.on('click', 'fatores-dot', (e: any) => {
+      const p = e.features[0].properties
+      const coords = e.features[0].geometry.coordinates
+      cbRef.current.onInspectPoint?.({
+        type: 'fator',
+        lat: coords[1],
+        lng: coords[0],
+        properties: { tipo: p.tipo, orgao: p.orgao, logradouro: p.logradouro },
+      })
+      popupRef.current?.remove()
+    })
+
+    // ── Chamados 1746 hover + click ──
+    map.on('mouseenter', 'chamados-dot', (e: any) => {
+      map.getCanvas().style.cursor = 'pointer'
+      const p = e.features[0].properties
+      popupRef.current
+        .setLngLat(e.lngLat)
+        .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:180px;max-width:240px">
+          <div style="font-size:9px;color:#f59e0b;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Chamado 1746</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:5px">${p.tipo || '—'}</div>
+          ${p.orgao ? `<div style="font-size:11px"><span style="color:#4a4a55;font-size:9px;text-transform:uppercase">Órgão</span> <span style="font-weight:500">${p.orgao}</span></div>` : ''}
+          <div style="margin-top:5px;font-size:9px;color:#4a4a55;font-style:italic">Clique para detalhar →</div>
+        </div>`)
+        .addTo(map)
+    })
+    map.on('mousemove', 'chamados-dot', (e: any) => {
+      popupRef.current?.setLngLat(e.lngLat)
+    })
+    map.on('mouseleave', 'chamados-dot', () => {
+      map.getCanvas().style.cursor = ''
+      popupRef.current?.remove()
+    })
+    map.on('click', 'chamados-dot', (e: any) => {
+      const p = e.features[0].properties
+      const coords = e.features[0].geometry.coordinates
+      cbRef.current.onInspectPoint?.({
+        type: 'chamado',
+        lat: coords[1],
+        lng: coords[0],
+        properties: { tipo: p.tipo, orgao: p.orgao },
+      })
+      popupRef.current?.remove()
+    })
+
     map.on('mouseenter', 'gaps-dot', (e: any) => {
       map.getCanvas().style.cursor = 'pointer'
       const f = e.features[0].properties
@@ -589,13 +747,12 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       popupRef.current?.remove()
     })
 
-    // Click outside areas → deselect
+    // Click outside interactive elements → deselect
     map.on('click', (e: any) => {
-      const features = map.queryRenderedFeatures(e.point, { layers: ['areas-interact'] })
-      if (features.length === 0) {
-        onSelectArea(null)
-        map.setFilter('areas-selected', ['==', ['get', 'id'], -1])
-      }
+      const areaHit = map.queryRenderedFeatures(e.point, { layers: ['areas-interact'] })
+      if (areaHit.length > 0 || hitsInteractive(e.point)) return
+      onSelectArea(null)
+      map.setFilter('areas-selected', ['==', ['get', 'id'], -1])
     })
   }
 
@@ -609,19 +766,48 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   }, [weights, mapReady, data])
 
   // ─────────────────────────────────────────────────────────
-  // 4. SYNC SELECTED AREA HIGHLIGHT
+  // 4a. SYNC SELECTED AREA (polygon + bairros)
   // ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapInst.current || !mapReady) return
     const map = mapInst.current
     map.setFilter('areas-selected', ['==', ['get', 'id'], selected?.id ?? -1])
 
+    const bairroFeatures = selected?.bairros_entorno
+      ? selected.bairros_entorno.map(b => ({
+          type: 'Feature' as const,
+          properties: { nome: b.nome, populacao: b.populacao, denuncias: b.denuncias, chamados_1746: b.chamados_1746 },
+          geometry: b.geometry,
+        }))
+      : []
+    map.getSource('bairros')?.setData({ type: 'FeatureCollection', features: bairroFeatures })
+  }, [selected, mapReady])
+
+  // ─────────────────────────────────────────────────────────
+  // 4b. SYNC TRECHOS (depends on selected + highlights)
+  // ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!mapInst.current || !mapReady) return
+    const map = mapInst.current
+    const hl = new Set(highlightedTrechos ?? [])
+
     const trechoPointFeatures = selected
       ? selected.top_trechos
           .filter(t => t.lat && t.lng)
           .map((t, i) => ({
             type: 'Feature' as const,
-            properties: { rank: String(i + 1), name: t.locf_norm, total: t.total },
+            properties: {
+              idx: i,
+              rank: String(i + 1),
+              name: t.locf_norm,
+              total: t.total,
+              transeunte: t.roubo_transeunte,
+              celular: t.roubo_celular,
+              coletivo: t.roubo_coletivo,
+              pico: t.pico_hora,
+              bingo: t.bingo_count ?? 0,
+              highlighted: hl.has(i) ? 1 : 0,
+            },
             geometry: { type: 'Point' as const, coordinates: [t.lng, t.lat] },
           }))
       : []
@@ -638,15 +824,18 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       : []
     map.getSource('trechos-lines')?.setData({ type: 'FeatureCollection', features: trechoLineFeatures })
 
-    const bairroFeatures = selected?.bairros_entorno
-      ? selected.bairros_entorno.map(b => ({
-          type: 'Feature' as const,
-          properties: { nome: b.nome, populacao: b.populacao, denuncias: b.denuncias, chamados_1746: b.chamados_1746 },
-          geometry: b.geometry,
-        }))
+    const hlLineFeatures = selected
+      ? selected.top_trechos
+          .map((t, i) => ({ t, i }))
+          .filter(({ t, i }) => hl.has(i) && t.line_geometry)
+          .map(({ t, i }) => ({
+            type: 'Feature' as const,
+            properties: { rank: i + 1, name: t.locf_norm },
+            geometry: t.line_geometry!,
+          }))
       : []
-    map.getSource('bairros')?.setData({ type: 'FeatureCollection', features: bairroFeatures })
-  }, [selected, mapReady])
+    map.getSource('trechos-hl-lines')?.setData({ type: 'FeatureCollection', features: hlLineFeatures })
+  }, [selected, mapReady, highlightedTrechos])
 
   // ─────────────────────────────────────────────────────────
   // 5. LAYER TOGGLE
@@ -737,6 +926,10 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         Object.entries(snapshot).forEach(([key, visible]) => {
           setLayerVisible(key as AgentLayerKey, visible)
         })
+      },
+
+      highlightTrechos: (indices: number[]) => {
+        cbRef.current.onSetHighlightedTrechos?.(indices)
       },
     }
   }, [mapReady, mapControlRef, data])

@@ -1,0 +1,170 @@
+{
+  "area_id": "metro_botafogo",
+  "display_name": "Metrô Botafogo – Rua São Clemente – Rua Voluntários da Pátria",
+  "polygon_source": "shapefile",
+  "coverage": {
+    "has_polygon": true,
+    "has_relint": true,
+    "has_cameras": true
+  },
+  "identificacao": {
+    "aisp": "2",
+    "bairro": "Botafogo",
+    "area_orcrim": "7 território(s) sob influência nas proximidades"
+  },
+  "indicadores": {
+    "periodo": "2023-2024",
+    "total_ocorrencias": 432,
+    "por_tipo": {
+      "Roubo a transeunte": 278,
+      "Roubo de aparelho celular": 143,
+      "Roubo em coletivo": 11
+    },
+    "ranking": {
+      "posicao": 5,
+      "de": 10,
+      "share_pct": 9.0
+    },
+    "n_trechos_criticos": 2
+  },
+  "trechos": [
+    {
+      "cells": [
+        "8aa8a078854ffff",
+        "8aa8a0788097fff",
+        "8aa8a078809ffff",
+        "8aa8a0788727fff",
+        "8aa8a0788467fff",
+        "8aa8a0788447fff",
+        "8aa8a078845ffff",
+        "8aa8a07887b7fff",
+        "8aa8a0788797fff",
+        "8aa8a078ab67fff",
+        "8aa8a07884cffff",
+        "8aa8a07884effff",
+        "8aa8a0788457fff",
+        "8aa8a0788477fff",
+        "8aa8a078855ffff",
+        "8aa8a078842ffff",
+        "8aa8a078840ffff",
+        "8aa8a07884e7fff",
+        "8aa8a07884c7fff",
+        "8aa8a07884dffff",
+        "8aa8a07884f7fff"
+      ],
+      "logradouro": "Rua Voluntarios Da Patria",
+      "n_cells": 21,
+      "crime_total": 193,
+      "max_bingo_count": 3,
+      "score": 15.1068,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz",
+        "SEOP",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Calçada estreita forçando pedestres à pista",
+        "Cena de uso de drogas",
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Estacionamento irregular forçando pedestres à pista",
+        "Lixo/entulho forçando pedestres à pista",
+        "Lixo/entulho obstruindo a visibilidade",
+        "Mobiliário abandonado servindo de esconderijo",
+        "Mobiliário urbano desviando pedestres para a pista",
+        "Mobiliário/estrutura servindo de esconderijo",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Praças e Parques",
+        "Sem ocorrência",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Veículos de grande porte obstruindo a visibilidade",
+        "Vãos ou cavidades usados como esconderijo",
+        "Área mal iluminada com circulação de pedestres",
+        "Área mal iluminada com parada de veículos"
+      ],
+      "rank": 1
+    },
+    {
+      "cells": [
+        "8aa8a078ab37fff",
+        "8aa8a078ab27fff"
+      ],
+      "logradouro": "Rua Voluntarios Da Patria",
+      "n_cells": 2,
+      "crime_total": 23,
+      "max_bingo_count": 2,
+      "score": 1.0241,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz",
+        "SEOP",
+        "SMAS",
+        "SMTR",
+        "Seconserva"
+      ],
+      "factors": [
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Estacionamento irregular forçando pedestres à pista",
+        "Mobiliário/estrutura servindo de esconderijo",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Ponto de ônibus com histórico de vandalismo",
+        "Praças e Parques",
+        "Sem ocorrência",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Área mal iluminada com circulação de pedestres"
+      ],
+      "rank": 2
+    }
+  ],
+  "orcrim": {
+    "intersecting": [],
+    "nearby": [
+      {
+        "territorio": "MORRO DO AZUL",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DONA MARTA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "FAVELA FUNDÃO DA BALANÇA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "LADEIRA DOS TABAJARAS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "FAVELA CERRO CORÁ",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DOS CABRITOS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "BABILÔNIA",
+        "orcrim": "TCP"
+      }
+    ],
+    "factions": [
+      "CV",
+      "TCP"
+    ],
+    "summary": "7 território(s) sob influência nas proximidades"
+  },
+  "n_bingo_cells": 23,
+  "n_triple_bingo": 8
+}

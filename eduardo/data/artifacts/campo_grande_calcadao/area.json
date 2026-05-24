@@ -1,0 +1,196 @@
+{
+  "area_id": "campo_grande_calcadao",
+  "display_name": "Campo Grande: Estação de Trem – Calçadão",
+  "polygon_source": "shapefile",
+  "coverage": {
+    "has_polygon": true,
+    "has_relint": true,
+    "has_cameras": true
+  },
+  "identificacao": {
+    "aisp": "40",
+    "bairro": "Campo Grande",
+    "area_orcrim": "sob domínio direto de Milícia; 35 território(s) sob influência nas proximidades"
+  },
+  "indicadores": {
+    "periodo": "2023-2024",
+    "total_ocorrencias": 109,
+    "por_tipo": {
+      "Roubo a transeunte": 81,
+      "Roubo de aparelho celular": 24,
+      "Roubo em coletivo": 4
+    },
+    "ranking": {
+      "posicao": 9,
+      "de": 10,
+      "share_pct": 2.3
+    },
+    "n_trechos_criticos": 1
+  },
+  "trechos": [
+    {
+      "cells": [
+        "8aa8a029569ffff",
+        "8aa8a029568ffff",
+        "8aa8a02956d7fff",
+        "8aa8a02956dffff",
+        "8aa8a02956cffff",
+        "8aa8a02919b7fff",
+        "8aa8a029565ffff",
+        "8aa8a0291987fff",
+        "8aa8a029199ffff",
+        "8aa8a0291d6ffff",
+        "8aa8a0291997fff",
+        "8aa8a0291d67fff",
+        "8aa8a0291d47fff",
+        "8aa8a0291d77fff",
+        "8aa8a0291d0ffff",
+        "8aa8a0291d2ffff",
+        "8aa8a0291d07fff",
+        "8aa8a0291d27fff",
+        "8aa8a0291d1ffff",
+        "8aa8a0291c27fff"
+      ],
+      "logradouro": "Rua Aurelio Figueiredo",
+      "n_cells": 20,
+      "crime_total": 47,
+      "max_bingo_count": 3,
+      "score": 14.5326,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz",
+        "SEOP",
+        "SMAS",
+        "SMTR",
+        "Seconserva"
+      ],
+      "factors": [
+        "Calçada estreita forçando pedestres à pista",
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Estacionamento irregular forçando pedestres à pista",
+        "Mobiliário abandonado servindo de esconderijo",
+        "Mobiliário urbano desviando pedestres para a pista",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Ponto de ônibus com histórico de vandalismo",
+        "Tapumes servindo de esconderijo",
+        "Vegetação encobrindo iluminação pública",
+        "Veículos de grande porte obstruindo a visibilidade",
+        "Área mal iluminada com circulação de pedestres",
+        "Área mal iluminada com parada de veículos"
+      ],
+      "rank": 1
+    }
+  ],
+  "orcrim": {
+    "intersecting": [
+      {
+        "territorio": "CENTRO DE CAMPO GRANDE",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "JOARI",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "LOTEAMENTO BOM PASTOR",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "LOTEAMENTO ROSÁRIA TROTTA",
+        "orcrim": "Milícia"
+      }
+    ],
+    "nearby": [
+      {
+        "territorio": "FAVELA JD MORIÇABA",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "FAVELA COMARI",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "PARQUE SÃO LUIZ",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "PINA RANGEL",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "JARDIM DAMASCO",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "JARDIM MARIA DE LURDES",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "BAIRRO FIGUEIRA",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "JARDIM AMÉRICA",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "MAGALI",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "JARDIM PAULISTA",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "FAVELA DO BREJINHO",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "OITICICA",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "LOTEAMENTO SANTA EDWIGES",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "COMUNIDADE SÃO BASÍLIO",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "MIÉCIMO DA SILVA",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "SÃO CLÁUDIO ",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "BENJAMIN DO MONTE",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "VILA CAMACHO",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "JARDIM PARAÍSO",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "LOTEAMENTO LUÍS BARATA",
+        "orcrim": "Milícia"
+      }
+    ],
+    "factions": [
+      "Milícia"
+    ],
+    "summary": "sob domínio direto de Milícia; 35 território(s) sob influência nas proximidades"
+  },
+  "n_bingo_cells": 20,
+  "n_triple_bingo": 7
+}

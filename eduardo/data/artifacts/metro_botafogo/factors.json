@@ -1,0 +1,315 @@
+{
+  "orgaos": [
+    {
+      "orgao": "Comlurb",
+      "total": 73,
+      "fatores": [
+        {
+          "fator": "Vegetação encobrindo iluminação pública",
+          "count": 48,
+          "exemplos": [
+            {
+              "logradouro": "Rua Paulino Fernandes",
+              "obs": "Árvore podre"
+            },
+            {
+              "logradouro": "Rua Voluntários da Pátria",
+              "obs": "vegetação encobrindo postes"
+            }
+          ]
+        },
+        {
+          "fator": "Vegetação obstruindo a visibilidade do passeio",
+          "count": 19,
+          "exemplos": [
+            {
+              "logradouro": "Rua Conde de Irajá",
+              "obs": "Problema se estende por todo trecho até a rua São Clemente"
+            },
+            {
+              "logradouro": "Rua Sorocaba",
+              "obs": "Além de risco de queda em cima d e patrimônio histórico"
+            }
+          ]
+        },
+        {
+          "fator": "Lixo/entulho obstruindo a visibilidade",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Rua Camuirano",
+              "obs": "E também forçando a ir para pista em Toda extensão da rua"
+            }
+          ]
+        },
+        {
+          "fator": "Lixo/entulho forçando pedestres à pista",
+          "count": 2,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "SMAS",
+      "total": 30,
+      "fatores": [
+        {
+          "fator": "Pessoas em situação de rua",
+          "count": 24,
+          "exemplos": [
+            {
+              "logradouro": "Rua Voluntários da Pátria",
+              "obs": "Local com a presença de 01 PSR em frente ao número 114."
+            },
+            {
+              "logradouro": "Rua Voluntários da Pátria",
+              "obs": "Com PSR no local"
+            }
+          ]
+        },
+        {
+          "fator": "Cena de uso de drogas",
+          "count": 6,
+          "exemplos": [
+            {
+              "logradouro": "Rua Professor Álvaro Rodrigues",
+              "obs": "Psr’s fazem pernoite e também consomem no local , o que desdobra no dia seguinte ."
+            },
+            {
+              "logradouro": "Rua Conde de Irajá",
+              "obs": "Prédio fechado a algum tempo com recuo onde pode facilitar o esconderijo"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "RioLuz",
+      "total": 24,
+      "fatores": [
+        {
+          "fator": "Área mal iluminada com circulação de pedestres",
+          "count": 21,
+          "exemplos": [
+            {
+              "logradouro": "Rua Dezenove de Fevereiro",
+              "obs": "Rua transversal com bastante passagem de pedestre. Muito arborizada, neccessidade de melhorar a iluminação."
+            },
+            {
+              "logradouro": "Rua São Clemente",
+              "obs": "Área de grande circulação de pedestre com ponto de onibus e saida do metro. Necessidade de melhorias na praça e nas calçadas."
+            }
+          ]
+        },
+        {
+          "fator": "Área mal iluminada com parada de veículos",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Rua Real Grandeza",
+              "obs": "Via principal com grande circulação de pedrestes e veículos."
+            },
+            {
+              "logradouro": "Rua Guilhermina Guinle",
+              "obs": "área de parada de veículos, entrada e saida de escolas e centro cultural. Necessidade de melhoria na iluminação."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Seconserva",
+      "total": 13,
+      "fatores": [
+        {
+          "fator": "Mobiliário/estrutura servindo de esconderijo",
+          "count": 5,
+          "exemplos": [
+            {
+              "logradouro": "Rua Nelson Mandela",
+              "obs": "PRAÇA NELSON MANDELA"
+            },
+            {
+              "logradouro": "Rua Real Grandeza",
+              "obs": "carros abandonadas servindo de esconderijo"
+            }
+          ]
+        },
+        {
+          "fator": "Calçada estreita forçando pedestres à pista",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Rua Sorocaba",
+              "obs": "Rua com índice de assalto com pouca iluminação ."
+            },
+            {
+              "logradouro": "Rua Paulino Fernandes",
+              "obs": "Calçadas super apertadas , índice de assalto alto. Luz do poste fraca ."
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário abandonado servindo de esconderijo",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Rua Visconde de Silva",
+              "obs": "Terreno abandonado possível esconderijo"
+            },
+            {
+              "logradouro": "Rua São João Batista",
+              "obs": "Por consequência da falta de uso adequado da banca , usuários e pessoas em situação de rua se abrigam , sendo possível local para incidência crimina"
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário urbano desviando pedestres para a pista",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Dona Mariana",
+              "obs": "banca abandonada há 5 meses"
+            }
+          ]
+        },
+        {
+          "fator": "Vãos ou cavidades usados como esconderijo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua São João Batista",
+              "obs": "MURO ATRAPALHANDO CALÇADA E SERVINDO UM VÃO DE ESCONDERIJO"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "CET-Rio",
+      "total": 12,
+      "fatores": [
+        {
+          "fator": "Ponto de retenção do tráfego",
+          "count": 12,
+          "exemplos": [
+            {
+              "logradouro": "Rua Voluntários da Pátria",
+              "obs": "sinalizar vias de mão dupla com pinturas na via"
+            },
+            {
+              "logradouro": "Rua Guilhermina Guinle",
+              "obs": "Ponto de retenção de tráfego devido a colégios vans e ônibus parando e saindo para coletar alunos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SEOP",
+      "total": 10,
+      "fatores": [
+        {
+          "fator": "Estacionamento irregular forçando pedestres à pista",
+          "count": 6,
+          "exemplos": [
+            {
+              "logradouro": "Rua Ipu",
+              "obs": "Lado direito inteiro da rua com carro em mão dupla"
+            }
+          ]
+        },
+        {
+          "fator": "Comércio irregular obstruindo a visibilidade do passeio",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Rua Nelson Mandela",
+              "obs": "Obstrução do logradouro."
+            },
+            {
+              "logradouro": "Rua São João Batista",
+              "obs": "BANCA ABANDONADA"
+            }
+          ]
+        },
+        {
+          "fator": "Veículos de grande porte obstruindo a visibilidade",
+          "count": 1,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "Não atribuído",
+      "total": 4,
+      "fatores": [
+        {
+          "fator": "Praças e Parques",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Rua Sorocaba",
+              "obs": "Árvores frondosa obstruindo iluminação pública."
+            },
+            {
+              "logradouro": "Rua Nelson Mandela",
+              "obs": "Tanto ambulantes quanto a floricultura podem causar obstrução da visão por parte das forças de segurança , tanto quanto lugar propício a incidência de crime . Exemplo que se estender por toda a praça lado voluntários da pátria"
+            }
+          ]
+        },
+        {
+          "fator": "Sem ocorrência",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Rua Nelson Mandela",
+              "obs": "96473"
+            },
+            {
+              "logradouro": "Rua Sorocaba",
+              "obs": "97802"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "GM-Rio",
+      "total": 4,
+      "fatores": [
+        {
+          "fator": "Motocicletas trafegando no passeio",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Rua Dezenove de Fevereiro",
+              "obs": "N⁰ 53 da rua 19 de fevereiro existe um delivery de pizza no local"
+            },
+            {
+              "logradouro": "Rua Sorocaba",
+              "obs": "Trânsito de moto a combustão sobre o passeio público."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SMTR",
+      "total": 1,
+      "fatores": [
+        {
+          "fator": "Ponto de ônibus com histórico de vandalismo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Nelson Mandela",
+              "obs": "Ponto de ônibus da linha 548 não está em funcionamento e encontra-se vandalizado, avaliar retirada de estrutura e cabine de bilhetagem"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "total_fatores": 171
+}

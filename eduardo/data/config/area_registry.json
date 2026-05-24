@@ -1,0 +1,148 @@
+{
+  "_comment": "JOIN BACKBONE. Area names are spelled differently across the shapefile (nome_subar), the camera CSV (nome_area_fm), and the RELINT filenames. This registry reconciles them by a stable area_id. polygon_source = 'shapefile' when a polygon exists, else 'camera_hull' (derive an approximate boundary from the area's camera point cloud). Identification fields known from the reference report are filled; the rest are derived from data (aisp/bairro via crime sjoin, orcrim via dominio_territorial overlap) or left for the analyst (human-in-the-loop).",
+  "areas": [
+    {
+      "area_id": "presidente_vargas",
+      "display_name": "Presidente Vargas – Campo de Santana – Central do Brasil – Cinelândia",
+      "shapefile_name": "Presidente Vargas - Campo de Santana - Central do Brasil - Cinelândia",
+      "camera_name": "Presidente Vargas - Campo de Santana - Central do Brasil - Cinelândia",
+      "relint_file": "Cópia de RI_017_2026_Presidente_Vargas_Campo_Santana.docx",
+      "polygon_source": "shapefile",
+      "has_polygon": true,
+      "has_relint": true,
+      "has_cameras": true,
+      "is_anchor": true,
+      "identificacao": {
+        "subprefeitura": "Centro",
+        "base_fm": null
+      }
+    },
+    {
+      "area_id": "rodoviaria_gentileza",
+      "display_name": "Rodoviária – Terminal Gentileza – Estação Leopoldina",
+      "shapefile_name": "Rodoviária - Terminal Gentileza - Estação Leopoldina",
+      "camera_name": "Rodoviária - Terminal Gentileza - Estação Leopoldina",
+      "relint_file": "Cópia de RI_010_2026_Rodoviaria_Terminal_Gentileza.docx",
+      "polygon_source": "shapefile",
+      "has_polygon": true,
+      "has_relint": true,
+      "has_cameras": true,
+      "is_anchor": false,
+      "identificacao": {}
+    },
+    {
+      "area_id": "praia_botafogo",
+      "display_name": "Praia de Botafogo – Rua Marquês de Abrantes",
+      "shapefile_name": "Praia de Botafogo - Rua Marquês de Abrantes",
+      "camera_name": "Praia de Botafogo - Rua Marquês de Abrantes",
+      "relint_file": "Cópia de RI_015_2026_Praia_Botafogo_Marques_Abrantes.docx",
+      "polygon_source": "shapefile",
+      "has_polygon": true,
+      "has_relint": true,
+      "has_cameras": true,
+      "is_anchor": false,
+      "identificacao": {}
+    },
+    {
+      "area_id": "metro_botafogo",
+      "display_name": "Metrô Botafogo – Rua São Clemente – Rua Voluntários da Pátria",
+      "shapefile_name": "Metrô Botafogo - Rua São Clemente - Rua Voluntários da Pátria",
+      "camera_name": "Metrô Botafogo - Rua São Clemente - Rua Voluntários da Pátria",
+      "relint_file": "Cópia de RI_011_2026_Metro_Botafogo_Sao_Clemente.docx",
+      "polygon_source": "shapefile",
+      "has_polygon": true,
+      "has_relint": true,
+      "has_cameras": true,
+      "is_anchor": false,
+      "identificacao": {}
+    },
+    {
+      "area_id": "estacoes_sfx_afonso_pena",
+      "display_name": "Estações São Francisco Xavier – Afonso Pena",
+      "shapefile_name": "Estações São Francisco Xavier - Afonso Pena",
+      "camera_name": "Estações São Francisco Xavier - Afonso Pena",
+      "relint_file": "Cópia de RI_016_2026_Estacoes_SFX_Afonso_Pena.docx",
+      "polygon_source": "shapefile",
+      "has_polygon": true,
+      "has_relint": true,
+      "has_cameras": true,
+      "is_anchor": false,
+      "identificacao": {}
+    },
+    {
+      "area_id": "campo_grande_calcadao",
+      "display_name": "Campo Grande: Estação de Trem – Calçadão",
+      "shapefile_name": "Campo Grande: Estação de Trem - Calçadão",
+      "camera_name": "Campo Grande: Estação de Trem - Calçadão",
+      "relint_file": "Cópia de RI_013_2026_Campo_Grande_Estacao_Calcadao.docx",
+      "polygon_source": "shapefile",
+      "has_polygon": true,
+      "has_relint": true,
+      "has_cameras": true,
+      "is_anchor": false,
+      "identificacao": {}
+    },
+    {
+      "area_id": "jardim_de_alah",
+      "display_name": "Jardim de Alah",
+      "shapefile_name": "Jardim de Alah",
+      "camera_name": "Jardim de Alah",
+      "relint_file": "Cópia de RI_012_2026_Jardim_de_Alah.docx",
+      "polygon_source": "shapefile",
+      "has_polygon": true,
+      "has_relint": true,
+      "has_cameras": true,
+      "is_anchor": false,
+      "identificacao": {}
+    },
+    {
+      "area_id": "rio_sul",
+      "display_name": "Rio Sul",
+      "shapefile_name": "Rio Sul",
+      "camera_name": null,
+      "relint_file": "Cópia de RI_014_2026_Rio_Sul.docx",
+      "polygon_source": "shapefile",
+      "has_polygon": true,
+      "has_relint": true,
+      "has_cameras": false,
+      "is_anchor": false,
+      "identificacao": {}
+    },
+    {
+      "area_id": "lauro_muller",
+      "display_name": "Rua Lauro Müller – Avenida General Severiano – Avenida Venceslau Brás",
+      "shapefile_name": null,
+      "camera_name": "Rua Lauro Müller – Avenida General Severiano – Avenida Venceslau Brás",
+      "relint_file": null,
+      "polygon_source": "camera_hull",
+      "has_polygon": false,
+      "has_relint": false,
+      "has_cameras": true,
+      "is_anchor": true,
+      "_note": "This is the REFERENCE-REPORT area. No shapefile polygon and no RELINT in the dataset; polygon derived from camera point cloud, dinâmica criminal from Disque Denúncia only.",
+      "identificacao": {
+        "aisp": "2",
+        "bairro": "Botafogo / Urca / Copacabana",
+        "dp": "10ª / 12ª",
+        "bpm": "2º / 19º",
+        "subprefeitura": "Zona Sul",
+        "base_fm": "Litorânea",
+        "area_orcrim": "Comunidades próximas sob domínio do TCP"
+      }
+    },
+    {
+      "area_id": "bangu_calcadao",
+      "display_name": "Bangu: Calçadão – Bangu Shopping",
+      "shapefile_name": null,
+      "camera_name": "Bangu: Calçadão - Bangu Shopping",
+      "relint_file": null,
+      "polygon_source": "camera_hull",
+      "has_polygon": false,
+      "has_relint": false,
+      "has_cameras": true,
+      "is_anchor": false,
+      "_note": "Briefing example area. Cameras only; no shapefile polygon, no RELINT.",
+      "identificacao": {}
+    }
+  ]
+}

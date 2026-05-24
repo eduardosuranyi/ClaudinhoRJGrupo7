@@ -71,6 +71,11 @@ class OntologySettings(BaseSettings):
     def tweet_raw_dir(self) -> Path:
         return self.valente_data_dir / "raw"   # mesma pasta usada pelo scraper
 
+    @property
+    def classified_tweets_dir(self) -> Path:
+        """Veredictos de relevância (1 arquivo/conta) — ver classified_store.py."""
+        return self.valente_data_dir / "classified" / "tweets"
+
     # ── Paths CompStat ────────────────────────────────────────────────
 
     @property

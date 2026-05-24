@@ -376,8 +376,9 @@ def _normalize_street(s):
     return s.lower().strip()
 
 
-def match_trechos_to_lines(top_trechos, logradouros, bairro_names):
-    """For each top_trecho, find matching LineString geometries from the gazetteer."""
+def match_trechos_to_lines(top_trechos, logradouros, bairro_names, clip_polygon=None):
+    """For each top_trecho, find matching LineString geometries from the gazetteer,
+    clipped to the FM area polygon so lines don't overflow."""
     if logradouros.empty or "_name_norm" not in logradouros.columns:
         return top_trechos
 
@@ -396,6 +397,8 @@ def match_trechos_to_lines(top_trechos, logradouros, bairro_names):
     from shapely.ops import linemerge
     from shapely.geometry import MultiLineString as ShapelyMLS
 
+    clip = clip_polygon.buffer(0.001) if clip_polygon else None
+
     enriched = []
     for t in top_trechos:
         raw_name = t["locf_norm"]
@@ -405,8 +408,11 @@ def match_trechos_to_lines(top_trechos, logradouros, bairro_names):
         tc = dict(t)
         if geoms:
             merged = linemerge(ShapelyMLS(geoms)) if len(geoms) > 1 else geoms[0]
-            simplified = merged.simplify(0.0002, preserve_topology=True)
-            tc["line_geometry"] = simplified.__geo_interface__
+            if clip and not merged.is_empty:
+                merged = merged.intersection(clip)
+            if not merged.is_empty:
+                simplified = merged.simplify(0.0002, preserve_topology=True)
+                tc["line_geometry"] = simplified.__geo_interface__
         enriched.append(tc)
     return enriched
 
@@ -1105,7 +1111,7 @@ def build_areas_data(data_dir: Path) -> dict:
         top_trechos, n_bingo, n_triple_bingo = compute_bingo(
             top_trechos, fu_area, dd_area, oc_area)
         _bairro_names = bairro_context.get(nome, {}).get("bairros", [])
-        top_trechos = match_trechos_to_lines(top_trechos, logradouros, _bairro_names)
+        top_trechos = match_trechos_to_lines(top_trechos, logradouros, _bairro_names, clip_polygon=geom)
 
         # Camera gap analysis
         camera_gaps = compute_camera_gaps(oc_area, cam_area)

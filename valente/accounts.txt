@@ -6,26 +6,3 @@
 
 # --- Agregadores cidadãos / alertas comunitários ---
 riodenojeiraofc
-
-
-
-ondetemtiroteio
-fogocruzadoapp
-vozdacomunidade
-RioOnWatch
-AlertaRJ
-
-# --- Imprensa / portais com cobertura policial RJ ---
-extra
-OGlobo_Rio
-g1rio
-bandnewsfmrio
-
-# --- Forças de segurança (oficiais) ---
-PMERJ
-PCERJ
-GovRJ_
-
-# --- Comunidades de alerta (apps/coletivos) ---
-sosrio
-canguruzinho
