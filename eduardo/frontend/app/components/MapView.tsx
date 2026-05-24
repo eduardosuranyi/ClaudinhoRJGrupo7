@@ -96,6 +96,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
 
       map.on('load', () => {
         mapInst.current = map
+        registerMapIcons(map)
         buildDataLayers(map, data)
         setMapReady(true)
       })
@@ -193,22 +194,23 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     })
     map.addLayer({
       id: 'crime-dot',
-      type: 'circle',
+      type: 'symbol',
       source: 'crime',
-      layout: { visibility: 'none' },
       minzoom: 14,
-      paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 14, 2, 17, 5],
-        'circle-color': ['match', ['get', 'tipo'],
-          'Roubo a transeunte',      '#ff6b35',
-          'Roubo de aparelho celular','#fbb040',
-          'Roubo em coletivo',       '#a855f7',
-          '#888',
+      layout: {
+        visibility: 'none',
+        'icon-image': ['match', ['get', 'tipo'],
+          'Roubo a transeunte',       'icon-crime-transeunte',
+          'Roubo de aparelho celular', 'icon-crime-celular',
+          'Roubo em coletivo',         'icon-crime-coletivo',
+          'icon-crime-default',
         ],
-        'circle-opacity': 0.85,
-        'circle-stroke-color': 'rgba(0,0,0,0.5)',
-        'circle-stroke-width': 0.5,
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 14, 0.38, 17, 0.75],
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+        'icon-padding': 0,
       },
+      paint: { 'icon-opacity': 0.9 },
     })
 
     // ── Fatores urbanos ─────────────────────────────────
@@ -222,24 +224,25 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     map.addSource('fatores', { type: 'geojson', data: { type: 'FeatureCollection', features: fatoresFeatures } })
     map.addLayer({
       id: 'fatores-dot',
-      type: 'circle',
+      type: 'symbol',
       source: 'fatores',
-      layout: { visibility: 'none' },
-      paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 3, 15, 6],
-        'circle-color': ['match', ['get', 'orgao'],
-          'COMLURB',    '#36c476',
-          'Rio Luz',    '#fbb040',
-          'SEOP',       '#a855f7',
-          'SECONSERVA', '#4a90e2',
-          'SMAS',       '#ef4444',
-          'CET-Rio',    '#ff6b35',
-          '#888',
+      layout: {
+        visibility: 'none',
+        'icon-image': ['match', ['get', 'orgao'],
+          'COMLURB',    'icon-fator-comlurb',
+          'Rio Luz',    'icon-fator-rioluz',
+          'SEOP',       'icon-fator-seop',
+          'SECONSERVA', 'icon-fator-seconserva',
+          'SMAS',       'icon-fator-smas',
+          'CET-Rio',    'icon-fator-cetrio',
+          'icon-fator-default',
         ],
-        'circle-opacity': 0.9,
-        'circle-stroke-color': '#07070a',
-        'circle-stroke-width': 1,
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 11, 0.4, 15, 0.7],
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+        'icon-padding': 0,
       },
+      paint: { 'icon-opacity': 0.9 },
     })
 
     // ── Câmeras ─────────────────────────────────────────
@@ -253,16 +256,17 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     map.addSource('cameras', { type: 'geojson', data: { type: 'FeatureCollection', features: camFeatures } })
     map.addLayer({
       id: 'cameras-dot',
-      type: 'circle',
+      type: 'symbol',
       source: 'cameras',
-      layout: { visibility: 'none' },
-      paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 2, 15, 5],
-        'circle-color': '#4a90e2',
-        'circle-opacity': 0.75,
-        'circle-stroke-color': '#07070a',
-        'circle-stroke-width': 0.5,
+      layout: {
+        visibility: 'none',
+        'icon-image': 'icon-camera',
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 11, 0.35, 15, 0.65],
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+        'icon-padding': 0,
       },
+      paint: { 'icon-opacity': 0.8 },
     })
 
     const gapFeatures = data.areas.flatMap(a =>
@@ -280,16 +284,19 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     map.addSource('gaps', { type: 'geojson', data: { type: 'FeatureCollection', features: gapFeatures } })
     map.addLayer({
       id: 'gaps-dot',
-      type: 'circle',
+      type: 'symbol',
       source: 'gaps',
-      layout: { visibility: 'none' },
-      paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 4, 15, 8],
-        'circle-color': ['match', ['get', 'recommendation'], 'instalar', '#ef4444', '#fbb040'],
-        'circle-opacity': 0.9,
-        'circle-stroke-color': '#07070a',
-        'circle-stroke-width': 1.5,
+      layout: {
+        visibility: 'none',
+        'icon-image': ['match', ['get', 'recommendation'],
+          'instalar',  'icon-gap-instalar',
+          'icon-gap-remanejar',
+        ],
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 11, 0.5, 15, 0.85],
+        'icon-allow-overlap': true,
+        'icon-padding': 0,
       },
+      paint: { 'icon-opacity': 0.95 },
     })
 
     // ── PSR ─────────────────────────────────────────────
@@ -303,14 +310,17 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     map.addSource('psr', { type: 'geojson', data: { type: 'FeatureCollection', features: psrFeatures } })
     map.addLayer({
       id: 'psr-dot',
-      type: 'circle',
+      type: 'symbol',
       source: 'psr',
-      layout: { visibility: 'none' },
-      paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 1.5, 15, 4],
-        'circle-color': '#a855f7',
-        'circle-opacity': 0.5,
+      layout: {
+        visibility: 'none',
+        'icon-image': 'icon-psr',
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 11, 0.32, 15, 0.55],
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+        'icon-padding': 0,
       },
+      paint: { 'icon-opacity': 0.6 },
     })
 
     // ── Chamados 1746 ─────────────────────────────────
@@ -324,14 +334,17 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     map.addSource('chamados', { type: 'geojson', data: { type: 'FeatureCollection', features: chamadosFeatures } })
     map.addLayer({
       id: 'chamados-dot',
-      type: 'circle',
+      type: 'symbol',
       source: 'chamados',
-      layout: { visibility: 'none' },
-      paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 1.5, 15, 4],
-        'circle-color': '#f59e0b',
-        'circle-opacity': 0.5,
+      layout: {
+        visibility: 'none',
+        'icon-image': 'icon-chamado',
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 11, 0.32, 15, 0.55],
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+        'icon-padding': 0,
       },
+      paint: { 'icon-opacity': 0.6 },
     })
 
     // ── Domínio territorial ─────────────────────────────
@@ -1254,14 +1267,55 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
             padding: '10px 12px',
             minWidth: 210,
           }}>
-            <LayerBtn label="Mancha Criminal"       color="#ff6b35" active={layers.crime}   n={totalCrime}   onClick={() => toggleLayer('crime')} />
-            <LayerBtn label="Fatores Urbanos"       color="#36c476" active={layers.fatores} n={totalFatores} onClick={() => toggleLayer('fatores')} />
-            <LayerBtn label="Câmeras CIVITAS"       color="#4a90e2" active={layers.cameras} n={totalCameras} onClick={() => toggleLayer('cameras')} />
-            <LayerBtn label="Pop. Situação de Rua"  color="#a855f7" active={layers.psr}     n={totalPSR}     onClick={() => toggleLayer('psr')} />
-            {totalChamados > 0 && <LayerBtn label="Chamados 1746"  color="#f59e0b" active={layers.chamados} n={totalChamados} onClick={() => toggleLayer('chamados')} />}
-            <LayerBtn label="Domínio Territorial"   color="#fbb040" active={layers.dominio} n={totalDominio} onClick={() => toggleLayer('dominio')} />
-            <LayerBtn label="Pontos Cegos"          color="#ef4444" active={layers.gaps}    n={totalGaps}    onClick={() => toggleLayer('gaps')} />
-            {selected && <LayerBtn label="Bairros Entorno" color="#38bdf8" active={layers.bairros} n={totalBairros} onClick={() => toggleLayer('bairros')} />}
+            <LayerBtn label="Mancha Criminal"       color="#ff6b35" active={layers.crime}   n={totalCrime}   onClick={() => toggleLayer('crime')} shape="circle" />
+            {layers.crime && (
+              <div style={{ paddingLeft: 17, marginBottom: 4 }}>
+                {([
+                  ['#ff6b35', 'Roubo a transeunte',       'person'],
+                  ['#fbb040', 'Roubo de aparelho celular', 'phone'],
+                  ['#a855f7', 'Roubo em coletivo',        'bus'],
+                ] as const).map(([c, label, icon]) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                    <LegendIcon icon={icon} color={c} />
+                    <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <LayerBtn label="Fatores Urbanos"       color="#36c476" active={layers.fatores} n={totalFatores} onClick={() => toggleLayer('fatores')} shape="square" />
+            {layers.fatores && (
+              <div style={{ paddingLeft: 17, marginBottom: 4 }}>
+                {([
+                  ['#36c476', 'COMLURB'],  ['#fbb040', 'Rio Luz'],
+                  ['#a855f7', 'SEOP'],     ['#4a90e2', 'SECONSERVA'],
+                  ['#ef4444', 'SMAS'],     ['#ff6b35', 'CET-Rio'],
+                ] as const).map(([c, label]) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                    <div style={{ width: 8, height: 8, background: c, flexShrink: 0 }} />
+                    <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <LayerBtn label="Câmeras CIVITAS"       color="#4a90e2" active={layers.cameras} n={totalCameras} onClick={() => toggleLayer('cameras')} shape="camera" />
+            <LayerBtn label="Pop. Situação de Rua"  color="#a855f7" active={layers.psr}     n={totalPSR}     onClick={() => toggleLayer('psr')} shape="diamond" />
+            {totalChamados > 0 && <LayerBtn label="Chamados 1746"  color="#f59e0b" active={layers.chamados} n={totalChamados} onClick={() => toggleLayer('chamados')} shape="triangle" />}
+            <LayerBtn label="Domínio Territorial"   color="#fbb040" active={layers.dominio} n={totalDominio} onClick={() => toggleLayer('dominio')} shape="square" />
+            <LayerBtn label="Pontos Cegos"          color="#ef4444" active={layers.gaps}    n={totalGaps}    onClick={() => toggleLayer('gaps')} shape="warning" />
+            {layers.gaps && (
+              <div style={{ paddingLeft: 17, marginBottom: 4 }}>
+                {([['#ef4444', 'Instalar câmera'], ['#fbb040', 'Remanejar câmera']] as const).map(([c, label]) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                    <svg width="10" height="10" viewBox="0 0 12 12" style={{ flexShrink: 0 }}>
+                      <polygon points="6,1 11,10 1,10" fill={c} stroke="rgba(0,0,0,0.4)" strokeWidth="0.8" />
+                      <text x="6" y="8.5" textAnchor="middle" fill="#fff" fontSize="7" fontWeight="bold">!</text>
+                    </svg>
+                    <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {selected && <LayerBtn label="Bairros Entorno" color="#38bdf8" active={layers.bairros} n={totalBairros} onClick={() => toggleLayer('bairros')} shape="square" />}
 
             <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(42,42,53,0.7)' }}>
               <div className="label-overline" style={{ marginBottom: 5 }}>Legenda Facções</div>
@@ -1351,9 +1405,224 @@ function geomBounds(geom: any): [[number, number], [number, number]] | null {
   return [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]]
 }
 
-function LayerBtn({ label, color, active, n, onClick }: {
+// ─────────────────────────────────────────────────────────
+// MAP ICON REGISTRATION (canvas-drawn icons for symbol layers)
+// ─────────────────────────────────────────────────────────
+function registerMapIcons(map: any) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2)
+  const S = 32
+  const px = Math.round(S * dpr)
+  const C = S / 2
+
+  function reg(name: string, draw: (ctx: CanvasRenderingContext2D) => void) {
+    const c = document.createElement('canvas')
+    c.width = px; c.height = px
+    const ctx = c.getContext('2d')!
+    ctx.scale(dpr, dpr)
+    draw(ctx)
+    map.addImage(name, {
+      width: px, height: px,
+      data: new Uint8Array(ctx.getImageData(0, 0, px, px).data.buffer),
+    }, { pixelRatio: dpr })
+  }
+
+  function rrect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+    ctx.moveTo(x + r, y)
+    ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r)
+    ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x + w - r, y + h, r)
+    ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y + h - r, r)
+    ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r)
+    ctx.closePath()
+  }
+
+  function filledCircle(ctx: CanvasRenderingContext2D, col: string, r = 10) {
+    ctx.beginPath(); ctx.arc(C, C, r, 0, Math.PI * 2)
+    ctx.fillStyle = col; ctx.fill()
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1.5; ctx.stroke()
+  }
+
+  function filledSquare(ctx: CanvasRenderingContext2D, col: string, sz = 18) {
+    const h = sz / 2
+    ctx.fillStyle = col; ctx.fillRect(C - h, C - h, sz, sz)
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1.5; ctx.strokeRect(C - h, C - h, sz, sz)
+  }
+
+  function filledDiamond(ctx: CanvasRenderingContext2D, col: string, r = 11) {
+    ctx.beginPath()
+    ctx.moveTo(C, C - r); ctx.lineTo(C + r, C); ctx.lineTo(C, C + r); ctx.lineTo(C - r, C)
+    ctx.closePath()
+    ctx.fillStyle = col; ctx.fill()
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1.5; ctx.stroke()
+  }
+
+  function filledTriangle(ctx: CanvasRenderingContext2D, col: string, r = 13) {
+    ctx.beginPath()
+    ctx.moveTo(C, C - r); ctx.lineTo(C + r * 0.87, C + r * 0.5); ctx.lineTo(C - r * 0.87, C + r * 0.5)
+    ctx.closePath()
+    ctx.fillStyle = col; ctx.fill()
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1.5; ctx.stroke()
+  }
+
+  // ── Crime: walking person (Roubo a transeunte) ──
+  reg('icon-crime-transeunte', (ctx) => {
+    const col = '#ff6b35'
+    ctx.fillStyle = col
+    ctx.beginPath(); ctx.arc(C, 6, 4, 0, Math.PI * 2); ctx.fill()
+    ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.lineCap = 'round'
+    ctx.beginPath(); ctx.moveTo(C, 10); ctx.lineTo(C, 19); ctx.stroke()
+    ctx.lineWidth = 2.5
+    ctx.beginPath(); ctx.moveTo(C, 19); ctx.lineTo(C - 5, 28); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(C, 19); ctx.lineTo(C + 5, 28); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(C, 13); ctx.lineTo(C - 6, 18); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(C, 13); ctx.lineTo(C + 6, 18); ctx.stroke()
+  })
+
+  // ── Crime: phone (Roubo de aparelho celular) ──
+  reg('icon-crime-celular', (ctx) => {
+    const col = '#fbb040', x = C - 6, y = C - 10, w = 12, h = 20
+    ctx.beginPath(); rrect(ctx, x, y, w, h, 2.5)
+    ctx.fillStyle = col; ctx.fill()
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1.5; ctx.stroke()
+    ctx.fillStyle = 'rgba(0,0,0,0.3)'
+    ctx.fillRect(x + 2, y + 3, w - 4, h - 7)
+    ctx.beginPath(); ctx.arc(C, y + h - 2.5, 1.3, 0, Math.PI * 2); ctx.fill()
+  })
+
+  // ── Crime: bus (Roubo em coletivo) ──
+  reg('icon-crime-coletivo', (ctx) => {
+    const col = '#a855f7', x = C - 10, y = 4, w = 20, h = 18
+    ctx.beginPath(); rrect(ctx, x, y, w, h, 3)
+    ctx.fillStyle = col; ctx.fill()
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1.5; ctx.stroke()
+    ctx.fillStyle = 'rgba(255,255,255,0.3)'
+    ctx.fillRect(x + 3, y + 3, 5.5, 5.5)
+    ctx.fillRect(x + 10.5, y + 3, 5.5, 5.5)
+    ctx.fillStyle = 'rgba(0,0,0,0.6)'
+    ctx.beginPath(); ctx.arc(x + 5.5, y + h + 1.5, 2.5, 0, Math.PI * 2); ctx.fill()
+    ctx.beginPath(); ctx.arc(x + w - 5.5, y + h + 1.5, 2.5, 0, Math.PI * 2); ctx.fill()
+  })
+
+  reg('icon-crime-default', (ctx) => filledCircle(ctx, '#888', 8))
+
+  // ── Camera icon ──
+  reg('icon-camera', (ctx) => {
+    const col = '#4a90e2'
+    ctx.fillStyle = col
+    ctx.beginPath()
+    ctx.moveTo(C - 4, C - 7); ctx.lineTo(C + 4, C - 7)
+    ctx.lineTo(C + 6, C - 3); ctx.lineTo(C - 6, C - 3)
+    ctx.closePath(); ctx.fill()
+    ctx.beginPath(); rrect(ctx, C - 10, C - 3, 20, 14, 2)
+    ctx.fill()
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1.5; ctx.stroke()
+    ctx.beginPath(); ctx.arc(C, C + 4, 5, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fill()
+    ctx.beginPath(); ctx.arc(C, C + 4, 3, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.fill()
+  })
+
+  // ── Warning triangles for camera gaps ──
+  function warningTri(ctx: CanvasRenderingContext2D, col: string) {
+    filledTriangle(ctx, col, 13)
+    ctx.fillStyle = '#fff'
+    ctx.font = 'bold 14px sans-serif'
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.fillText('!', C, C + 2)
+  }
+  reg('icon-gap-instalar', (ctx) => warningTri(ctx, '#ef4444'))
+  reg('icon-gap-remanejar', (ctx) => warningTri(ctx, '#fbb040'))
+
+  // ── Fatores urbanos: colored squares per orgão ──
+  const fatoresColors: [string, string][] = [
+    ['comlurb', '#36c476'], ['rioluz', '#fbb040'], ['seop', '#a855f7'],
+    ['seconserva', '#4a90e2'], ['smas', '#ef4444'], ['cetrio', '#ff6b35'], ['default', '#888'],
+  ]
+  for (const [key, col] of fatoresColors) {
+    reg(`icon-fator-${key}`, (ctx) => filledSquare(ctx, col, 18))
+  }
+
+  // ── PSR: diamond ──
+  reg('icon-psr', (ctx) => filledDiamond(ctx, '#a855f7', 11))
+
+  // ── Chamados 1746: triangle ──
+  reg('icon-chamado', (ctx) => filledTriangle(ctx, '#f59e0b', 11))
+}
+
+function LegendIcon({ icon, color }: { icon: 'person' | 'phone' | 'bus'; color: string }) {
+  switch (icon) {
+    case 'person':
+      return (
+        <svg width="10" height="12" viewBox="0 0 20 26" style={{ flexShrink: 0 }}>
+          <circle cx="10" cy="4" r="3.5" fill={color} />
+          <line x1="10" y1="8" x2="10" y2="17" stroke={color} strokeWidth="2.8" strokeLinecap="round" />
+          <line x1="10" y1="17" x2="6" y2="24" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
+          <line x1="10" y1="17" x2="14" y2="24" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
+          <line x1="10" y1="11" x2="5" y2="15" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
+          <line x1="10" y1="11" x2="15" y2="15" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
+        </svg>
+      )
+    case 'phone':
+      return (
+        <svg width="8" height="12" viewBox="0 0 14 22" style={{ flexShrink: 0 }}>
+          <rect x="1" y="1" width="12" height="20" rx="2" fill={color} stroke="rgba(0,0,0,0.3)" strokeWidth="1" />
+          <rect x="3" y="3.5" width="8" height="12" rx="0.5" fill="rgba(0,0,0,0.25)" />
+          <circle cx="7" cy="18" r="1.2" fill="rgba(0,0,0,0.25)" />
+        </svg>
+      )
+    case 'bus':
+      return (
+        <svg width="12" height="12" viewBox="0 0 22 22" style={{ flexShrink: 0 }}>
+          <rect x="1" y="1" width="20" height="16" rx="2.5" fill={color} stroke="rgba(0,0,0,0.3)" strokeWidth="1" />
+          <rect x="3.5" y="3.5" width="6" height="5" rx="0.5" fill="rgba(255,255,255,0.35)" />
+          <rect x="12" y="3.5" width="6" height="5" rx="0.5" fill="rgba(255,255,255,0.35)" />
+          <circle cx="6" cy="19.5" r="2.2" fill="rgba(0,0,0,0.5)" />
+          <circle cx="16" cy="19.5" r="2.2" fill="rgba(0,0,0,0.5)" />
+        </svg>
+      )
+  }
+}
+
+function LayerBtn({ label, color, active, n, onClick, shape = 'square' }: {
   label: string; color: string; active: boolean; n: number; onClick: () => void
+  shape?: 'circle' | 'square' | 'diamond' | 'triangle' | 'camera' | 'warning'
 }) {
+  let shapeEl: React.ReactNode
+  const fill = active ? color : 'transparent'
+  switch (shape) {
+    case 'circle':
+      shapeEl = <div style={{ width: 10, height: 10, borderRadius: '50%', border: `1.5px solid ${color}`, background: fill, transition: 'background 0.15s', flexShrink: 0 }} />
+      break
+    case 'diamond':
+      shapeEl = <div style={{ width: 9, height: 9, border: `1.5px solid ${color}`, background: fill, transform: 'rotate(45deg)', transition: 'background 0.15s', flexShrink: 0 }} />
+      break
+    case 'triangle':
+      shapeEl = (
+        <svg width="11" height="11" viewBox="0 0 12 12" style={{ flexShrink: 0 }}>
+          <polygon points="6,1.5 11,10.5 1,10.5" fill={fill} stroke={color} strokeWidth="1.5" />
+        </svg>
+      )
+      break
+    case 'camera':
+      shapeEl = (
+        <svg width="12" height="10" viewBox="0 0 16 12" style={{ flexShrink: 0 }}>
+          <rect x="1" y="3" width="14" height="8" rx="1.5" fill={fill} stroke={color} strokeWidth="1.3" />
+          <path d="M5.5 3 L7 0.5 L9 0.5 L10.5 3" fill={fill} stroke={color} strokeWidth="1" strokeLinejoin="round" />
+          <circle cx="8" cy="7.5" r="2.5" fill="none" stroke={active ? 'rgba(0,0,0,0.3)' : color} strokeWidth="1" />
+        </svg>
+      )
+      break
+    case 'warning':
+      shapeEl = (
+        <svg width="11" height="11" viewBox="0 0 12 12" style={{ flexShrink: 0 }}>
+          <polygon points="6,1 11.5,11 0.5,11" fill={fill} stroke={color} strokeWidth="1.3" />
+          {active && <text x="6" y="9.5" textAnchor="middle" fill="#fff" fontSize="7" fontWeight="bold">!</text>}
+        </svg>
+      )
+      break
+    default:
+      shapeEl = <div style={{ width: 10, height: 10, border: `1.5px solid ${color}`, background: fill, borderRadius: 1, transition: 'background 0.15s', flexShrink: 0 }} />
+  }
+
   return (
     <button onClick={onClick} style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -1361,11 +1630,7 @@ function LayerBtn({ label, color, active, n, onClick }: {
       cursor: 'pointer', gap: 8,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-        <div style={{
-          width: 10, height: 10, border: `1.5px solid ${color}`,
-          background: active ? color : 'transparent', borderRadius: 2,
-          transition: 'background 0.15s',
-        }} />
+        {shapeEl}
         <span style={{ fontSize: 11, color: active ? 'var(--text)' : 'var(--text-dim)', whiteSpace: 'nowrap' }}>
           {label}
         </span>

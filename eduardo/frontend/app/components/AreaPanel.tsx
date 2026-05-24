@@ -28,17 +28,17 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
   const [showAllIds, setShowAllIds] = useState(false)
   const [showBairros, setShowBairros] = useState(false)
 
-  const tabs: { id: TabId; label: string; highlight?: boolean }[] = [
-    { id: 'escala',       label: 'Escala',       highlight: true },
-    { id: 'analise',      label: 'Análise' },
-    { id: 'inteligencia', label: 'Inteligência' },
-    { id: 'acao',         label: 'Ação' },
+  const tabs: { id: TabId; label: string; highlight?: boolean; status?: 'ready' | 'pending' }[] = [
+    { id: 'escala',       label: 'Efetivo FM',        highlight: true, status: 'ready' },
+    { id: 'analise',      label: 'Mancha Criminal',   status: 'ready' },
+    { id: 'inteligencia', label: 'Dinâmica',          status: area.relint_disponivel ? 'ready' : 'pending' },
+    { id: 'acao',         label: 'Plano de Ação',     status: 'pending' },
   ]
 
   return (
     <aside style={{
       width: 420, minWidth: 420,
-      borderLeft: '1px solid var(--border)',
+      borderLeft: `2px solid ${scoreColor(area.score.total)}`,
       display: 'flex', flexDirection: 'column',
       background: 'var(--bg)',
       overflow: 'hidden',
@@ -162,10 +162,17 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
               ? `3px solid ${t.highlight ? 'var(--amber)' : 'var(--accent)'}`
               : '3px solid transparent',
             color: tab === t.id ? 'var(--text)' : 'var(--text-muted)',
-            fontSize: 12, fontWeight: tab === t.id ? 600 : 400,
+            fontSize: 11, fontWeight: tab === t.id ? 600 : 400,
             transition: 'background 0.15s, color 0.15s',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
           }}>
             {t.label}
+            {t.status === 'pending' && tab !== t.id && (
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--amber)', flexShrink: 0 }} />
+            )}
+            {t.status === 'ready' && tab !== t.id && (
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--green)', opacity: 0.6, flexShrink: 0 }} />
+            )}
           </button>
         ))}
       </div>
@@ -199,6 +206,51 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
           </>
         )}
         {tab === 'acao' && <RelatorioTab area={area} allAreas={allAreas} />}
+      </div>
+
+      {/* Quick-action footer */}
+      <div style={{
+        flexShrink: 0,
+        borderTop: '1px solid var(--border)',
+        background: 'var(--bg-1)',
+        padding: '8px 12px',
+        display: 'flex',
+        gap: 6,
+        alignItems: 'center',
+      }}>
+        <button
+          onClick={() => setTab('acao')}
+          style={{
+            flex: 1, padding: '6px 0', fontSize: 10, fontWeight: 600, cursor: 'pointer',
+            background: 'var(--accent-soft)', border: '1px solid var(--accent)', color: 'var(--accent)',
+            borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+          }}
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+          Plano de Ação
+        </button>
+        <button
+          onClick={() => setTab('inteligencia')}
+          style={{
+            flex: 1, padding: '6px 0', fontSize: 10, fontWeight: 600, cursor: 'pointer',
+            background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text-dim)',
+            borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+          }}
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          RELINT
+        </button>
+        {area.n_triple_bingo > 0 && (
+          <div style={{
+            padding: '5px 8px', borderRadius: 2,
+            background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.4)',
+            fontSize: 10, fontWeight: 600, color: '#ef4444',
+            display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap',
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444' }} />
+            {area.n_triple_bingo} BINGO 3/3
+          </div>
+        )}
       </div>
     </aside>
   )

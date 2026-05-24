@@ -103,7 +103,7 @@ function KPI({ label, value, sub }: { label: string; value: string; sub: string 
         <span className="label-overline">{label}</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 1 }}>
-        <span className="mono tnum" style={{ fontSize: 17, color: 'var(--text)', fontWeight: 500 }}>
+        <span className="mono tnum" style={{ fontSize: 19, color: 'var(--text)', fontWeight: 500 }}>
           {value}
         </span>
         <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{sub}</span>

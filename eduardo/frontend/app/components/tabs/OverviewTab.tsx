@@ -24,7 +24,7 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
   const diaOrder = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado', 'Domingo']
 
   return (
-    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 18 }}>
       {/* KPI cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
         <KPI label="Ocorrências" value={fmt(area.stats.crimes_total)} hint="2020–2024" />
@@ -36,10 +36,31 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
         <KPI label="Fatores" value={fmt(area.stats.fatores_urbanos_total)} hint="pendentes" />
         <KPI label="Pop. Rua" value={fmt(area.stats.psr_total)} hint="censo 2024" />
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
-        <KPI label="Bingo 2+/3" value={fmt(area.n_bingo_trechos)} hint="trechos coincidentes" />
-        <KPI label="Bingo 3/3" value={fmt(area.n_triple_bingo)} hint="tripla coincidência" />
-        <KPI label="Pontos Cegos" value={fmt(area.camera_gaps.gaps.length)} hint={`${fmt(area.camera_gaps.n_cameras)} câmeras`} />
+      {/* BINGO — Coincidências de alto risco */}
+      <div style={{
+        background: area.n_triple_bingo > 0 ? 'rgba(239,68,68,0.06)' : 'var(--bg-1)',
+        border: area.n_triple_bingo > 0 ? '1px solid rgba(239,68,68,0.3)' : '1px solid var(--border)',
+        borderRadius: 3, padding: '10px 12px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+          <span style={{
+            fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em',
+            color: area.n_triple_bingo > 0 ? '#ef4444' : 'var(--text-muted)',
+          }}>
+            Coincidências de Alto Risco (BINGO)
+          </span>
+          {area.n_triple_bingo > 0 && (
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', animation: 'pulse-accent 2s ease-in-out infinite' }} />
+          )}
+        </div>
+        <div style={{ fontSize: 10, color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>
+          Trechos onde mancha criminal + fatores urbanos + dinâmica criminal se sobrepõem.
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+          <KPI label="Bingo 2+/3" value={fmt(area.n_bingo_trechos)} hint="trechos coincidentes" />
+          <KPI label="Bingo 3/3" value={fmt(area.n_triple_bingo)} hint="tripla coincidência" />
+          <KPI label="Pontos Cegos" value={fmt(area.camera_gaps.gaps.length)} hint={`${fmt(area.camera_gaps.n_cameras)} câmeras`} />
+        </div>
       </div>
 
       {/* Per-capita / population enrichment row */}
@@ -274,7 +295,7 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <div className="label-overline" style={{ marginBottom: 8 }}>{children}</div>
+  return <div className="label-overline" style={{ marginBottom: 8, fontSize: 11 }}>{children}</div>
 }
 
 function KPI({ label, value, hint }: { label: string; value: string; hint?: string }) {
@@ -282,12 +303,12 @@ function KPI({ label, value, hint }: { label: string; value: string; hint?: stri
     <div style={{
       background: 'var(--bg-1)',
       border: '1px solid var(--border)',
-      padding: '8px 10px',
+      padding: '9px 10px',
       borderRadius: 2,
     }}>
       <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>{label}</div>
-      <div className="mono tnum" style={{ fontSize: 14, color: 'var(--text)', fontWeight: 500, lineHeight: 1 }}>{value}</div>
-      {hint && <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3 }}>{hint}</div>}
+      <div className="mono tnum" style={{ fontSize: 15, color: 'var(--text)', fontWeight: 500, lineHeight: 1 }}>{value}</div>
+      {hint && <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>{hint}</div>}
     </div>
   )
 }

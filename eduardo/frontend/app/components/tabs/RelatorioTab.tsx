@@ -162,19 +162,46 @@ Prefeitura do Rio de Janeiro`)
         </div>
       </div>
 
-      {/* Loading */}
+      {/* Loading skeleton */}
       {loading && (
-        <div style={{ padding: '28px 0', textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
             <div style={{
               width: 7, height: 7, borderRadius: '50%',
               background: 'var(--accent)',
               animation: 'pulse-accent 1s ease-in-out infinite',
             }} />
             <span className="mono" style={{ fontSize: 11, color: 'var(--text-dim)' }}>
-              Analisando dados e gerando plano de acao…
+              Analisando dados e gerando plano de ação…
             </span>
           </div>
+          {/* Skeleton: dynamics card */}
+          <div style={{ background: 'var(--bg-1)', border: '1px solid var(--border)', borderLeft: '2px solid var(--accent)', borderRadius: 2, padding: '12px' }}>
+            <div style={{ height: 8, width: '30%', background: 'var(--bg-3)', borderRadius: 2, marginBottom: 10 }} />
+            <div style={{ height: 10, width: '100%', background: 'var(--bg-3)', borderRadius: 2, marginBottom: 6 }} />
+            <div style={{ height: 10, width: '85%', background: 'var(--bg-3)', borderRadius: 2, marginBottom: 6 }} />
+            <div style={{ height: 10, width: '70%', background: 'var(--bg-3)', borderRadius: 2 }} />
+          </div>
+          {/* Skeleton: urgency badges */}
+          <div style={{ display: 'flex', gap: 6 }}>
+            {[1,2,3].map(i => (
+              <div key={i} style={{ flex: 1, padding: '12px 10px', borderRadius: 2, background: 'var(--bg-2)', border: '1px solid var(--border)' }}>
+                <div style={{ height: 16, width: '40%', background: 'var(--bg-3)', borderRadius: 2, margin: '0 auto 6px' }} />
+                <div style={{ height: 8, width: '60%', background: 'var(--bg-3)', borderRadius: 2, margin: '0 auto' }} />
+              </div>
+            ))}
+          </div>
+          {/* Skeleton: action cards */}
+          {[1,2,3].map(i => (
+            <div key={i} style={{ background: 'var(--bg-1)', border: '1px solid var(--border)', borderLeft: '3px solid var(--bg-4)', borderRadius: 2, padding: '10px' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ width: 18, height: 10, background: 'var(--bg-3)', borderRadius: 2 }} />
+                <div style={{ width: 50, height: 14, background: 'var(--bg-3)', borderRadius: 2 }} />
+                <div style={{ flex: 1, height: 10, background: 'var(--bg-3)', borderRadius: 2 }} />
+                <div style={{ width: 40, height: 14, background: 'var(--bg-3)', borderRadius: 2 }} />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

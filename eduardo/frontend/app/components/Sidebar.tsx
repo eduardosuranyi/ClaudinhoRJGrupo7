@@ -191,14 +191,21 @@ export default function Sidebar({ data, selected, weights, setWeights, onSelectA
 
       {/* Footer */}
       <div style={{
-        padding: '6px 16px',
+        padding: '8px 16px',
         borderTop: '1px solid var(--border)',
         background: 'var(--bg-1)',
+        display: 'flex', flexDirection: 'column', gap: 4,
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Crimes nos polígonos:</span>
           <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-dim)' }}>
             {fmt(data.meta.total_ocorrencias_em_areas)} / {fmt(data.meta.total_ocorrencias)}
+          </span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Dados:</span>
+          <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-dim)' }}>
+            {data.meta.periodo_criminal}
           </span>
         </div>
       </div>
@@ -252,7 +259,7 @@ function AreaRow({ area, rank, score, selected, agentActive, onClick, onInvestig
         <span className="mono tnum" style={{ fontSize: 11, textAlign: 'right', color: 'var(--text-dim)' }}>
           {fmt(area.stats.crimes_total)}
         </span>
-        <div style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
           <span className="mono tnum" style={{
             fontSize: 12,
             color: scoreColor(score),
@@ -260,34 +267,44 @@ function AreaRow({ area, rank, score, selected, agentActive, onClick, onInvestig
           }}>
             {score.toFixed(0)}
           </span>
+          {area.n_triple_bingo > 0 && (
+            <span style={{
+              fontSize: 8, fontWeight: 700, color: '#ef4444',
+              background: 'rgba(239,68,68,0.12)', padding: '0px 3px',
+              borderRadius: 2, lineHeight: '14px', letterSpacing: '0.02em',
+            }}>
+              {area.n_triple_bingo}x3/3
+            </span>
+          )}
         </div>
       </button>
 
-      {/* Investigate button — appears on hover of the row */}
+      {/* Investigate button — inline in the subtitle row */}
       {onInvestigate && !agentActive && (
         <button
           onClick={e => { e.stopPropagation(); onInvestigate() }}
           title="Investigar com IA"
           style={{
-            position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
-            background: 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(251,176,64,0.15))',
-            border: '1px solid rgba(168,85,247,0.4)',
-            borderRadius: 3, padding: '4px 9px',
-            fontSize: 10, color: '#c4b5fd',
+            position: 'absolute', left: 38, bottom: 6,
+            background: 'linear-gradient(135deg, rgba(168,85,247,0.12), rgba(251,176,64,0.12))',
+            border: '1px solid rgba(168,85,247,0.35)',
+            borderRadius: 3, padding: '2px 7px',
+            fontSize: 9, color: '#c4b5fd',
             cursor: 'pointer', opacity: 0,
-            transition: 'opacity 0.12s, background 0.15s',
-            display: 'flex', alignItems: 'center', gap: 4,
-            fontWeight: 500,
+            transition: 'opacity 0.12s, background 0.15s, border-color 0.15s',
+            display: 'flex', alignItems: 'center', gap: 3,
+            fontWeight: 600,
+            letterSpacing: '0.03em',
           }}
           className="investigate-btn"
           onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168,85,247,0.25), rgba(251,176,64,0.25))'; e.currentTarget.style.borderColor = 'rgba(168,85,247,0.7)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(251,176,64,0.15))'; e.currentTarget.style.borderColor = 'rgba(168,85,247,0.4)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168,85,247,0.12), rgba(251,176,64,0.12))'; e.currentTarget.style.borderColor = 'rgba(168,85,247,0.35)' }}
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" />
-            <path d="M19 13l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z" />
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M12 1l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6z" />
+            <path d="M19 11l1.2 3.6 3.6 1.2-3.6 1.2-1.2 3.6-1.2-3.6-3.6-1.2 3.6-1.2 1.2-3.6z" opacity="0.6" />
           </svg>
-          IA
+          Investigar
         </button>
       )}
     </div>

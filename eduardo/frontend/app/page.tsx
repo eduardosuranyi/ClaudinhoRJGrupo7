@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { AreasData, Area, MapControl, InspectedPoint } from './types'
+import { scoreColor, fmt } from './lib/helpers'
 import TopHeader from './components/TopHeader'
 import Sidebar from './components/Sidebar'
 import MapView from './components/MapView'
@@ -91,6 +92,44 @@ export default function Home() {
           {showComparativo ? '← Mapa' : 'Comparativo'}
         </button>
       </div>
+
+      {/* Context strip for selected area */}
+      {selected && !showComparativo && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '4px 16px',
+          background: 'var(--bg-2)',
+          borderBottom: '1px solid var(--border-dim)',
+          flexShrink: 0,
+          minHeight: 28,
+        }}>
+          <div style={{ width: 3, height: 14, borderRadius: 1, background: scoreColor(selected.score.total) }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>
+            {selected.nome.split(' - ')[0]}
+          </span>
+          <span style={{ width: 1, height: 12, background: 'var(--border)' }} />
+          <span className="mono tnum" style={{ fontSize: 11, color: scoreColor(selected.score.total), fontWeight: 600 }}>
+            Score {selected.score.total.toFixed(0)}
+          </span>
+          {selected.n_triple_bingo > 0 && (
+            <>
+              <span style={{ width: 1, height: 12, background: 'var(--border)' }} />
+              <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 600 }}>
+                BINGO 3/3: {selected.n_triple_bingo} trechos
+              </span>
+            </>
+          )}
+          {selected.relint_disponivel && (
+            <>
+              <span style={{ width: 1, height: 12, background: 'var(--border)' }} />
+              <span style={{ fontSize: 10, color: 'var(--accent)' }}>RELINT disponível</span>
+            </>
+          )}
+          <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-muted)' }}>
+            {fmt(selected.stats.crimes_total)} ocorrências · {selected.stats.pico_horario} pico
+          </span>
+        </div>
+      )}
 
       {showComparativo ? (
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px' }}>
