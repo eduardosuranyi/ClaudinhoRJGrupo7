@@ -45,7 +45,7 @@ export default function TopHeader({ data }: Props) {
           background: 'var(--accent)',
         }} />
         <div>
-          <div style={{ fontSize: 9, color: 'var(--accent)', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 600 }}>
+          <div style={{ fontSize: 10, color: 'var(--accent)', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 600 }}>
             CompStat Municipal
           </div>
           <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text)', marginTop: -1 }}>

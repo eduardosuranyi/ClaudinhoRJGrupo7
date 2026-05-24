@@ -13,6 +13,62 @@ import {
 
 const client = new Anthropic()
 
+/**
+ * Parse JSON com reparo defensivo de truncamento.
+ * Se Haiku cortar no meio de uma string ou objeto, tenta fechar e reparsear.
+ * Rede de segurança caso max_tokens estoure mesmo assim.
+ */
+function safeParseJSON(raw: string): any {
+  // Tentativa 1: parse direto
+  try {
+    return JSON.parse(raw)
+  } catch (e1) {
+    // Tentativa 2: reparo de truncamento
+    let s = raw.trim()
+
+    // Remove vírgula pendurada antes de fechar
+    s = s.replace(/,\s*$/, '')
+
+    // Conta aspas não-escapadas pra ver se string está aberta
+    let inString = false
+    let escape = false
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i]
+      if (escape) { escape = false; continue }
+      if (c === '\\') { escape = true; continue }
+      if (c === '"') inString = !inString
+    }
+    if (inString) s += '"'
+
+    // Conta { } e [ ] pra fechar o que sobrou aberto
+    let braces = 0, brackets = 0
+    inString = false; escape = false
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i]
+      if (escape) { escape = false; continue }
+      if (c === '\\') { escape = true; continue }
+      if (c === '"') inString = !inString
+      if (inString) continue
+      if (c === '{') braces++
+      else if (c === '}') braces--
+      else if (c === '[') brackets++
+      else if (c === ']') brackets--
+    }
+
+    // Remove vírgula pendurada de novo (caso string tenha sido fechada agora)
+    s = s.replace(/,(\s*)$/, '$1')
+
+    while (brackets-- > 0) s += ']'
+    while (braces-- > 0) s += '}'
+
+    try {
+      return JSON.parse(s)
+    } catch (e2: any) {
+      throw new Error(`JSON truncado e irrecuperável: ${e2.message}`)
+    }
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────
 // 1. Escala 12x36
 // ─────────────────────────────────────────────────────────────────────
@@ -50,12 +106,6 @@ function calcularEscala(area: any, todasAreas: any[]) {
 // ─────────────────────────────────────────────────────────────────────
 // 2. Helpers docx
 // ─────────────────────────────────────────────────────────────────────
-const NO_BORDER = {
-  top:    { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-  bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-  left:   { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-  right:  { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-}
 const THIN_BORDER = { style: BorderStyle.SINGLE, size: 4, color: '000000' }
 
 function txt(text: string, bold = false): TextRun {
@@ -321,7 +371,7 @@ ESTRUTURA EXATA:
   try {
     const r = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 4000,
+      max_tokens: 8000,
       messages: [
         { role: 'user', content: prompt },
         { role: 'assistant', content: '{' },  // prefill to force JSON
@@ -329,7 +379,7 @@ ESTRUTURA EXATA:
     })
     const raw = '{' + (r.content[0] as any).text.trim()
       .replace(/```\s*$/,'').trim()
-    content = JSON.parse(raw)
+    content = safeParseJSON(raw)
   } catch (e: any) {
     return NextResponse.json({ error: `Erro Claude: ${e.message}` }, { status: 500 })
   }

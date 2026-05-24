@@ -1,6 +1,6 @@
 'use client'
 
-import type { Area } from '../../types'
+import type { Area, Relato } from '../../types'
 import { fmt, cap, MODUS_LABELS } from '../../lib/helpers'
 
 export default function DenunciasTab({ area }: { area: Area }) {
@@ -35,7 +35,7 @@ export default function DenunciasTab({ area }: { area: Area }) {
       {/* Bairro breakdown */}
       {area.denuncias_por_bairro && area.denuncias_por_bairro.length > 0 && (
         <div style={{ marginBottom: 14 }}>
-          <div className="label-overline" style={{ marginBottom: 6, fontSize: 9 }}>Distribuição por Bairro (entorno)</div>
+          <div className="label-overline" style={{ marginBottom: 6, fontSize: 10 }}>Distribuição por Bairro (entorno)</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {area.denuncias_por_bairro.slice(0, 8).map((db) => {
               const maxTotal = area.denuncias_por_bairro![0].total || 1
@@ -44,7 +44,7 @@ export default function DenunciasTab({ area }: { area: Area }) {
                 <div key={db.bairro}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 1 }}>
                     <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{db.bairro}</span>
-                    <span className="mono tnum" style={{ fontSize: 9, color: 'var(--text-muted)' }}>{fmt(db.total)}</span>
+                    <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-muted)' }}>{fmt(db.total)}</span>
                   </div>
                   <div style={{ height: 2, background: 'var(--bg-3)' }}>
                     <div style={{ height: '100%', width: `${pct}%`, background: 'var(--accent)' }} />
@@ -65,7 +65,7 @@ export default function DenunciasTab({ area }: { area: Area }) {
   )
 }
 
-function RelatoCard({ relato }: { relato: any }) {
+function RelatoCard({ relato }: { relato: Relato }) {
   const dataShort = relato.data ? relato.data.split(' ')[0] : ''
   return (
     <div style={{
@@ -82,7 +82,7 @@ function RelatoCard({ relato }: { relato: any }) {
             {relato.tipo}
           </span>
         </div>
-        <span className="mono" style={{ fontSize: 9, color: 'var(--text-muted)' }}>
+        <span className="mono" style={{ fontSize: 10, color: 'var(--text-muted)' }}>
           {dataShort}
         </span>
       </div>
@@ -109,7 +109,7 @@ function RelatoCard({ relato }: { relato: any }) {
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>
         {relato.modus.length > 0 && relato.modus.map((m: string) => (
           <span key={m} style={{
-            fontSize: 9,
+            fontSize: 10,
             padding: '2px 6px',
             background: 'rgba(251,176,64,0.08)',
             border: '1px solid rgba(251,176,64,0.3)',
@@ -122,7 +122,7 @@ function RelatoCard({ relato }: { relato: any }) {
         ))}
         {relato.perfil_suspeito && (
           <span style={{
-            fontSize: 9,
+            fontSize: 10,
             padding: '2px 6px',
             background: 'rgba(168,85,247,0.08)',
             border: '1px solid rgba(168,85,247,0.3)',
@@ -146,7 +146,7 @@ function MiniKPI({ label, value, accent }: { label: string; value: string; accen
       borderRadius: 2,
       flex: 1,
     }}>
-      <div style={{ fontSize: 8, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
+      <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
       <div className="mono tnum" style={{ fontSize: 14, color: accent ? '#ef4444' : 'var(--text)', fontWeight: 500 }}>{value}</div>
     </div>
   )

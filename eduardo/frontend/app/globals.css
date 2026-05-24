@@ -134,7 +134,7 @@ div:focus-within > .investigate-btn {
 
 /* Section labels */
 .label-overline {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;

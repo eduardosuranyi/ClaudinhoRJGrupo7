@@ -42,10 +42,10 @@ export default function Sidebar({ data, selected, weights, setWeights, onSelectA
         gap: 8,
         borderBottom: '1px solid var(--border)',
       }}>
-        <span className="label-overline" style={{ fontSize: 9 }}>#</span>
-        <span className="label-overline" style={{ fontSize: 9 }}>Área Operacional</span>
-        <span className="label-overline" style={{ fontSize: 9, textAlign: 'right' }}>Ocs.</span>
-        <span className="label-overline" style={{ fontSize: 9, textAlign: 'right' }}>Score</span>
+        <span className="label-overline" style={{ fontSize: 10 }}>#</span>
+        <span className="label-overline" style={{ fontSize: 10 }}>Área Operacional</span>
+        <span className="label-overline" style={{ fontSize: 10, textAlign: 'right' }}>Ocs.</span>
+        <span className="label-overline" style={{ fontSize: 10, textAlign: 'right' }}>Score</span>
       </div>
 
       {/* Area list */}
@@ -97,7 +97,7 @@ export default function Sidebar({ data, selected, weights, setWeights, onSelectA
         background: 'var(--bg-1)',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>Crimes nos polígonos:</span>
+          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Crimes nos polígonos:</span>
           <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-dim)' }}>
             {fmt(data.meta.total_ocorrencias_em_areas)} / {fmt(data.meta.total_ocorrencias)}
           </span>
@@ -139,13 +139,13 @@ function AreaRow({ area, rank, score, selected, agentActive, onClick, onInvestig
           </div>
           <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
             {area.identificacao.aisp && (
-              <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>AISP {area.identificacao.aisp}</span>
+              <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>AISP {area.identificacao.aisp}</span>
             )}
             {area.relint_disponivel && (
-              <span style={{ fontSize: 9, color: 'var(--accent)' }}>· RELINT</span>
+              <span style={{ fontSize: 10, color: 'var(--accent)' }}>· RELINT</span>
             )}
             {agentActive && (
-              <span style={{ fontSize: 9, color: 'var(--amber)' }}>· IA ativa</span>
+              <span style={{ fontSize: 10, color: 'var(--amber)' }}>· IA ativa</span>
             )}
           </div>
         </div>
@@ -172,7 +172,7 @@ function AreaRow({ area, rank, score, selected, agentActive, onClick, onInvestig
             position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
             background: 'var(--bg-4)', border: '1px solid var(--border)',
             borderRadius: 2, padding: '3px 7px',
-            fontSize: 9, color: 'var(--text-muted)',
+            fontSize: 10, color: 'var(--text-muted)',
             cursor: 'pointer', opacity: 0,
             transition: 'opacity 0.12s',
           }}

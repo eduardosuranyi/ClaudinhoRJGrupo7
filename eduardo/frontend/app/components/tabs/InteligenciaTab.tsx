@@ -2,28 +2,110 @@
 
 import { useState } from 'react'
 import type { Area } from '../../types'
-import { fmt, faccaoColor } from '../../lib/helpers'
+import { faccaoColor } from '../../lib/helpers'
 
 export default function InteligenciaTab({ area, allAreas }: { area: Area; allAreas: Area[] }) {
   const [loading, setLoading] = useState(false)
 
-  async function gerarRelint() {
+  async function gerarRelint(forceRegen = false) {
     setLoading(true)
+    const cacheKey = `relint_cache_${area.id}`
+    const CACHE_TTL_MS = 60 * 60 * 1000 // 1h
+
+    const downloadFromBase64 = (b64: string) => {
+      const bin = atob(b64)
+      const bytes = new Uint8Array(bin.length)
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+      const blob = new Blob([bytes], {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `RELINT_${area.nome.slice(0,30).replace(/[^a-zA-Z0-9]/g,'_')}.docx`
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    }
+
+    // 1) Cache fresco (TTL 1h) — download instantâneo se válido
+    if (!forceRegen) {
+      try {
+        const cached = localStorage.getItem(cacheKey)
+        if (cached) {
+          const { b64, ts } = JSON.parse(cached)
+          if (Date.now() - ts < CACHE_TTL_MS && b64) {
+            downloadFromBase64(b64)
+            setLoading(false)
+            return
+          }
+        }
+      } catch { /* cache corrompido, segue pra API */ }
+    }
+
+    // 2) Chama API
     try {
       const res = await fetch('/api/relint', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ area, allAreas }),
       })
-      if (!res.ok) { const e = await res.json(); alert(e.error || 'Erro'); return }
+
+      if (!res.ok) {
+        // API falhou — tenta cache antigo como fallback de emergência
+        try {
+          const cached = localStorage.getItem(cacheKey)
+          if (cached) {
+            const { b64 } = JSON.parse(cached)
+            if (b64) {
+              console.warn('[RELINT] API falhou, usando cache de fallback')
+              downloadFromBase64(b64)
+              return
+            }
+          }
+        } catch {}
+        const e = await res.json().catch(() => ({ error: 'Erro desconhecido' }))
+        alert(e.error || 'Erro')
+        return
+      }
+
       const blob = await res.blob()
+
+      // Salva no cache (blob → base64)
+      try {
+        const buf = await blob.arrayBuffer()
+        const bytes = new Uint8Array(buf)
+        let bin = ''
+        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i])
+        const b64 = btoa(bin)
+        localStorage.setItem(cacheKey, JSON.stringify({ b64, ts: Date.now() }))
+      } catch (e) {
+        console.warn('[RELINT] cache write falhou:', e)
+      }
+
+      // Download
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       a.download = `RELINT_${area.nome.slice(0,30).replace(/[^a-zA-Z0-9]/g,'_')}.docx`
       a.click()
-    } catch { alert('Erro de conexão.') }
-    finally { setLoading(false) }
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch {
+      // Erro de rede — última tentativa com cache antigo
+      try {
+        const cached = localStorage.getItem(cacheKey)
+        if (cached) {
+          const { b64 } = JSON.parse(cached)
+          if (b64) {
+            console.warn('[RELINT] Erro de rede, usando cache de fallback')
+            downloadFromBase64(b64)
+            return
+          }
+        }
+      } catch {}
+      alert('Erro de conexão.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (!area.relint_disponivel || area.relint.sections.length === 0) {
@@ -33,7 +115,7 @@ export default function InteligenciaTab({ area, allAreas }: { area: Area; allAre
         <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
           Sem RELINT de origem para esta área.
         </div>
-        <GerarBtn loading={loading} onClick={gerarRelint} />
+        <GerarBtn loading={loading} onClick={() => gerarRelint(false)} />
       </div>
     )
   }
@@ -45,7 +127,7 @@ export default function InteligenciaTab({ area, allAreas }: { area: Area; allAre
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <div className="label-overline">Relatório de Inteligência</div>
-          <GerarBtn loading={loading} onClick={gerarRelint} />
+          <GerarBtn loading={loading} onClick={() => gerarRelint(false)} />
         </div>
         <p style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 12 }}>
           Documento de campo · {area.relint.sections.length} sub-áreas

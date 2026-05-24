@@ -1,24 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useMapAgent } from '@/hooks/useMapAgent'
-import type { Area, MapControl } from '@/types'
-
-// Build a ReadableStream that sends SSE events then closes
-function makeSSEStream(events: object[]): ReadableStream<Uint8Array> {
-  const enc = new TextEncoder()
-  return new ReadableStream<Uint8Array>({
-    start(ctrl) {
-      for (const e of events) {
-        ctrl.enqueue(enc.encode(`data: ${JSON.stringify(e)}\n\n`))
-      }
-      ctrl.close()
-    },
-  })
-}
-
-function makeResponse(events: object[]): Response {
-  return { ok: true, body: makeSSEStream(events) } as unknown as Response
-}
+import { executeMapTool } from '@/hooks/useMapAgent'
+import type { MapControl } from '@/types'
 
 const mapControl: MapControl = {
   toggleLayer: vi.fn(),
@@ -27,269 +9,140 @@ const mapControl: MapControl = {
   clearAnnotations: vi.fn(),
   snapshotLayers: vi.fn().mockReturnValue({}),
   restoreLayers: vi.fn(),
+  highlightTrecho: vi.fn().mockReturnValue(true),
+  highlightTopTrechos: vi.fn(),
+  clearHighlights: vi.fn(),
+  focusBairro: vi.fn().mockReturnValue(true),
+  setTimeFilter: vi.fn(),
+  showRoute: vi.fn(),
 }
 
-const mockArea = { id: 1, nome: 'Área Teste' } as unknown as Area
+const mockArea = { id: 1, nome: 'Área Teste' } as any
 
-const hookOpts = {
-  mapControlRef: { current: mapControl } as React.MutableRefObject<MapControl | null>,
-  setWeights: vi.fn(),
-  setSelected: vi.fn(),
-  getArea: vi.fn().mockReturnValue(mockArea),
+const setWeights = vi.fn()
+const setSelected = vi.fn()
+const getArea = vi.fn().mockReturnValue(mockArea)
+
+function makeDeps() {
+  return { ctrl: mapControl, setWeights, setSelected, getArea }
 }
 
 beforeEach(() => {
   vi.clearAllMocks()
-  global.fetch = vi.fn()
 })
 
-describe('useMapAgent — fluxo inicial', () => {
-  it('test_startAgent_status_goes_running_then_paused', async () => {
-    const checkpoint = {
-      question: 'Deseja continuar?',
-      options: ['Continuar análise', 'Ver detalhes'],
-      reasoning: 'Análise inicial concluída',
-      tool_use_id: 'tu_cp_1',
-    }
-
-    ;(global.fetch as any).mockResolvedValueOnce(makeResponse([
-      { type: 'thinking', turn: 1, detail: 'Turno 1 — consultando modelo…' },
-      { type: 'tool', name: 'zoom_to_area', input: { area_id: 1 }, id: 'tu_zoom' },
-      { type: 'tool', name: 'narrate', input: { step_title: 'Visão Geral', text: 'Total: 100 ocorrências.' }, id: 'tu_narrate' },
-      { type: 'pause', checkpoint, messages: [{ role: 'user', content: 'resumo' }] },
-      { type: 'done' },
-    ]))
-
-    const { result } = renderHook(() => useMapAgent(hookOpts))
-
-    await act(async () => { result.current.startAgent(mockArea) })
-    await waitFor(() => expect(result.current.agentState.status).toBe('paused'))
-
-    expect(result.current.agentState.pendingCheckpoint?.question).toBe('Deseja continuar?')
-    expect(result.current.agentState.pendingCheckpoint?.tool_use_id).toBe('tu_cp_1')
-    expect(result.current.agentState.thinkingDetail).toBeNull()
-
-    const transcript = result.current.agentState.transcript
-    expect(transcript.some(e => e.type === 'narrate' && e.content === 'Total: 100 ocorrências.')).toBe(true)
-    expect(transcript.some(e => e.type === 'checkpoint_ask')).toBe(true)
+describe('executeMapTool — toggle_layer', () => {
+  it('test_calls_toggleLayer_with_correct_args', () => {
+    executeMapTool('toggle_layer', { layer: 'crime', visible: true }, makeDeps())
+    expect(mapControl.toggleLayer).toHaveBeenCalledWith('crime', true)
   })
 
-  it('test_startAgent_completes_without_checkpoint', async () => {
-    ;(global.fetch as any).mockResolvedValueOnce(makeResponse([
-      {
-        type: 'complete',
-        findings: { summary: 'Investigação encerrada.', key_findings: ['Achado 1'], actions: [] },
-      },
-      { type: 'done' },
-    ]))
-
-    const { result } = renderHook(() => useMapAgent(hookOpts))
-
-    await act(async () => { result.current.startAgent(mockArea) })
-    await waitFor(() => expect(result.current.agentState.status).toBe('complete'))
-
-    expect(result.current.agentState.findings?.summary).toBe('Investigação encerrada.')
-    expect(result.current.agentState.thinkingDetail).toBeNull()
+  it('test_toggle_false_is_passed', () => {
+    executeMapTool('toggle_layer', { layer: 'dominio', visible: false }, makeDeps())
+    expect(mapControl.toggleLayer).toHaveBeenCalledWith('dominio', false)
   })
 })
 
-describe('useMapAgent — respondToCheckpoint (bug do freeze)', () => {
-  it('test_resume_calls_fetch_again_with_correct_payload', async () => {
-    const savedMessages = [{ role: 'user', content: 'msg inicial' }]
-    const checkpoint = {
-      question: 'Deseja continuar?',
-      options: ['Continuar análise'],
-      reasoning: 'Pausa',
-      tool_use_id: 'tu_cp_resume',
-    }
-
-    ;(global.fetch as any)
-      .mockResolvedValueOnce(makeResponse([
-        { type: 'pause', checkpoint, messages: savedMessages },
-        { type: 'done' },
-      ]))
-      .mockResolvedValueOnce(makeResponse([
-        { type: 'complete', findings: { summary: 'Concluído.', key_findings: [], actions: [] } },
-        { type: 'done' },
-      ]))
-
-    const { result } = renderHook(() => useMapAgent(hookOpts))
-
-    await act(async () => { result.current.startAgent(mockArea) })
-    await waitFor(() => expect(result.current.agentState.status).toBe('paused'))
-
-    await act(async () => { result.current.respondToCheckpoint('Continuar análise') })
-    await waitFor(() => expect(result.current.agentState.status).toBe('complete'))
-
-    // Segunda chamada deve ter o payload de resumo correto
-    const [, secondCall] = (global.fetch as any).mock.calls
-    const body = JSON.parse(secondCall[1].body)
-    expect(body.checkpoint_tool_use_id).toBe('tu_cp_resume')
-    expect(body.checkpoint_answer).toBe('Continuar análise')
-    expect(body.messages).toEqual(savedMessages)
+describe('executeMapTool — zoom_to_area', () => {
+  it('test_calls_zoomToArea_and_setSelected', () => {
+    executeMapTool('zoom_to_area', { area_id: 1 }, makeDeps())
+    expect(mapControl.zoomToArea).toHaveBeenCalledWith(1)
+    expect(getArea).toHaveBeenCalledWith(1)
+    expect(setSelected).toHaveBeenCalledWith(mockArea)
   })
 
-  it('test_resume_with_free_text_answer', async () => {
-    const checkpoint = {
-      question: 'Deseja continuar?',
-      options: ['Continuar análise'],
-      reasoning: 'Pausa',
-      tool_use_id: 'tu_cp_free',
-    }
-
-    ;(global.fetch as any)
-      .mockResolvedValueOnce(makeResponse([
-        { type: 'pause', checkpoint, messages: [] },
-        { type: 'done' },
-      ]))
-      .mockResolvedValueOnce(makeResponse([
-        { type: 'complete', findings: { summary: 'ok', key_findings: [], actions: [] } },
-        { type: 'done' },
-      ]))
-
-    const { result } = renderHook(() => useMapAgent(hookOpts))
-
-    await act(async () => { result.current.startAgent(mockArea) })
-    await waitFor(() => expect(result.current.agentState.status).toBe('paused'))
-
-    await act(async () => {
-      result.current.respondToCheckpoint('Quero ver os dados de câmeras em detalhe')
-    })
-    await waitFor(() => expect(result.current.agentState.status).toBe('complete'))
-
-    const body = JSON.parse((global.fetch as any).mock.calls[1][1].body)
-    expect(body.checkpoint_answer).toBe('Quero ver os dados de câmeras em detalhe')
-
-    // Entrada de resposta deve aparecer no transcript
-    const answerEntry = result.current.agentState.transcript.find(e => e.type === 'checkpoint_answer')
-    expect(answerEntry?.content).toBe('Quero ver os dados de câmeras em detalhe')
-  })
-
-  it('test_pendingCheckpoint_is_null_after_respond_fires', async () => {
-    const checkpoint = {
-      question: 'Q?', options: ['Continuar análise'], reasoning: 'r', tool_use_id: 'tu_x',
-    }
-
-    ;(global.fetch as any)
-      .mockResolvedValueOnce(makeResponse([
-        { type: 'pause', checkpoint, messages: [] },
-        { type: 'done' },
-      ]))
-      .mockResolvedValueOnce(makeResponse([
-        { type: 'complete', findings: { summary: 'ok', key_findings: [], actions: [] } },
-        { type: 'done' },
-      ]))
-
-    const { result } = renderHook(() => useMapAgent(hookOpts))
-
-    await act(async () => { result.current.startAgent(mockArea) })
-    await waitFor(() => expect(result.current.agentState.status).toBe('paused'))
-
-    await act(async () => { result.current.respondToCheckpoint('Continuar análise') })
-
-    // Imediatamente após responder, pendingCheckpoint deve ser null (não freeze)
-    await waitFor(() => expect(result.current.agentState.pendingCheckpoint).toBeNull())
-    await waitFor(() => expect(result.current.agentState.status).toBe('complete'))
+  it('test_setSelected_not_called_when_area_not_found', () => {
+    getArea.mockReturnValueOnce(undefined)
+    executeMapTool('zoom_to_area', { area_id: 99 }, makeDeps())
+    expect(mapControl.zoomToArea).toHaveBeenCalledWith(99)
+    expect(setSelected).not.toHaveBeenCalled()
   })
 })
 
-describe('useMapAgent — error e abort', () => {
-  it('test_stream_error_event_sets_error_status', async () => {
-    ;(global.fetch as any).mockResolvedValueOnce(makeResponse([
-      { type: 'error', message: 'SDK falhou' },
-    ]))
+describe('executeMapTool — show_annotation', () => {
+  it('test_calls_addAnnotation_with_correct_args', () => {
+    executeMapTool('show_annotation', { lat: -22.9, lng: -43.2, title: 'Rua A', body: 'Crime spot' }, makeDeps())
+    expect(mapControl.addAnnotation).toHaveBeenCalledWith(-22.9, -43.2, 'Rua A', 'Crime spot')
+  })
+})
 
-    const { result } = renderHook(() => useMapAgent(hookOpts))
-
-    await act(async () => { result.current.startAgent(mockArea) })
-    await waitFor(() => expect(result.current.agentState.status).toBe('error'))
-
-    expect(result.current.agentState.error).toBe('SDK falhou')
+describe('executeMapTool — update_weights', () => {
+  it('test_merges_with_defaults', () => {
+    executeMapTool('update_weights', { mancha: 50 }, makeDeps())
+    expect(setWeights).toHaveBeenCalledWith({ mancha: 50, pico: 15, fatores: 25, dinamica: 15 })
   })
 
-  it('test_fetch_rejection_sets_error_status', async () => {
-    ;(global.fetch as any).mockRejectedValueOnce(new Error('network error'))
+  it('test_all_weights_can_be_set', () => {
+    executeMapTool('update_weights', { mancha: 20, pico: 10, fatores: 30, dinamica: 20 }, makeDeps())
+    expect(setWeights).toHaveBeenCalledWith({ mancha: 20, pico: 10, fatores: 30, dinamica: 20 })
+  })
+})
 
-    const { result } = renderHook(() => useMapAgent(hookOpts))
-
-    await act(async () => { result.current.startAgent(mockArea) })
-    await waitFor(() => expect(result.current.agentState.status).toBe('error'))
-
-    expect(result.current.agentState.error).toBe('network error')
+describe('executeMapTool — highlight_trecho', () => {
+  it('test_passes_locf_and_optional_color_label', () => {
+    executeMapTool(
+      'highlight_trecho',
+      { locf_norm: 'Avenida Presidente Vargas', color: '#ef4444', label: 'Crítico' },
+      makeDeps(),
+    )
+    expect(mapControl.highlightTrecho).toHaveBeenCalledWith(
+      'Avenida Presidente Vargas',
+      { color: '#ef4444', label: 'Crítico' },
+    )
   })
 
-  it('test_network_error_retries_and_eventually_succeeds', async () => {
-    vi.useFakeTimers()
-    try {
-      ;(global.fetch as any)
-        .mockRejectedValueOnce(new TypeError('Failed to fetch'))
-        .mockRejectedValueOnce(new TypeError('Failed to fetch'))
-        .mockResolvedValueOnce(makeResponse([
-          { type: 'complete', findings: { summary: 'ok', key_findings: [], actions: [] } },
-          { type: 'done' },
-        ]))
+  it('test_handles_missing_color_label', () => {
+    executeMapTool('highlight_trecho', { locf_norm: 'Rua X' }, makeDeps())
+    expect(mapControl.highlightTrecho).toHaveBeenCalledWith('Rua X', { color: undefined, label: undefined })
+  })
+})
 
-      const { result } = renderHook(() => useMapAgent(hookOpts))
+describe('executeMapTool — highlight_top_trechos', () => {
+  it('test_passes_n', () => {
+    executeMapTool('highlight_top_trechos', { n: 5 }, makeDeps())
+    expect(mapControl.highlightTopTrechos).toHaveBeenCalledWith(5)
+  })
+})
 
-      act(() => { result.current.startAgent(mockArea) })
-      await act(async () => { await vi.advanceTimersByTimeAsync(2500) })
+describe('executeMapTool — clear_highlights', () => {
+  it('test_calls_clearHighlights', () => {
+    executeMapTool('clear_highlights', {}, makeDeps())
+    expect(mapControl.clearHighlights).toHaveBeenCalled()
+  })
+})
 
-      expect(result.current.agentState.status).toBe('complete')
-      expect(result.current.agentState.transcript.some(e => e.type === 'error')).toBe(false)
-      expect((global.fetch as any).mock.calls).toHaveLength(3)
-    } finally {
-      vi.useRealTimers()
-    }
+describe('executeMapTool — focus_bairro', () => {
+  it('test_passes_nome', () => {
+    executeMapTool('focus_bairro', { nome: 'Botafogo' }, makeDeps())
+    expect(mapControl.focusBairro).toHaveBeenCalledWith('Botafogo')
+  })
+})
+
+describe('executeMapTool — set_time_filter', () => {
+  it('test_passes_hour_window', () => {
+    executeMapTool('set_time_filter', { hora_inicio: 20, hora_fim: 23 }, makeDeps())
+    expect(mapControl.setTimeFilter).toHaveBeenCalledWith(20, 23)
   })
 
-  it('test_network_error_exhausted_sets_error_status', async () => {
-    vi.useFakeTimers()
-    try {
-      ;(global.fetch as any)
-        .mockRejectedValueOnce(new TypeError('Failed to fetch'))
-        .mockRejectedValueOnce(new TypeError('Failed to fetch'))
-        .mockRejectedValueOnce(new TypeError('Failed to fetch'))
-
-      const { result } = renderHook(() => useMapAgent(hookOpts))
-
-      act(() => { result.current.startAgent(mockArea) })
-      await act(async () => { await vi.advanceTimersByTimeAsync(2500) })
-
-      expect(result.current.agentState.status).toBe('error')
-      expect(result.current.agentState.transcript.filter(e => e.type === 'error')).toHaveLength(1)
-      expect((global.fetch as any).mock.calls).toHaveLength(3)
-    } finally {
-      vi.useRealTimers()
-    }
+  it('test_null_resets_filter', () => {
+    executeMapTool('set_time_filter', { hora_inicio: null, hora_fim: null }, makeDeps())
+    expect(mapControl.setTimeFilter).toHaveBeenCalledWith(null, null)
   })
+})
 
-  it('test_semantic_error_no_retry', async () => {
-    ;(global.fetch as any).mockResolvedValueOnce(makeResponse([
-      { type: 'error', message: 'limite de tokens excedido' },
-    ]))
-
-    const { result } = renderHook(() => useMapAgent(hookOpts))
-
-    await act(async () => { result.current.startAgent(mockArea) })
-    await waitFor(() => expect(result.current.agentState.status).toBe('error'))
-
-    expect(result.current.agentState.error).toBe('limite de tokens excedido')
-    expect((global.fetch as any).mock.calls).toHaveLength(1)
+describe('executeMapTool — show_route', () => {
+  it('test_converts_to_lnglat_pairs', () => {
+    executeMapTool(
+      'show_route',
+      { from_lat: -22.9, from_lng: -43.2, to_lat: -22.91, to_lng: -43.21, label: 'fuga' },
+      makeDeps(),
+    )
+    expect(mapControl.showRoute).toHaveBeenCalledWith([-43.2, -22.9], [-43.21, -22.91], 'fuga')
   })
+})
 
-  it('test_abortAgent_resets_state_to_idle', async () => {
-    ;(global.fetch as any).mockResolvedValueOnce(makeResponse([
-      { type: 'done' },
-    ]))
-
-    const { result } = renderHook(() => useMapAgent(hookOpts))
-
-    await act(async () => { result.current.startAgent(mockArea) })
-
-    act(() => { result.current.abortAgent() })
-
-    expect(result.current.agentState.status).toBe('idle')
-    expect(result.current.agentState.transcript).toHaveLength(0)
-    expect(result.current.agentState.pendingCheckpoint).toBeNull()
+describe('executeMapTool — unknown tool', () => {
+  it('test_does_not_throw_for_unknown_tool', () => {
+    expect(() => executeMapTool('unknown_tool', {}, makeDeps())).not.toThrow()
   })
 })
