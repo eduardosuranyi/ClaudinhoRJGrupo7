@@ -21213,16 +21213,6 @@
           "pico_hora": 20
         },
         {
-          "locf_norm": "rua professor alvaro rodrigues",
-          "total": 31,
-          "lat": -22.952226056774194,
-          "lng": -43.183915832903224,
-          "roubo_transeunte": 19,
-          "roubo_celular": 11,
-          "roubo_coletivo": 1,
-          "pico_hora": 23
-        },
-        {
           "locf_norm": "rua paulino fernandes",
           "total": 31,
           "lat": -22.952751607096772,
@@ -21230,6 +21220,16 @@
           "roubo_transeunte": 18,
           "roubo_celular": 13,
           "roubo_coletivo": 0,
+          "pico_hora": 23
+        },
+        {
+          "locf_norm": "rua professor alvaro rodrigues",
+          "total": 31,
+          "lat": -22.952226056774194,
+          "lng": -43.183915832903224,
+          "roubo_transeunte": 19,
+          "roubo_celular": 11,
+          "roubo_coletivo": 1,
           "pico_hora": 23
         },
         {
@@ -32004,16 +32004,6 @@
           "pico_hora": 22
         },
         {
-          "locf_norm": "avenida ataulfo de paiva",
-          "total": 18,
-          "lat": -22.983723413333333,
-          "lng": -43.21666269722222,
-          "roubo_transeunte": 7,
-          "roubo_celular": 11,
-          "roubo_coletivo": 0,
-          "pico_hora": 22
-        },
-        {
           "locf_norm": "avenida epitacio pessoa",
           "total": 18,
           "lat": -22.984834872222223,
@@ -32022,6 +32012,16 @@
           "roubo_celular": 4,
           "roubo_coletivo": 0,
           "pico_hora": 20
+        },
+        {
+          "locf_norm": "avenida ataulfo de paiva",
+          "total": 18,
+          "lat": -22.983723413333333,
+          "lng": -43.21666269722222,
+          "roubo_transeunte": 7,
+          "roubo_celular": 11,
+          "roubo_coletivo": 0,
+          "pico_hora": 22
         },
         {
           "locf_norm": "vila avenida vieira souto",

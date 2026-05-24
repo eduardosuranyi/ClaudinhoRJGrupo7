@@ -65,7 +65,12 @@ export default function Home() {
         />
 
         {selected && (
-          <AreaPanel area={selected} onClose={() => setSelected(null)} />
+          <AreaPanel
+            area={selected}
+            allAreas={data.areas}
+            weights={weights}
+            onClose={() => setSelected(null)}
+          />
         )}
       </div>
     </div>
