@@ -1,27 +1,35 @@
 [project]
-name = "valente-scraper"
-version = "0.1.0"
-description = "Scrapper de Twitter/X para postagens sobre roubo e furto no Rio de Janeiro"
+name = "valente"
+version = "0.2.0"
+description = "Scrapper X/Twitter + pipeline ontológica de incidências criminais (RJ)"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    # Compartilhadas (scraper + ontology)
     "pydantic>=2.7.0",
     "pydantic-settings>=2.0.0",
     "python-dotenv>=1.0.0",
     "loguru>=0.7.0",
     "tenacity>=8.5.0",
     "typer>=0.12.0",
+
+    # Scraper
     "httpx>=0.28.1",
     "selectolax>=0.4.9",
     "playwright>=1.60.0",
+
+    # Ontology pipeline
+    "anthropic>=0.40.0",
+    "python-docx>=1.1.0",
 ]
 
 [project.scripts]
 valente-scrape = "valente_scraper.main:app"
+valente-ontology = "valente_ontology.cli:app"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["valente_scraper"]
+packages = ["valente_scraper", "valente_ontology"]

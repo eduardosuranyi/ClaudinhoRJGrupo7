@@ -5,6 +5,10 @@
 # Verifique cada uma antes de produzir — algumas podem estar inativas/renomeadas.
 
 # --- Agregadores cidadãos / alertas comunitários ---
+riodenojeiraofc
+
+
+
 ondetemtiroteio
 fogocruzadoapp
 vozdacomunidade
