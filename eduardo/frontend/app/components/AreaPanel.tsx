@@ -200,10 +200,11 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
         {tab === 'inteligencia' && (
           <>
             <DenunciasTab area={area} />
-            <div style={{ margin: '0 16px', padding: '12px 0', borderTop: '1px solid var(--border)' }}>
+            <div style={{ margin: '0 16px', padding: '12px 0', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span className="label-overline" style={{ fontSize: 10 }}>
                 Inteligência Territorial
               </span>
+              <RelintDownloadBtn area={area} allAreas={allAreas} />
             </div>
             <InteligenciaTab area={area} allAreas={allAreas} />
           </>
@@ -289,6 +290,90 @@ function BreakdownPill({ label, value, max }: { label: string; value: number; ma
         }} />
       </div>
     </div>
+  )
+}
+
+function RelintDownloadBtn({ area, allAreas }: { area: Area; allAreas: Area[] }) {
+  const [loading, setLoading] = useState(false)
+
+  async function download() {
+    setLoading(true)
+    const cacheKey = `relint_cache_${area.id}`
+    const CACHE_TTL_MS = 60 * 60 * 1000
+
+    const downloadFromBase64 = (b64: string) => {
+      const bin = atob(b64)
+      const bytes = new Uint8Array(bin.length)
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+      const blob = new Blob([bytes], {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `RELINT_${area.nome.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.docx`
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    }
+
+    try {
+      const cached = localStorage.getItem(cacheKey)
+      if (cached) {
+        const { b64, ts } = JSON.parse(cached)
+        if (Date.now() - ts < CACHE_TTL_MS && b64) {
+          downloadFromBase64(b64)
+          setLoading(false)
+          return
+        }
+      }
+    } catch { /* ignore */ }
+
+    try {
+      const res = await fetch('/api/relint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ area, allAreas }),
+      })
+      if (!res.ok) { alert('Erro ao gerar RELINT'); return }
+      const blob = await res.blob()
+      try {
+        const buf = await blob.arrayBuffer()
+        const bytes = new Uint8Array(buf)
+        let bin = ''
+        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i])
+        localStorage.setItem(cacheKey, JSON.stringify({ b64: btoa(bin), ts: Date.now() }))
+      } catch { /* cache write failed */ }
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `RELINT_${area.nome.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.docx`
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch {
+      alert('Erro de conexão.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <button onClick={download} disabled={loading} style={{
+      padding: '3px 10px',
+      background: loading ? 'var(--bg-3)' : 'var(--accent-soft)',
+      border: loading ? '1px solid var(--border)' : '1px solid var(--accent)',
+      color: loading ? 'var(--text-muted)' : 'var(--accent)',
+      fontSize: 10, fontWeight: 600, borderRadius: 2,
+      cursor: loading ? 'wait' : 'pointer',
+      display: 'flex', alignItems: 'center', gap: 4,
+      whiteSpace: 'nowrap',
+    }}>
+      {loading ? (
+        <>
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', animation: 'pulse-accent 1s ease-in-out infinite', display: 'inline-block' }} />
+          Gerando…
+        </>
+      ) : '↓ RELINT'}
+    </button>
   )
 }
 
