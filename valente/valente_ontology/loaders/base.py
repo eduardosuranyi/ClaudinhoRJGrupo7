@@ -58,6 +58,13 @@ class RawSource(BaseModel):
     hint_longitude: Optional[float] = None
     hint_logradouro: Optional[str] = None
     hint_bairro: Optional[str] = None
+    hint_area_fm: Optional[str] = Field(
+        default=None,
+        description="Nome da subárea FM resolvido por point-in-polygon a partir "
+                    "de hint_latitude/longitude (ver valente_ontology.geo). "
+                    "Loaders que conhecem a área diretamente (RELINTs, FMActions) "
+                    "preenchem sem geo lookup.",
+    )
 
 
 class Loader(Protocol):

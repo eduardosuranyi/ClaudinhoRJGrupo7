@@ -8,6 +8,7 @@ Comandos:
     schema             — imprime o JSON Schema da ontologia
     score              — calcula score ontológico por área/logradouro, gera JSON
     fleet              — distribui efetivo (600 agentes default) a partir do score
+    reindex-areas      — preenche spatial.area_fm via point-in-polygon
     init-fm-actions    — cria um exemplo de actions.jsonl
 """
 
@@ -143,6 +144,84 @@ def init_fm_actions():
     settings.ensure_dirs()
     write_example_actions(settings.fm_actions_path)
     typer.echo(f"Exemplo escrito em {settings.fm_actions_path}")
+
+
+@app.command("reindex-areas")
+def reindex_areas(
+    force: bool = typer.Option(
+        False, "--force",
+        help="Sobrescreve area_fm mesmo em eventos que já têm valor — útil "
+             "quando o GeoJSON foi atualizado. Default: só preenche os que "
+             "estão null.",
+    ),
+):
+    """Re-mapeia spatial.area_fm via point-in-polygon nos eventos existentes.
+
+    Lê crime_events.jsonl, faz lookup nos eventos com lat/lon válidos, e
+    regrava o arquivo de uma vez (operação batch — não usa upsert linha
+    a linha). Idempotente: rodar duas vezes não muda nada.
+    """
+    from valente_ontology.geo import load_fm_polygons
+
+    path = settings.crime_events_path
+    if not path.exists():
+        typer.echo(f"Nada para fazer — {path} não existe.")
+        raise typer.Exit(code=0)
+
+    fm_idx = load_fm_polygons()
+    if fm_idx is None:
+        typer.echo("GeoJSON de áreas FM não encontrado — abortando.")
+        raise typer.Exit(code=1)
+
+    n_total = 0
+    n_updated = 0
+    n_already = 0
+    n_no_coords = 0
+    tmp = path.with_suffix(path.suffix + ".tmp")
+
+    with path.open("r", encoding="utf-8") as fin, tmp.open("w", encoding="utf-8") as fout:
+        for line in fin:
+            line = line.strip()
+            if not line:
+                continue
+            n_total += 1
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                fout.write(line + "\n")
+                continue
+
+            spatial = obj.get("spatial") or {}
+            current = spatial.get("area_fm")
+            lat = spatial.get("latitude")
+            lon = spatial.get("longitude")
+
+            if current and not force:
+                n_already += 1
+                fout.write(line + "\n")
+                continue
+            if lat is None or lon is None:
+                n_no_coords += 1
+                fout.write(line + "\n")
+                continue
+
+            new_area = fm_idx.find(lat, lon)
+            if new_area is None or new_area == current:
+                fout.write(line + "\n")
+                continue
+
+            spatial["area_fm"] = new_area
+            obj["spatial"] = spatial
+            fout.write(json.dumps(obj, ensure_ascii=False) + "\n")
+            n_updated += 1
+
+    tmp.replace(path)
+    typer.echo(json.dumps({
+        "total_events": n_total,
+        "updated": n_updated,
+        "already_had_area": n_already,
+        "skipped_no_coords": n_no_coords,
+    }, indent=2, ensure_ascii=False))
 
 
 @app.command("classify-tweets")

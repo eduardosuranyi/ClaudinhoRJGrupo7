@@ -102,6 +102,7 @@ def _from_ocorrencia(source: RawSource) -> CrimeEvent:
         latitude=source.hint_latitude,
         longitude=source.hint_longitude,
         aisp=f.get("aisp"),
+        area_fm=source.hint_area_fm,
     )
 
     return _wrap(
@@ -133,6 +134,7 @@ def _from_disque_denuncia(source: RawSource) -> CrimeEvent:
         bairro=f.get("bairro_logradouro"),
         latitude=source.hint_latitude,
         longitude=source.hint_longitude,
+        area_fm=source.hint_area_fm,
     )
 
     agents = []

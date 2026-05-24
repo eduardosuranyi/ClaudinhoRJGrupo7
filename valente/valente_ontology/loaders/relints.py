@@ -70,6 +70,7 @@ class RelintLoader:
                     raw_text=chunk,
                     structured_fields={"area_fm": area, "chunk_index": idx},
                     hint_logradouro=None,
+                    hint_area_fm=area,
                 )
 
 

@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Iterator, Optional
 
 from valente_ontology.enums import SourceKind
+from valente_ontology.geo import load_fm_polygons
 from valente_ontology.loaders.base import RawSource
 
 
@@ -48,10 +49,14 @@ class OcorrenciasLoader:
         self.csv_path = Path(csv_path)
 
     def iter_sources(self) -> Iterator[RawSource]:
+        fm_idx = load_fm_polygons()
         with self.csv_path.open("r", encoding="utf-8", newline="") as fh:
             reader = csv.DictReader(fh)
             for row in reader:
                 src_id = row.get("id_criptografado") or _row_hash(row)
+                lat = _safe_float(row.get("latitude"))
+                lon = _safe_float(row.get("longitude"))
+                area_fm = fm_idx.find(lat, lon) if fm_idx else None
                 yield RawSource(
                     kind=self.kind,
                     source_id=src_id,
@@ -61,9 +66,10 @@ class OcorrenciasLoader:
                     structured_fields={k: (v or None) for k, v in row.items()},
                     hint_date_iso=_compose_date_iso(row.get("ano"), row.get("mes"), row.get("data")),
                     hint_hour_24=_safe_int(row.get("hora")),
-                    hint_latitude=_safe_float(row.get("latitude")),
-                    hint_longitude=_safe_float(row.get("longitude")),
+                    hint_latitude=lat,
+                    hint_longitude=lon,
                     hint_logradouro=row.get("locf") or None,
+                    hint_area_fm=area_fm,
                 )
 
 
@@ -89,11 +95,15 @@ class DisqueDenunciaLoader:
         self.csv_path = Path(csv_path)
 
     def iter_sources(self) -> Iterator[RawSource]:
+        fm_idx = load_fm_polygons()
         with self.csv_path.open("r", encoding="utf-8", newline="", errors="replace") as fh:
             reader = csv.DictReader(fh, delimiter=";")
             for row in reader:
                 src_id = row.get("id_denuncia") or row.get("numero_denuncia") or _row_hash(row)
                 relato = (row.get("relato_redacted") or "").strip() or None
+                lat = _safe_float(_normalize_comma_decimal(row.get("latitude")))
+                lon = _safe_float(_normalize_comma_decimal(row.get("longitude")))
+                area_fm = fm_idx.find(lat, lon) if fm_idx else None
                 yield RawSource(
                     kind=self.kind,
                     source_id=str(src_id),
@@ -102,10 +112,11 @@ class DisqueDenunciaLoader:
                     raw_text=relato,
                     structured_fields={k: (v or None) for k, v in row.items()},
                     hint_date_iso=_parse_br_date_to_iso(row.get("data_denuncia")),
-                    hint_latitude=_safe_float(_normalize_comma_decimal(row.get("latitude"))),
-                    hint_longitude=_safe_float(_normalize_comma_decimal(row.get("longitude"))),
+                    hint_latitude=lat,
+                    hint_longitude=lon,
                     hint_logradouro=row.get("logradouro") or None,
                     hint_bairro=row.get("bairro_logradouro") or None,
+                    hint_area_fm=area_fm,
                 )
 
 
