@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #07070a;
+  --bg-1: #0d0d11;
+  --bg-2: #14141a;
+  --bg-3: #1c1c25;
+  --bg-4: #25252f;
+  --border: #2a2a35;
+  --border-dim: #1e1e26;
+  --border-bright: #3a3a48;
+  --text: #f0f0f3;
+  --text-dim: #8a8a95;
+  --text-muted: #4a4a55;
+  --text-faint: #2e2e38;
+
+  --accent: #ff6b35;
+  --accent-dim: #99421f;
+  --accent-soft: rgba(255, 107, 53, 0.12);
+
+  --amber: #fbb040;
+  --amber-soft: rgba(251, 176, 64, 0.12);
+
+  --green: #36c476;
+  --green-soft: rgba(54, 196, 118, 0.12);
+
+  --red: #ef4444;
+  --red-soft: rgba(239, 68, 68, 0.12);
+
+  --blue: #4a90e2;
+  --blue-soft: rgba(74, 144, 226, 0.12);
+
+  --purple: #a855f7;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin: 0;
+  font-feature-settings: 'ss01' 1, 'cv11' 1;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum' 1;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-bright); }
+
+/* Map */
+.maplibregl-popup-content {
+  background: var(--bg-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  font-size: 11px !important;
+  border-radius: 3px !important;
+  padding: 8px 10px !important;
+}
+
+.maplibregl-popup-tip { display: none !important; }
+
+button {
+  font-family: inherit;
+}
+
+button:focus { outline: none; }
+
+/* Slider */
+.range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  outline: none;
+  border-radius: 1px;
+}
+
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+
+.range-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+
+/* Subtle pulse for accent dot */
+@keyframes pulse-accent {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.pulse-dot {
+  animation: pulse-accent 2s ease-in-out infinite;
+}
+
+/* Section labels */
+.label-overline {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+}
