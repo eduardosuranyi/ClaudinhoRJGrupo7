@@ -5,6 +5,7 @@ Lê credenciais e parâmetros de execução de variáveis de ambiente (`.env` na
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 from pydantic import Field
@@ -32,6 +33,20 @@ class Settings(BaseSettings):
     valente_rate_limit_sleep: float = 2.0
     valente_page_size: int = 40
 
+    # --- Backfill histórico ---
+    valente_since_date: date | None = Field(
+        default=None,
+        description="Para o scraper quando atingir tweets anteriores a esta data. "
+                    "ISO YYYY-MM-DD. None = sem limite temporal.",
+    )
+    valente_backfill: bool = Field(
+        default=False,
+        description="Modo backfill: ignora detecção de 'caught up' e força paginação "
+                    "até esgotar o cursor (ou bater em --since). Útil quando o JSONL "
+                    "já contém os tweets recentes e queremos histórico mais antigo.",
+    )
+    valente_log_every_n_pages: int = 5
+
     @property
     def raw_dir(self) -> Path:
         return self.valente_data_dir / "raw"
@@ -39,6 +54,11 @@ class Settings(BaseSettings):
     @property
     def state_dir(self) -> Path:
         return self.valente_data_dir / "state"
+
+    @property
+    def news_raw_dir(self) -> Path:
+        # Mesma pasta consumida por valente_ontology/loaders/news.py
+        return self.valente_data_dir / "news_raw"
 
     def ensure_dirs(self) -> None:
         self.raw_dir.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,414 @@
+{
+  "generated_at": "2026-05-24T19:01:48.838073",
+  "fleet_size": 600,
+  "window_start_iso": "2024-12-03",
+  "window_end_iso": "2025-01-02",
+  "allocations": [
+    {
+      "area_fm": "DESCONHECIDA",
+      "score": 85.0,
+      "priority": "CRITICA",
+      "agents_total": 74,
+      "share_of_fleet": 0.1233,
+      "shifts": [
+        {
+          "daypart": "tarde",
+          "agents": 19,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "noite",
+          "agents": 16,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "entardecer",
+          "agents": 14,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "manha",
+          "agents": 13,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "madrugada",
+          "agents": 7,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "amanhecer",
+          "agents": 5,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        }
+      ],
+      "top_reasons": [
+        "Tipo do crime: roubo transeunte (+9360) — 780 eventos",
+        "Desfecho: desconhecido (+7650) — 1530 eventos",
+        "Tipo do crime: outro (+3100) — 620 eventos"
+      ],
+      "suggested_actions": []
+    },
+    {
+      "area_fm": "Presidente Vargas - Campo de Santana - Central do Brasil - Cinelândia",
+      "score": 85.0,
+      "priority": "CRITICA",
+      "agents_total": 74,
+      "share_of_fleet": 0.1233,
+      "shifts": [
+        {
+          "daypart": "tarde",
+          "agents": 19,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "noite",
+          "agents": 16,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "entardecer",
+          "agents": 14,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "manha",
+          "agents": 13,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "madrugada",
+          "agents": 7,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "amanhecer",
+          "agents": 5,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        }
+      ],
+      "top_reasons": [
+        "Tipo do crime: roubo transeunte (+312) — 26 eventos",
+        "Desfecho: desconhecido (+270) — 54 eventos",
+        "Tipo do crime: roubo transporte coletivo (+180) — 10 eventos"
+      ],
+      "suggested_actions": []
+    },
+    {
+      "area_fm": "Rodoviária - Terminal Gentileza - Estação Leopoldina",
+      "score": 85.0,
+      "priority": "CRITICA",
+      "agents_total": 74,
+      "share_of_fleet": 0.1233,
+      "shifts": [
+        {
+          "daypart": "tarde",
+          "agents": 19,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "noite",
+          "agents": 16,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "entardecer",
+          "agents": 14,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "manha",
+          "agents": 13,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "madrugada",
+          "agents": 7,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "amanhecer",
+          "agents": 5,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        }
+      ],
+      "top_reasons": [
+        "Tipo do crime: roubo transporte coletivo (+216) — 12 eventos",
+        "Desfecho: desconhecido (+175) — 35 eventos",
+        "Tipo do crime: roubo transeunte (+144) — 12 eventos"
+      ],
+      "suggested_actions": []
+    },
+    {
+      "area_fm": "Praia de Botafogo - Rua Marquês de Abrantes",
+      "score": 82.22,
+      "priority": "CRITICA",
+      "agents_total": 72,
+      "share_of_fleet": 0.12,
+      "shifts": [
+        {
+          "daypart": "tarde",
+          "agents": 19,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "noite",
+          "agents": 15,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "entardecer",
+          "agents": 14,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "manha",
+          "agents": 12,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "madrugada",
+          "agents": 7,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "amanhecer",
+          "agents": 5,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        }
+      ],
+      "top_reasons": [
+        "Tipo do crime: roubo transeunte (+180) — 15 eventos",
+        "Desfecho: desconhecido (+140) — 28 eventos",
+        "Volume de gravidade: 28 eventos, soma S_event = 398 (+91) — 28 eventos com S_event médio 14.2"
+      ],
+      "suggested_actions": []
+    },
+    {
+      "area_fm": "Estações São Francisco Xavier - Afonso Pena",
+      "score": 78.82,
+      "priority": "ALTA",
+      "agents_total": 71,
+      "share_of_fleet": 0.1183,
+      "shifts": [
+        {
+          "daypart": "tarde",
+          "agents": 18,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "noite",
+          "agents": 15,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "entardecer",
+          "agents": 14,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "manha",
+          "agents": 12,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "madrugada",
+          "agents": 7,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "amanhecer",
+          "agents": 5,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        }
+      ],
+      "top_reasons": [
+        "Tipo do crime: roubo transeunte (+168) — 14 eventos",
+        "Desfecho: desconhecido (+110) — 22 eventos",
+        "Volume de gravidade: 22 eventos, soma S_event = 318 (+88) — 22 eventos com S_event médio 14.5"
+      ],
+      "suggested_actions": []
+    },
+    {
+      "area_fm": "Metrô Botafogo - Rua São Clemente - Rua Voluntários da Pátria",
+      "score": 69.58,
+      "priority": "ALTA",
+      "agents_total": 65,
+      "share_of_fleet": 0.1083,
+      "shifts": [
+        {
+          "daypart": "tarde",
+          "agents": 16,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "noite",
+          "agents": 14,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "entardecer",
+          "agents": 13,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "manha",
+          "agents": 11,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "madrugada",
+          "agents": 6,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "amanhecer",
+          "agents": 5,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        }
+      ],
+      "top_reasons": [
+        "Volume de gravidade: 12 eventos, soma S_event = 155 (+77) — 12 eventos com S_event médio 12.9",
+        "Tipo do crime: roubo transeunte (+60) — 5 eventos",
+        "Desfecho: desconhecido (+60) — 12 eventos"
+      ],
+      "suggested_actions": []
+    },
+    {
+      "area_fm": "Campo Grande: Estação de Trem - Calçadão",
+      "score": 62.33,
+      "priority": "ALTA",
+      "agents_total": 61,
+      "share_of_fleet": 0.1017,
+      "shifts": [
+        {
+          "daypart": "tarde",
+          "agents": 16,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "noite",
+          "agents": 13,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "entardecer",
+          "agents": 12,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "manha",
+          "agents": 10,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "madrugada",
+          "agents": 6,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "amanhecer",
+          "agents": 4,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        }
+      ],
+      "top_reasons": [
+        "Volume de gravidade: 6 eventos, soma S_event = 88 (+68) — 6 eventos com S_event médio 14.7",
+        "Tipo do crime: roubo transeunte (+48) — 4 eventos",
+        "Desfecho: desconhecido (+30) — 6 eventos"
+      ],
+      "suggested_actions": []
+    },
+    {
+      "area_fm": "Jardim de Alah",
+      "score": 61.27,
+      "priority": "ALTA",
+      "agents_total": 60,
+      "share_of_fleet": 0.1,
+      "shifts": [
+        {
+          "daypart": "tarde",
+          "agents": 15,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "noite",
+          "agents": 13,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "entardecer",
+          "agents": 12,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "manha",
+          "agents": 10,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "madrugada",
+          "agents": 6,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "amanhecer",
+          "agents": 4,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        }
+      ],
+      "top_reasons": [
+        "Volume de gravidade: 6 eventos, soma S_event = 81 (+67) — 6 eventos com S_event médio 13.5",
+        "Tipo do crime: roubo transeunte (+36) — 3 eventos",
+        "Desfecho: desconhecido (+30) — 6 eventos"
+      ],
+      "suggested_actions": []
+    },
+    {
+      "area_fm": "Rio Sul",
+      "score": 41.89,
+      "priority": "MEDIA",
+      "agents_total": 49,
+      "share_of_fleet": 0.0817,
+      "shifts": [
+        {
+          "daypart": "tarde",
+          "agents": 15,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "noite",
+          "agents": 10,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "entardecer",
+          "agents": 9,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "manha",
+          "agents": 8,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "madrugada",
+          "agents": 4,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        },
+        {
+          "daypart": "amanhecer",
+          "agents": 3,
+          "rationale": "Distribuição padrão (concentração temporal baixa)."
+        }
+      ],
+      "top_reasons": [
+        "Volume de gravidade: 2 eventos, soma S_event = 20 (+46) — 2 eventos com S_event médio 10.0",
+        "Tipo do crime: outro (+10) — 2 eventos",
+        "Desfecho: desconhecido (+10) — 2 eventos"
+      ],
+      "suggested_actions": []
+    }
+  ],
+  "unallocated": 0
+}
