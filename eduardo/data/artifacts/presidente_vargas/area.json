@@ -1,0 +1,254 @@
+{
+  "area_id": "presidente_vargas",
+  "display_name": "Presidente Vargas – Campo de Santana – Central do Brasil – Cinelândia",
+  "polygon_source": "shapefile",
+  "coverage": {
+    "has_polygon": true,
+    "has_relint": true,
+    "has_cameras": true
+  },
+  "identificacao": {
+    "subprefeitura": "Centro",
+    "base_fm": null,
+    "aisp": "5",
+    "bairro": "Centro",
+    "area_orcrim": "17 território(s) sob influência nas proximidades"
+  },
+  "indicadores": {
+    "periodo": "2023-2024",
+    "total_ocorrencias": 1533,
+    "por_tipo": {
+      "Roubo a transeunte": 933,
+      "Roubo de aparelho celular": 497,
+      "Roubo em coletivo": 103
+    },
+    "ranking": {
+      "posicao": 1,
+      "de": 10,
+      "share_pct": 31.8
+    },
+    "n_trechos_criticos": 4
+  },
+  "trechos": [
+    {
+      "cells": [
+        "8aa8a06a0a87fff",
+        "8aa8a06a0aa7fff",
+        "8aa8a06a0a17fff",
+        "8aa8a06a0a07fff",
+        "8aa8a06a0a2ffff",
+        "8aa8a06a0b5ffff",
+        "8aa8a06a0b4ffff",
+        "8aa8a06a56b7fff",
+        "8aa8a06a56a7fff",
+        "8aa8a06a578ffff",
+        "8aa8a06a0a0ffff",
+        "8aa8a06a0a1ffff",
+        "8aa8a06a0aaffff"
+      ],
+      "logradouro": "Avenida Presidente Vargas",
+      "n_cells": 13,
+      "crime_total": 375,
+      "max_bingo_count": 3,
+      "score": 8.0025,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz",
+        "SEOP",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Calçada estreita forçando pedestres à pista",
+        "Cena de uso de drogas",
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Estacionamento irregular forçando pedestres à pista",
+        "Mobiliário urbano desviando pedestres para a pista",
+        "Mobiliário/estrutura servindo de esconderijo",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Praças e Parques",
+        "Sem ocorrência",
+        "Vegetação encobrindo iluminação pública",
+        "Vãos ou cavidades usados como esconderijo",
+        "Área mal iluminada com circulação de pedestres"
+      ],
+      "rank": 1
+    },
+    {
+      "cells": [
+        "8aa8a06a570ffff",
+        "8aa8a06a572ffff",
+        "8aa8a06a5777fff",
+        "8aa8a06a5757fff",
+        "8aa8a06a5627fff",
+        "8aa8a06a5707fff"
+      ],
+      "logradouro": "Avenida Presidente Vargas",
+      "n_cells": 6,
+      "crime_total": 194,
+      "max_bingo_count": 2,
+      "score": 3.0604,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "SEOP",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Calçada estreita forçando pedestres à pista",
+        "Cena de uso de drogas",
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Estacionamento irregular forçando pedestres à pista",
+        "Mobiliário/estrutura servindo de esconderijo",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Sem ocorrência",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Veículos de grande porte obstruindo a visibilidade"
+      ],
+      "rank": 2
+    },
+    {
+      "cells": [
+        "8aa8a06a098ffff",
+        "8aa8a06a09affff",
+        "8aa8a06a091ffff",
+        "8aa8a06a0837fff",
+        "8aa8a06a0817fff",
+        "8aa8a06a08a7fff"
+      ],
+      "logradouro": "Praca Floriano",
+      "n_cells": 6,
+      "crime_total": 163,
+      "max_bingo_count": 3,
+      "score": 2.9676,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio"
+      ],
+      "factors": [
+        "Motocicletas trafegando no passeio",
+        "Ponto de retenção do tráfego",
+        "Praças e Parques",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio"
+      ],
+      "rank": 3
+    },
+    {
+      "cells": [
+        "8aa8a06a08cffff",
+        "8aa8a06a08effff",
+        "8aa8a06a0bb7fff",
+        "8aa8a06a0b97fff",
+        "8aa8a06a08c7fff"
+      ],
+      "logradouro": "Avenida Rio Branco",
+      "n_cells": 5,
+      "crime_total": 76,
+      "max_bingo_count": 2,
+      "score": 1.3455,
+      "agencies": [
+        "CET-Rio",
+        "SEOP",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Mobiliário urbano desviando pedestres para a pista",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego"
+      ],
+      "rank": 4
+    }
+  ],
+  "orcrim": {
+    "intersecting": [],
+    "nearby": [
+      {
+        "territorio": "PROVIDÊNCIA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "SANTO AMARO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DO LIVRAMENTO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DA CONCEIÇÃO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "PREDINHOS DO SÃO CARLOS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DA FALLET",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "FAVELA TAVARES BASTOS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "ESCADARIA SELARON",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "MORRO DO SÃO CARLOS",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DA COROA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "FAVELA DA LAURA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DO QUEROSENE",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DA MINEIRA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "FAVELA PAULA MATOS",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DO SÃO CARLOS (BAIXO)",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "R. ITAPIRU - DIVISA (CPX DO SÃO CARLOS X FALLET FOGUETEIRO)",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DO ZINCO",
+        "orcrim": "TCP"
+      }
+    ],
+    "factions": [
+      "CV",
+      "Milícia",
+      "TCP"
+    ],
+    "summary": "17 território(s) sob influência nas proximidades"
+  },
+  "n_bingo_cells": 31,
+  "n_triple_bingo": 8
+}

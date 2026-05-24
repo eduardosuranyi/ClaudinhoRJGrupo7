@@ -1,0 +1,288 @@
+{
+  "orgaos": [
+    {
+      "orgao": "Comlurb",
+      "total": 25,
+      "fatores": [
+        {
+          "fator": "Vegetação encobrindo iluminação pública",
+          "count": 16,
+          "exemplos": [
+            {
+              "logradouro": "Rua Martins Pena",
+              "obs": "Tua muito escuro mesmo de manhã"
+            },
+            {
+              "logradouro": "Rua Araújo Pena",
+              "obs": "31 árvores com necessidade de poda"
+            }
+          ]
+        },
+        {
+          "fator": "Vegetação obstruindo a visibilidade do passeio",
+          "count": 5,
+          "exemplos": [
+            {
+              "logradouro": "Rua Haddock Lobo",
+              "obs": "Vegetação baixa e possui um recuo muito grande no final do trecho"
+            },
+            {
+              "logradouro": "Rua São Francisco Xavier",
+              "obs": "20 árvores apresentando necessidade de poda"
+            }
+          ]
+        },
+        {
+          "fator": "Lixo/entulho forçando pedestres à pista",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Rua Professor Gabizo",
+              "obs": "Calçada estreita, com lixo, sem entulho"
+            },
+            {
+              "logradouro": "Rua Martins Pena",
+              "obs": "Calçada estreita, com lixo, sem entulho"
+            }
+          ]
+        },
+        {
+          "fator": "Lixo/entulho obstruindo a visibilidade",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Professor Gabizo",
+              "obs": "Calçada estreita, com lixo, sem conteiner de Alta Capacidade 1200l"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Seconserva",
+      "total": 13,
+      "fatores": [
+        {
+          "fator": "Calçada estreita forçando pedestres à pista",
+          "count": 6,
+          "exemplos": [
+            {
+              "logradouro": "Rua Araújo Pena",
+              "obs": "Árvore foi removida e a calçada está obstruída com troncos e calçada danificada."
+            },
+            {
+              "logradouro": "Rua Alfredo Pinto",
+              "obs": "Gola da árvore danificada, árvore com risco de queda e poste enferrujado e mal estado. Reparo de passeio pedra portuguesa."
+            }
+          ]
+        },
+        {
+          "fator": "Vãos ou cavidades usados como esconderijo",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Rua Mariz e Barros",
+              "obs": "Lado esquerdo tem muito recuo, sendo fácil o esconderijo"
+            },
+            {
+              "logradouro": "Rua Professor Gabizo",
+              "obs": "Recuo que estreita a calçada e ajuda o esconderijo"
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário urbano desviando pedestres para a pista",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Professor Gabizo",
+              "obs": "Banca de jornal abandonada e comercializando artigos usados."
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário/estrutura servindo de esconderijo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Afonso Pena",
+              "obs": "Banca deixa estreito o passeio"
+            }
+          ]
+        },
+        {
+          "fator": "Tapumes servindo de esconderijo",
+          "count": 1,
+          "exemplos": []
+        },
+        {
+          "fator": "Mobiliário abandonado servindo de esconderijo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Aguiar",
+              "obs": "Moradores solicitaram a remoção da cabine."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SEOP",
+      "total": 8,
+      "fatores": [
+        {
+          "fator": "Veículos de grande porte obstruindo a visibilidade",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Rua Alfredo Pinto",
+              "obs": "Incidência de operação de Carga e Descarga"
+            },
+            {
+              "logradouro": "Rua Campos Sales",
+              "obs": "Incidência de operação de carga e descarga"
+            }
+          ]
+        },
+        {
+          "fator": "Comércio irregular obstruindo a visibilidade do passeio",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Rua Martins Pena",
+              "obs": "Foi verificado pela equipe um comércio de ambulante irregular vendendo frutas."
+            }
+          ]
+        },
+        {
+          "fator": "Estacionamento irregular forçando pedestres à pista",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Rua Martins Pena",
+              "obs": "Foi verificado que no número 1 onde funciona uma oficina mecânica."
+            },
+            {
+              "logradouro": "Rua São Francisco Xavier",
+              "obs": "equipe verificou que existe um veículo abandonado este numeral."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "GM-Rio",
+      "total": 7,
+      "fatores": [
+        {
+          "fator": "Motocicletas trafegando no passeio",
+          "count": 7,
+          "exemplos": [
+            {
+              "logradouro": "Rua Professor Gabizo",
+              "obs": "Rua Prof. Gabizo 197, moto sobre a calçada, após transitar sobre a Via."
+            },
+            {
+              "logradouro": "Rua Campos Sales",
+              "obs": "Rua Campos Sales 25 moto estacionada na calçada após transitar sobre a Via."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SMAS",
+      "total": 6,
+      "fatores": [
+        {
+          "fator": "Pessoas em situação de rua",
+          "count": 6,
+          "exemplos": [
+            {
+              "logradouro": "Rua São Francisco Xavier",
+              "obs": "Equipe verificou que existe uma pessoa em situação de rua neste logradouro."
+            },
+            {
+              "logradouro": "Rua Doutor Satamini",
+              "obs": "Data: 19/01/2026 Horário: 18:30 Em frente ao supermercado Pão de Açúcar Diariamente é possível observar psr principalmente nos horários de pico de entrada e saída de metrô. Pedindo doações, dinheiro e remexendo os lixos."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "RioLuz",
+      "total": 5,
+      "fatores": [
+        {
+          "fator": "Área mal iluminada com circulação de pedestres",
+          "count": 4,
+          "exemplos": []
+        },
+        {
+          "fator": "Área mal iluminada com parada de veículos",
+          "count": 1,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "SMTR",
+      "total": 3,
+      "fatores": [
+        {
+          "fator": "Ponto de ônibus com histórico de vandalismo",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Rua Gonçalves Crespo",
+              "obs": "Ponto sem vandalismo, porém com pouco iluminação, o que pode favorecer praticas de violência."
+            },
+            {
+              "logradouro": "Rua Martins Pena",
+              "obs": "Não Há ponto de ônibus - Não circula Ônibus nessa via"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Não atribuído",
+      "total": 2,
+      "fatores": [
+        {
+          "fator": "Sem ocorrência",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Rua Mariz e Barros",
+              "obs": "304285"
+            },
+            {
+              "logradouro": "Rua Gonçalves Crespo",
+              "obs": "101731"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "CET-Rio",
+      "total": 1,
+      "fatores": [
+        {
+          "fator": "Ponto de retenção do tráfego",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Aguiar",
+              "obs": "Rua Aguiar entre Rua conde de Bonfim e Barão de Itapagibe. As segundas- feiras rua interditada para realização de feira."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "total_fatores": 70
+}

@@ -1,0 +1,214 @@
+{
+  "area_id": "lauro_muller",
+  "display_name": "Rua Lauro Müller – Avenida General Severiano – Avenida Venceslau Brás",
+  "polygon_source": "camera_hull",
+  "coverage": {
+    "has_polygon": false,
+    "has_relint": false,
+    "has_cameras": true
+  },
+  "identificacao": {
+    "aisp": "2",
+    "bairro": "Botafogo / Urca / Copacabana",
+    "dp": "10ª / 12ª",
+    "bpm": "2º / 19º",
+    "subprefeitura": "Zona Sul",
+    "base_fm": "Litorânea",
+    "area_orcrim": "Comunidades próximas sob domínio do TCP"
+  },
+  "indicadores": {
+    "periodo": "2023-2024",
+    "total_ocorrencias": 275,
+    "por_tipo": {
+      "Roubo a transeunte": 146,
+      "Roubo de aparelho celular": 115,
+      "Roubo em coletivo": 14
+    },
+    "ranking": {
+      "posicao": 6,
+      "de": 10,
+      "share_pct": 5.7
+    },
+    "n_trechos_criticos": 4
+  },
+  "trechos": [
+    {
+      "cells": [
+        "8aa8a078a9affff",
+        "8aa8a078a917fff",
+        "8aa8a078a937fff",
+        "8aa8a078e64ffff",
+        "8aa8a078a9a7fff",
+        "8aa8a078a987fff",
+        "8aa8a078a91ffff",
+        "8aa8a078a90ffff",
+        "8aa8a078a827fff",
+        "8aa8a078a837fff",
+        "8aa8a078a817fff"
+      ],
+      "logradouro": "Rua Lauro Muller",
+      "n_cells": 11,
+      "crime_total": 75,
+      "max_bingo_count": 3,
+      "score": 7.3263,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz",
+        "SEOP",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Calçada estreita forçando pedestres à pista",
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Estacionamento irregular forçando pedestres à pista",
+        "Mobiliário abandonado servindo de esconderijo",
+        "Mobiliário urbano desviando pedestres para a pista",
+        "Mobiliário/estrutura servindo de esconderijo",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Praças e Parques",
+        "Sem ocorrência",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Vãos ou cavidades usados como esconderijo",
+        "Área mal iluminada com circulação de pedestres"
+      ],
+      "rank": 1
+    },
+    {
+      "cells": [
+        "8aa8a078a85ffff",
+        "8aa8a078a847fff",
+        "8aa8a078a86ffff",
+        "8aa8a078a84ffff",
+        "8aa8a078a857fff",
+        "8aa8a078a8effff",
+        "8aa8a078a8cffff",
+        "8aa8a078a8c7fff"
+      ],
+      "logradouro": "Avenida Pasteur",
+      "n_cells": 8,
+      "crime_total": 53,
+      "max_bingo_count": 3,
+      "score": 4.9608,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz",
+        "SEOP",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Calçada estreita forçando pedestres à pista",
+        "Estacionamento irregular forçando pedestres à pista",
+        "Lixo/entulho forçando pedestres à pista",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Praças e Parques",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Área mal iluminada com circulação de pedestres",
+        "Área mal iluminada com parada de veículos"
+      ],
+      "rank": 2
+    },
+    {
+      "cells": [
+        "8aa8a078a8b7fff",
+        "8aa8a078a887fff",
+        "8aa8a078a89ffff",
+        "8aa8a078a897fff"
+      ],
+      "logradouro": "Avenida Pasteur",
+      "n_cells": 4,
+      "crime_total": 26,
+      "max_bingo_count": 3,
+      "score": 2.5654,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "RioLuz",
+        "SEOP",
+        "SMAS"
+      ],
+      "factors": [
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Vegetação encobrindo iluminação pública",
+        "Área mal iluminada com circulação de pedestres",
+        "Área mal iluminada com parada de veículos"
+      ],
+      "rank": 3
+    },
+    {
+      "cells": [
+        "8aa8a078a95ffff",
+        "8aa8a078a94ffff"
+      ],
+      "logradouro": "Rua Da Passagem",
+      "n_cells": 2,
+      "crime_total": 14,
+      "max_bingo_count": 2,
+      "score": 0.9319,
+      "agencies": [
+        "Comlurb",
+        "RioLuz",
+        "SEOP"
+      ],
+      "factors": [
+        "Estacionamento irregular forçando pedestres à pista",
+        "Vegetação encobrindo iluminação pública",
+        "Área mal iluminada com circulação de pedestres"
+      ],
+      "rank": 4
+    }
+  ],
+  "orcrim": {
+    "intersecting": [],
+    "nearby": [
+      {
+        "territorio": "MORRO DO AZUL",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DONA MARTA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "FAVELA FUNDÃO DA BALANÇA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "LADEIRA DOS TABAJARAS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DOS CABRITOS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "CHAPÉU MANGUEIRA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "BABILÔNIA",
+        "orcrim": "TCP"
+      }
+    ],
+    "factions": [
+      "CV",
+      "TCP"
+    ],
+    "summary": "7 território(s) sob influência nas proximidades"
+  },
+  "n_bingo_cells": 25,
+  "n_triple_bingo": 6
+}

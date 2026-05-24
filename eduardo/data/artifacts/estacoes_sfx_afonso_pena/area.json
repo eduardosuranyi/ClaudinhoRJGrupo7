@@ -1,0 +1,226 @@
+{
+  "area_id": "estacoes_sfx_afonso_pena",
+  "display_name": "Estações São Francisco Xavier – Afonso Pena",
+  "polygon_source": "shapefile",
+  "coverage": {
+    "has_polygon": true,
+    "has_relint": true,
+    "has_cameras": true
+  },
+  "identificacao": {
+    "aisp": "6",
+    "bairro": "Tijuca",
+    "area_orcrim": "22 território(s) sob influência nas proximidades"
+  },
+  "indicadores": {
+    "periodo": "2023-2024",
+    "total_ocorrencias": 741,
+    "por_tipo": {
+      "Roubo de aparelho celular": 364,
+      "Roubo a transeunte": 358,
+      "Roubo em coletivo": 19
+    },
+    "ranking": {
+      "posicao": 2,
+      "de": 10,
+      "share_pct": 15.4
+    },
+    "n_trechos_criticos": 2
+  },
+  "trechos": [
+    {
+      "cells": [
+        "8aa8a061675ffff",
+        "8aa8a0616747fff",
+        "8aa8a0616767fff",
+        "8aa8a06160cffff",
+        "8aa8a0616397fff",
+        "8aa8a061639ffff",
+        "8aa8a06162b7fff",
+        "8aa8a061674ffff",
+        "8aa8a061676ffff",
+        "8aa8a06160dffff",
+        "8aa8a06160c7fff",
+        "8aa8a06160e7fff",
+        "8aa8a061600ffff",
+        "8aa8a061602ffff",
+        "8aa8a061615ffff",
+        "8aa8a0616147fff",
+        "8aa8a061614ffff",
+        "8aa8a0616a97fff",
+        "8aa8a0616a87fff",
+        "8aa8a0616a8ffff",
+        "8aa8a0616327fff",
+        "8aa8a0616337fff",
+        "8aa8a0616a9ffff",
+        "8aa8a061606ffff",
+        "8aa8a0616047fff",
+        "8aa8a0616067fff",
+        "8aa8a0616077fff",
+        "8aa8a0616057fff",
+        "8aa8a06160f7fff",
+        "8aa8a06160d7fff",
+        "8aa8a0616777fff",
+        "8aa8a0616757fff"
+      ],
+      "logradouro": "Rua Martins Pena",
+      "n_cells": 32,
+      "crime_total": 371,
+      "max_bingo_count": 3,
+      "score": 22.2541,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz",
+        "SEOP",
+        "SMAS",
+        "SMTR",
+        "Seconserva"
+      ],
+      "factors": [
+        "Calçada estreita forçando pedestres à pista",
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Estacionamento irregular forçando pedestres à pista",
+        "Lixo/entulho forçando pedestres à pista",
+        "Lixo/entulho obstruindo a visibilidade",
+        "Mobiliário abandonado servindo de esconderijo",
+        "Mobiliário urbano desviando pedestres para a pista",
+        "Mobiliário/estrutura servindo de esconderijo",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Ponto de ônibus com histórico de vandalismo",
+        "Sem ocorrência",
+        "Tapumes servindo de esconderijo",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Veículos de grande porte obstruindo a visibilidade",
+        "Vãos ou cavidades usados como esconderijo",
+        "Área mal iluminada com circulação de pedestres",
+        "Área mal iluminada com parada de veículos"
+      ],
+      "rank": 1
+    },
+    {
+      "cells": [
+        "8aa8a061631ffff",
+        "8aa8a0616237fff"
+      ],
+      "logradouro": "Rua Mariz E Barros",
+      "n_cells": 2,
+      "crime_total": 38,
+      "max_bingo_count": 2,
+      "score": 0.8144,
+      "agencies": [
+        "Comlurb",
+        "SEOP",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Estacionamento irregular forçando pedestres à pista",
+        "Pessoas em situação de rua",
+        "Sem ocorrência",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Veículos de grande porte obstruindo a visibilidade",
+        "Vãos ou cavidades usados como esconderijo"
+      ],
+      "rank": 2
+    }
+  ],
+  "orcrim": {
+    "intersecting": [],
+    "nearby": [
+      {
+        "territorio": "VILAR DA SAUDADE",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "PROVIDÊNCIA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DO TURANO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "COMPLEXO PAULA RAMOS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DO SALGUEIRO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "PREDINHOS DO SÃO CARLOS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DA FALLET",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "COND MANGUEIRA I E II",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "VILA ELZA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DO FOGUETEIRO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "VILA ANCHIETA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DA CANDELÁRIA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "FAVELA DA COREIA DA TIJUCA",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "MORRO DO SÃO CARLOS",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DA COROA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "FAVELA DA LAURA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DO QUEROSENE",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DA MINEIRA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "VILA MIMOSA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DO SÃO CARLOS (BAIXO)",
+        "orcrim": "TCP"
+      }
+    ],
+    "factions": [
+      "CV",
+      "Milícia",
+      "TCP"
+    ],
+    "summary": "22 território(s) sob influência nas proximidades"
+  },
+  "n_bingo_cells": 34,
+  "n_triple_bingo": 13
+}

@@ -90,7 +90,7 @@ A arquitetura é **offline-first**: o pipeline Python processa dados brutos e ge
 
 ### Etapa 1 — Carregamento (Loading)
 
-O `data_pipeline.py` lê **12 fontes** a partir de `--data-dir`, detectando automaticamente o layout (Parquet ou CSV legacy):
+O `data_pipeline.py` lê **12 fontes** a partir de `--data-dir` (padrão: `../data`), detectando automaticamente o layout (Parquet ou CSV legacy):
 
 | # | Fonte | Formato | Tipo (briefing) | Função |
 |---|---|---|---|---|

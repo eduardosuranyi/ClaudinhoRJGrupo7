@@ -94,6 +94,13 @@ eduardo/
 │   ├── API_REFERENCE.md               # Documentação das rotas de API
 │   ├── CONTRIBUTING.md                # Guia de contribuição e extensão
 │   └── DATA_DICTIONARY.md            # Schema completo do areas_data.json
+├── data/                              # Datasets integrados (12 fontes)
+│   ├── clean/                         # 8 datasets oficiais limpos (Parquet/GeoJSON/JSON)
+│   ├── external/                      # 7 fontes públicas de enriquecimento
+│   ├── processed/                     # KPIs e spatial joins intermediários
+│   ├── artifacts/                     # Pacotes CompStat por área (10 × 7 arquivos)
+│   ├── config/                        # area_registry.json (backbone de junção)
+│   └── README.md                      # Documentação completa dos dados
 ├── backend/
 │   ├── data_pipeline.py               # 12 fontes → spatial joins → scoring → JSON
 │   ├── generate_report.py             # Gerador de relatório .docx (formato CompStat)
@@ -133,11 +140,11 @@ eduardo/
 
 ### Dados
 
-O pipeline aceita **duas estruturas de dados** via `--data-dir`:
+Os dados já estão incluídos em `data/` dentro deste projeto. O pipeline aceita **duas estruturas** via `--data-dir`:
 
 | Layout | Caminho | Formato | Quando usar |
 |---|---|---|---|
-| **Repositório Grupo 7** (padrão) | `../../data` | Parquet em `data/clean/` | Dados já versionados neste repo |
+| **Dados integrados** (padrão) | `../data` | Parquet em `data/clean/` | Dados já incluídos neste projeto |
 | **Pacote legacy** | `../../compstat` | CSV/XLSX/SHP/DOCX originais | Clone do `claude_impact_lab_compstat_rio` |
 
 ### Backend
@@ -147,8 +154,8 @@ cd eduardo/backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# Usando dados do repositório (padrão)
-python data_pipeline.py --data-dir ../../data --output areas_data.json
+# Usando dados incluídos no projeto (padrão)
+python data_pipeline.py --data-dir ../data --output areas_data.json
 
 # Ou usando pacote CSV original do hackathon
 # python data_pipeline.py --data-dir ../../compstat --output areas_data.json
@@ -280,6 +287,7 @@ npm run test:run
 
 | Documento | Conteúdo |
 |---|---|
+| [Dados](data/README.md) | O que fizemos com os dados: limpeza, enriquecimento, spatial joins, pacotes CompStat |
 | [Arquitetura](docs/ARCHITECTURE.md) | Fluxo de dados, componentes, decisões técnicas, mapeamento ao briefing |
 | [Dicionário de Dados](docs/DATA_DICTIONARY.md) | Schema completo do `areas_data.json`, fontes de entrada, modus operandi |
 | [Referência da API](docs/API_REFERENCE.md) | Rotas `/api/synthesize` e `/api/report` com exemplos cURL |

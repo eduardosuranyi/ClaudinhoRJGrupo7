@@ -1,0 +1,256 @@
+{
+  "orgaos": [
+    {
+      "orgao": "SMAS",
+      "total": 27,
+      "fatores": [
+        {
+          "fator": "Pessoas em situação de rua",
+          "count": 22,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "Equipe verificou que existe pessoas em situação de rua ocupando este logradouro."
+            },
+            {
+              "logradouro": "Rua Santana",
+              "obs": "Equipe foi até o local e não foi verificado alteração nesta data."
+            }
+          ]
+        },
+        {
+          "fator": "Cena de uso de drogas",
+          "count": 5,
+          "exemplos": [
+            {
+              "logradouro": "Rua Santana",
+              "obs": "Equipe foi até o local e não foi verificado alteração nesta data."
+            },
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "Equipe foi até o local e não foi verificado alteração nesta data."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Comlurb",
+      "total": 16,
+      "fatores": [
+        {
+          "fator": "Vegetação encobrindo iluminação pública",
+          "count": 13,
+          "exemplos": [
+            {
+              "logradouro": "Praça Floriano",
+              "obs": "Iluminação pública coberta pela vegetação urbana."
+            }
+          ]
+        },
+        {
+          "fator": "Vegetação obstruindo a visibilidade do passeio",
+          "count": 3,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "Seconserva",
+      "total": 12,
+      "fatores": [
+        {
+          "fator": "Calçada estreita forçando pedestres à pista",
+          "count": 5,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "Alto índice de assalto na região"
+            },
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "Alto índice de assalto"
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário/estrutura servindo de esconderijo",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "Banca de jornal que serve de anteparo."
+            },
+            {
+              "logradouro": "Rua Uruguaiana",
+              "obs": "Estrutura do Bar do Leite deixou o local escuro."
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário urbano desviando pedestres para a pista",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Rua Uruguaiana",
+              "obs": "Bar do Leite cercou a calçada obrigando pedestres a andar na via."
+            },
+            {
+              "logradouro": "Avenida Chile",
+              "obs": "Cabine da polícia em desuso servindo como anteparo de bandidos e meliantes."
+            }
+          ]
+        },
+        {
+          "fator": "Vãos ou cavidades usados como esconderijo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua da Conceição",
+              "obs": "Prédio do DETRAN serve de anteparo para marginais."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "CET-Rio",
+      "total": 11,
+      "fatores": [
+        {
+          "fator": "Ponto de retenção do tráfego",
+          "count": 11,
+          "exemplos": [
+            {
+              "logradouro": "Praça da República",
+              "obs": "Pequena retenção de veículos devido ao fechamento do semáforo do cruzamento das Ruas Praça da República com Avenida Presidente Vargas. Tempo de duração do semáforo é de 1,40min."
+            },
+            {
+              "logradouro": "Avenida Almirante Barroso",
+              "obs": "Trânsito um pouco lento devido a grande quantidade de semáforos próximo um do outro."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SEOP",
+      "total": 10,
+      "fatores": [
+        {
+          "fator": "Comércio irregular obstruindo a visibilidade do passeio",
+          "count": 7,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "Existe comércio irregular obstruindo a visibilidade do passeio."
+            },
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "Foi verificado que existe comércio irregular obstruindo a visibilidade do passeio."
+            }
+          ]
+        },
+        {
+          "fator": "Estacionamento irregular forçando pedestres à pista",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "Equipe foi até o local e não foi verificado alteração nesta data."
+            },
+            {
+              "logradouro": "Rua Santana",
+              "obs": "Equipe foi até o local e não foi verificado alteração nesta data."
+            }
+          ]
+        },
+        {
+          "fator": "Veículos de grande porte obstruindo a visibilidade",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Santana",
+              "obs": "Equipe foi até o local e não foi verificado alteração nesta data."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Não atribuído",
+      "total": 9,
+      "fatores": [
+        {
+          "fator": "Sem ocorrência",
+          "count": 5,
+          "exemplos": [
+            {
+              "logradouro": "Praça da República",
+              "obs": "49990"
+            },
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "70161"
+            }
+          ]
+        },
+        {
+          "fator": "Praças e Parques",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Praça Floriano",
+              "obs": "Necessitando de poda de árvore, pois estão cobrindo lâmpadas"
+            },
+            {
+              "logradouro": "Praça Floriano",
+              "obs": "Pedras portuguesas soltas."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "GM-Rio",
+      "total": 3,
+      "fatores": [
+        {
+          "fator": "Motocicletas trafegando no passeio",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Rio Branco",
+              "obs": "Não foi observado motos trafegando na calçada, local bem policiado pela PM, e Guarda municipal."
+            },
+            {
+              "logradouro": "Rua Uruguaiana",
+              "obs": "Moto estacionado na calçada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "RioLuz",
+      "total": 2,
+      "fatores": [
+        {
+          "fator": "Área mal iluminada com circulação de pedestres",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Rua da Conceição",
+              "obs": "A noite iluminação muito fraca"
+            },
+            {
+              "logradouro": "Rua Frei Caneca",
+              "obs": "Reforçar iluminação para pedestres."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "total_fatores": 90
+}

@@ -1,60 +1,93 @@
-# Guia de Contribuição — CompStat Municipal Eduardo
+# Guia de Contribuição — CompStat Municipal RJ
 
-Obrigado por contribuir com a plataforma CompStat Municipal do Rio de Janeiro. Este guia descreve como configurar o ambiente, executar o pipeline, rodar os testes e estender o projeto com novas camadas, abas e métricas.
+Obrigado por contribuir com a plataforma CompStat Municipal do Rio de Janeiro. Este guia cobre setup do ambiente, execução do pipeline, testes, convenções de código e como estender a plataforma com novas camadas, tabs e métricas.
 
 ---
 
-## 1. Ambiente de Desenvolvimento
+## 1. Contexto do Projeto
+
+Esta plataforma foi desenvolvida no **Claude Impact Lab Rio 2026** (Grupo 7) para o CompStat Municipal da Prefeitura do Rio de Janeiro. O objetivo é automatizar a produção dos Relatórios Analíticos de Área que subsidiam as reuniões semanais do CompStat, integrando dados quantitativos (ocorrências), qualitativos (Disque Denúncia, RELINTs) e geoespaciais (polígonos FM, fatores urbanos).
+
+Antes de contribuir, recomendamos ler:
+- [Arquitetura](ARCHITECTURE.md) — fluxo de dados, componentes e decisões técnicas
+- [Briefing técnico](../../claude_impact_lab_compstat_rio/Briefing_Hackathon_Desenvolvedores_CompStat-2.pdf) — contexto completo do CompStat e requisitos
+
+---
+
+## 2. Ambiente de Desenvolvimento
 
 ### Pré-requisitos
 
-| Ferramenta | Versão mínima | Observação |
-|---|---|---|
-| **Python** | 3.10+ | Recomendado usar `venv` isolado |
-| **Node.js** | 20+ | Para o frontend Next.js |
-| **Git** | — | Para clonar o repositório de dados |
+| Ferramenta | Versão mínima | Verificar com | Observação |
+|---|---|---|---|
+| **Python** | 3.10+ | `python3 --version` | Necessário para pipeline e geração de `.docx` |
+| **Node.js** | 20+ | `node --version` | Frontend Next.js 16 |
+| **npm** | 10+ | `npm --version` | Gerenciador de pacotes |
+| **Git** | — | `git --version` | Controle de versão |
 
-### Repositório de dados
+### Estrutura de Dados
 
-Clone o repositório de dados **ao lado** do projeto (no mesmo nível da pasta `eduardo/`):
+Os dados já estão incluídos em `eduardo/data/`. O pipeline também aceita o pacote CSV original.
+
+#### Layout 1: Dados integrados (padrão)
+
+Já incluídos neste projeto em `data/`:
+
+```
+eduardo/
+├── data/
+│   ├── clean/              # 8 datasets limpos (Parquet, GeoJSON, JSON)
+│   ├── external/           # fontes de enriquecimento (bairros, censo, 1746)
+│   ├── processed/          # spatial joins intermediários
+│   ├── artifacts/          # pacotes CompStat por área
+│   └── config/             # area_registry.json
+├── backend/
+└── frontend/
+```
+
+#### Layout 2: Pacote CSV Original do Hackathon
+
+Alternativa com os dados brutos originais:
 
 ```bash
 git clone https://github.com/CompStat-Rio/claude_impact_lab_compstat_rio.git compstat
 ```
 
-A estrutura esperada é:
-
 ```
 ClaudinhoRJGrupo7/
-├── compstat/          # dados brutos (CSV, SHP, DOCX, XLSX)
+├── compstat/               # clone do repositório de dados
+│   ├── dados/              # CSV, XLSX
+│   ├── sh_area_forca/      # SHP
+│   └── relints/            # DOCX
 └── eduardo/
-    ├── backend/
-    └── frontend/
 ```
 
-### Variáveis de ambiente
+### Variáveis de Ambiente
 
-Crie o arquivo `frontend/.env.local` com a chave da Anthropic (necessária para síntese de IA e relatórios):
+Crie `frontend/.env.local` com a chave da Anthropic (necessária para síntese de IA):
 
 ```env
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-> **Importante:** Nunca commite `.env.local` ou chaves de API no repositório.
+**Nunca commite `.env.local` ou chaves de API no repositório.** O arquivo já está no `.gitignore`.
 
 ---
 
-## 2. Setup
+## 3. Setup
 
 ### Backend
 
 ```bash
 cd eduardo/backend
-python -m venv .venv && source .venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate    # macOS/Linux
+# .venv\Scripts\activate     # Windows
+
 pip install -r requirements.txt
 ```
 
-No Windows, ative o venv com `.venv\Scripts\activate`.
+Dependências instaladas: `pandas`, `geopandas`, `pyarrow`, `shapely`, `pyproj`, `python-docx`, `lxml`, `pytest`, `pytest-cov`.
 
 ### Frontend
 
@@ -63,112 +96,144 @@ cd eduardo/frontend
 npm install
 ```
 
+Dependências principais: `next`, `react`, `maplibre-gl`, `recharts`, `@anthropic-ai/sdk`, `tailwindcss`, `typescript`, `vitest`.
+
 ---
 
-## 3. Executando o Pipeline
+## 4. Executando o Pipeline
 
-O pipeline processa as 9 fontes de dados e gera o artefato JSON consumido pelo frontend:
+O pipeline processa as 12 fontes de dados e gera `areas_data.json`, o artefato principal consumido pelo frontend.
 
-O pipeline aceita dois layouts sob `--data-dir`:
-
-- **`../../data`** (padrão) — pastas **`data/clean/`** deste repositório (Parquet + `relints.json` + GeoJSON FM).
-- **`../../compstat`** — pacote legacy com `dados/*.csv`, `sh_area_forca/*.shp`, `relints/*.docx`.
+### Com dados integrados (Layout 1 — padrão)
 
 ```bash
 cd eduardo/backend
-python data_pipeline.py --data-dir ../../data --output areas_data.json
-# ou
-# python data_pipeline.py --data-dir ../../compstat --output areas_data.json
+python data_pipeline.py --data-dir ../data --output areas_data.json
+```
+
+### Com dados CSV originais (Layout 2)
+
+```bash
+cd eduardo/backend
+python data_pipeline.py --data-dir ../../compstat --output areas_data.json
+```
+
+### Após gerar o JSON
+
+Copie o artefato para o frontend e (re)inicie o servidor de desenvolvimento:
+
+```bash
 cp areas_data.json ../frontend/public/areas_data.json
+cd ../frontend
+npm run dev
+# Abrir http://localhost:3000
 ```
 
-Após copiar o JSON, reinicie ou recarregue o frontend (`npm run dev`) para ver os dados atualizados.
+O pipeline detecta automaticamente o layout dos dados e carrega os formatos correspondentes. Fontes de enriquecimento (bairros, censo, 1746) são opcionais — o pipeline funciona sem elas.
 
 ---
 
-## 4. Rodando os Testes
+## 5. Rodando os Testes
 
-### Backend
+### Backend (32 testes)
 
 ```bash
 cd eduardo/backend
-python -m pytest tests/ -v --cov=data_pipeline
+python -m pytest tests/ -v                    # execução com output detalhado
+python -m pytest tests/ -v --cov=data_pipeline  # com cobertura de código
 ```
 
-### Frontend
+| Módulo | Testes | O que valida |
+|---|---|---|
+| `test_metrics.py` | 11 | Distribuições horárias/diárias, pico, noturno, top trechos, evolução mensal |
+| `test_modus.py` | 8 | Extração NLP de modus operandi de relatos |
+| `test_scoring.py` | 4 | Normalização, bônus RELINT, soma do breakdown |
+| `test_bingo.py` | 5 | Coincidência 2/3 e 3/3, contadores |
+| `test_camera_gaps.py` | 4 | Pontos cegos, recomendações instalar/remanejar |
+
+### Frontend (19 testes)
 
 ```bash
 cd eduardo/frontend
-npm run test:run
+npm run test:run     # execução única
+npm test             # modo watch (re-executa ao salvar)
 ```
 
-Execute os testes antes de abrir um pull request. Novas funcionalidades devem incluir testes correspondentes.
+| Módulo | Testes | O que valida |
+|---|---|---|
+| `scoring.test.ts` | 4 | `computeScore` com pesos default, zero, customizados, bônus RELINT |
+| `helpers.test.ts` | 15 | `fmt`, `scoreColor`, `faccaoColor`, `shortName`, `cap`, labels de modus/órgãos |
+
+### Antes de abrir PR
+
+Execute ambas as suítes. Novas funcionalidades devem incluir testes correspondentes:
+
+```bash
+cd eduardo/backend && python -m pytest tests/ -v
+cd ../frontend && npm run test:run
+```
 
 ---
 
-## 5. Convenções de Código
+## 6. Convenções de Código
 
 ### Python
 
-- Seguir **PEP 8** (indentação de 4 espaços, nomes `snake_case`)
-- Usar **type hints** em assinaturas de funções
-- Incluir **docstrings** nos módulos e funções públicas
+- **PEP 8**: indentação de 4 espaços, nomes `snake_case`
+- **Type hints** em assinaturas de funções públicas
+- **Docstrings** em módulos e funções públicas
 - Funções de métrica ficam em `data_pipeline.py`; testes em `backend/tests/`
 
 ### TypeScript
 
-- **Strict mode** habilitado (`tsconfig.json`)
+- **Strict mode** habilitado em `tsconfig.json`
 - Interfaces e tipos centralizados em `frontend/app/types.ts`
 - Componentes React em `frontend/app/components/`
-- Preferir tipagem explícita sobre `any`
+- Preferir tipagem explícita — evitar `any`
 
 ### CSS / Estilo
 
-- Usar variáveis CSS do tema escuro definidas em `globals.css`:
-  - `var(--bg)`, `var(--bg-1)`, `var(--bg-3)` — fundos
-  - `var(--text)`, `var(--text-muted)`, `var(--text-dim)` — texto
-  - `var(--border)`, `var(--accent)`, `var(--amber)` — bordas e destaques
-- Evitar cores hardcoded quando existir variável equivalente
+O projeto usa tema escuro com variáveis CSS definidas em `globals.css`:
+
+| Variável | Uso |
+|---|---|
+| `var(--bg)`, `var(--bg-1)`, `var(--bg-3)` | Fundos (escuro → mais claro) |
+| `var(--text)`, `var(--text-muted)`, `var(--text-dim)` | Texto (primário → terciário) |
+| `var(--border)`, `var(--accent)`, `var(--amber)` | Bordas e destaques |
+
+Evitar cores hardcoded quando existir variável equivalente.
 
 ### Commits
 
 Mensagens em **português**, com prefixos convencionais:
 
-| Prefixo | Uso |
-|---|---|
-| `feat:` | Nova funcionalidade |
-| `fix:` | Correção de bug |
-| `test:` | Adição ou alteração de testes |
-| `docs:` | Documentação |
-| `refactor:` | Refatoração sem mudança de comportamento |
-
-Exemplo: `feat: adiciona camada de iluminação pública no mapa`
+| Prefixo | Uso | Exemplo |
+|---|---|---|
+| `feat:` | Nova funcionalidade | `feat: adiciona camada de iluminação pública no mapa` |
+| `fix:` | Correção de bug | `fix: corrige spatial join de denúncias sem coordenada` |
+| `test:` | Adição/alteração de testes | `test: adiciona testes para camera gap analysis` |
+| `docs:` | Documentação | `docs: atualiza dicionário de dados com campos do Censo` |
+| `refactor:` | Refatoração sem mudança de comportamento | `refactor: extrai lógica de bingo para função separada` |
 
 ---
 
-## 6. Como Adicionar
+## 7. Como Estender a Plataforma
 
-### Uma nova camada no mapa
+### 7.1 Adicionar uma Nova Camada no Mapa
 
-As camadas do Maplibre são definidas em `frontend/app/components/MapView.tsx`.
+As camadas do MapLibre são definidas em `frontend/app/components/MapView.tsx`.
 
 **Passo 1 — Preparar os dados no pipeline**
 
-Inclua os pontos ou polígonos da nova camada no JSON de saída (por área), em `data_pipeline.py`. O padrão existente usa `map_layers` (ex.: `crime_points`, `fatores_points`).
+Inclua os pontos ou polígonos no JSON de saída (campo `map_layers` ou campo dedicado na área), em `data_pipeline.py`.
 
 **Passo 2 — Tipar no frontend**
 
-Adicione a interface correspondente em `frontend/app/types.ts` (ex.: estender `MapLayers` ou criar um campo dedicado na interface `Area`).
+Adicione a interface em `frontend/app/types.ts` (estender `MapLayers` ou a interface `Area`).
 
 **Passo 3 — Registrar source e layer**
 
-Dentro de `buildDataLayers()`, siga o padrão das camadas existentes:
-
-1. Montar um array de `Feature` GeoJSON a partir de `data.areas`
-2. Chamar `map.addSource('nome-da-camada', { type: 'geojson', data: ... })`
-3. Chamar `map.addLayer({ id: '...', source: 'nome-da-camada', layout: { visibility: 'none' }, ... })`
-
-Exemplo simplificado (pontos):
+Dentro de `buildDataLayers()` em `MapView.tsx`:
 
 ```typescript
 const features = data.areas.flatMap(a =>
@@ -178,7 +243,10 @@ const features = data.areas.flatMap(a =>
     geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
   }))
 )
-map.addSource('minha-camada', { type: 'geojson', data: { type: 'FeatureCollection', features } })
+map.addSource('minha-camada', {
+  type: 'geojson',
+  data: { type: 'FeatureCollection', features }
+})
 map.addLayer({
   id: 'minha-camada-dot',
   type: 'circle',
@@ -190,7 +258,7 @@ map.addLayer({
 
 **Passo 4 — Toggle na UI**
 
-1. Adicione a chave em `LayerVisibility` (interface no topo do arquivo)
+1. Adicione a chave em `LayerVisibility` (interface no topo do MapView)
 2. Inicialize em `useState` com `false`
 3. Registre os IDs da layer em `layerIds` dentro de `toggleLayer()`
 4. Adicione um `<LayerBtn>` no painel de controles
@@ -199,21 +267,19 @@ Referência: camada **Pontos Cegos** (`gaps`) — source `gaps`, layer `gaps-dot
 
 ---
 
-### Uma nova tab no painel de área
+### 7.2 Adicionar uma Nova Tab no Painel de Área
 
-As tabs ficam em `frontend/app/components/tabs/` e são registradas em `AreaPanel.tsx`.
+Tabs ficam em `frontend/app/components/tabs/` e são registradas em `AreaPanel.tsx`.
 
 **Passo 1 — Criar o componente**
 
-Crie `frontend/app/components/tabs/MinhaTab.tsx`:
-
 ```typescript
+// frontend/app/components/tabs/MinhaTab.tsx
 'use client'
 import type { Area } from '../../types'
 
 interface Props {
   area: Area
-  // props adicionais conforme necessário (ex.: allAreas, weights)
 }
 
 export default function MinhaTab({ area }: Props) {
@@ -229,28 +295,26 @@ export default function MinhaTab({ area }: Props) {
 
 1. Importe o componente
 2. Adicione o id ao union type `TabId`
-3. Inclua a entrada no array `tabs` (label, badge opcional)
-4. Renderize condicionalmente no bloco de conteúdo:
+3. Inclua entrada no array `tabs` (label, badge opcional)
+4. Renderize condicionalmente:
 
 ```typescript
 {tab === 'minha-tab' && <MinhaTab area={area} />}
 ```
 
-Referência: `EscalaTab`, `OverviewTab` (label **Dados**), `TrechosTab`.
+Referência: `EscalaTab`, `OverviewTab`, `TrechosTab`.
 
 ---
 
-### Uma nova métrica
+### 7.3 Adicionar uma Nova Métrica
 
 Métricas são calculadas no backend e consumidas pelo frontend via `areas_data.json`.
 
 **Passo 1 — Função no pipeline**
 
-Adicione uma função em `backend/data_pipeline.py` (ex.: `compute_minha_metrica(df)`) e chame-a no loop principal de `build_areas()`, dentro do bloco que monta cada área.
+Adicione em `backend/data_pipeline.py` (ex.: `compute_minha_metrica(df)`) e chame no loop de `build_areas()`.
 
 **Passo 2 — Incluir no output JSON**
-
-Adicione o resultado ao dicionário da área em `areas_raw`:
 
 ```python
 area_dict = {
@@ -261,22 +325,58 @@ area_dict = {
 
 **Passo 3 — Tipar no frontend**
 
-Declare a interface em `frontend/app/types.ts` e adicione o campo à interface `Area`.
+Declare em `frontend/app/types.ts` (campo opcional `?` para compatibilidade).
 
 **Passo 4 — Exibir nos componentes**
 
-Use o campo nos componentes relevantes (tab Dados, KPIs, mapa, etc.).
+Use o campo nas tabs, KPIs ou mapa relevantes.
 
 **Passo 5 — Testes**
 
-Adicione testes unitários em `backend/tests/` cobrindo a nova função e, se aplicável, testes de componente no frontend.
+Adicione testes em `backend/tests/` e, se aplicável, em `frontend/__tests__/`.
 
-Referências existentes: `compute_camera_gaps()`, `compute_bingo()`, interfaces `CameraGapAnalysis` e `Trecho`.
+Referências: `compute_camera_gaps()`, `compute_bingo()`, interfaces `CameraGapAnalysis`, `Trecho`.
 
 ---
 
-## Documentação relacionada
+## 8. Troubleshooting
 
-- [Arquitetura](ARCHITECTURE.md)
-- [Dicionário de Dados](DATA_DICTIONARY.md)
-- [Referência da API](API_REFERENCE.md)
+### Pipeline
+
+| Problema | Causa provável | Solução |
+|---|---|---|
+| `FileNotFoundError: ocorrencias.parquet` | `--data-dir` errado ou dados não baixados | Verifique o caminho (padrão: `../data`) e se `data/clean/` contém os Parquet |
+| `ModuleNotFoundError: geopandas` | Virtualenv não ativado | `source .venv/bin/activate` antes de rodar |
+| `CRS mismatch` | Shapefile com projeção diferente | Pipeline reprojeta para WGS84 automaticamente; verifique `.prj` |
+| JSON vazio ou 0 áreas | Dados fora do bounding box do Rio | Verifique lat/lng dos dados de entrada |
+
+### Frontend
+
+| Problema | Causa provável | Solução |
+|---|---|---|
+| Mapa em branco | `areas_data.json` ausente em `public/` | Copie do backend: `cp backend/areas_data.json frontend/public/` |
+| "Erro ao sintetizar" | Chave Anthropic ausente ou inválida | Verifique `frontend/.env.local` com `ANTHROPIC_API_KEY=sk-ant-...` |
+| Relatório `.docx` falha | Python não encontrado | Verifique `python3 --version` e `pip install python-docx` |
+| Porta 3000 em uso | Outro processo ocupando | `lsof -i :3000` para identificar; `kill <PID>` ou use `npm run dev -- -p 3001` |
+
+### Testes
+
+| Problema | Causa provável | Solução |
+|---|---|---|
+| `ImportError` nos testes Python | Módulo não encontrado | Execute os testes de dentro de `eduardo/backend/` |
+| Testes frontend falham | Dependências desatualizadas | `cd frontend && npm install` |
+
+---
+
+## 9. Documentação Relacionada
+
+| Documento | Conteúdo |
+|---|---|
+| [Arquitetura](ARCHITECTURE.md) | Fluxo de dados, componentes, decisões técnicas, mapeamento ao briefing |
+| [Dicionário de Dados](DATA_DICTIONARY.md) | Schema completo do `areas_data.json` |
+| [Referência da API](API_REFERENCE.md) | Rotas `/api/synthesize` e `/api/report` com exemplos |
+| [Changelog](../CHANGELOG.md) | Histórico de alterações por versão |
+
+---
+
+*CompStat Municipal RJ · Claude Impact Lab Rio · Grupo 7*

@@ -1,0 +1,234 @@
+{
+  "orgaos": [
+    {
+      "orgao": "RioLuz",
+      "total": 46,
+      "fatores": [
+        {
+          "fator": "Área mal iluminada com circulação de pedestres",
+          "count": 37,
+          "exemplos": [
+            {
+              "logradouro": "Praia de Botafogo",
+              "obs": "Necessidade de iluminação em baixo das copas das árvores. Área muito arborizada com calçadas mal iluminadas"
+            },
+            {
+              "logradouro": "Rua Marquês de Olinda",
+              "obs": "Melhoria na iluminação da via. Muito arborizada."
+            }
+          ]
+        },
+        {
+          "fator": "Área mal iluminada com parada de veículos",
+          "count": 9,
+          "exemplos": [
+            {
+              "logradouro": "Praia de Botafogo",
+              "obs": "Área de estacionamento de veículos, muito arborizada. Necessidade de iluminar embaixo das copas das árvores."
+            },
+            {
+              "logradouro": "Rua Bambina",
+              "obs": "Necessidade de melhoria na iluminação das calçadas."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Comlurb",
+      "total": 27,
+      "fatores": [
+        {
+          "fator": "Vegetação encobrindo iluminação pública",
+          "count": 21,
+          "exemplos": [
+            {
+              "logradouro": "Rua Marquês de Abrantes",
+              "obs": "poda"
+            },
+            {
+              "logradouro": "Avenida Rui Barbosa",
+              "obs": "Alguns pontos do trecho poda a pé"
+            }
+          ]
+        },
+        {
+          "fator": "Vegetação obstruindo a visibilidade do passeio",
+          "count": 6,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "SMAS",
+      "total": 24,
+      "fatores": [
+        {
+          "fator": "Pessoas em situação de rua",
+          "count": 24,
+          "exemplos": [
+            {
+              "logradouro": "Praia de Botafogo",
+              "obs": "Observado um (1) PSR em frente, 316. Sem alterações nos demais aspectos elencados."
+            },
+            {
+              "logradouro": "Rua Paissandu",
+              "obs": "PSR COM MATERIAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Seconserva",
+      "total": 16,
+      "fatores": [
+        {
+          "fator": "Vãos ou cavidades usados como esconderijo",
+          "count": 8,
+          "exemplos": [
+            {
+              "logradouro": "R. Marquês de Abrantes",
+              "obs": "TERRENO BALDIO ABERTO"
+            },
+            {
+              "logradouro": "Rua Fernando Ferrari",
+              "obs": "grade do viaduto que pode servir de esconderijo"
+            }
+          ]
+        },
+        {
+          "fator": "Calçada estreita forçando pedestres à pista",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Rua Senador Vergueiro",
+              "obs": "Iluminação precoce. Índice de assalto"
+            },
+            {
+              "logradouro": "Rua Fernando Osório",
+              "obs": "Índice de assalto e calçada estreita."
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário abandonado servindo de esconderijo",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Rua Barão de Icaraí",
+              "obs": "chaveiro com sinais de abandono"
+            },
+            {
+              "logradouro": "Rua Bambina",
+              "obs": "Imobiliário antigo com tapumes podendo servir de esconderijo"
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário urbano desviando pedestres para a pista",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Paissandu",
+              "obs": "burro sem rabo de psr com acúmulos"
+            }
+          ]
+        },
+        {
+          "fator": "Tapumes servindo de esconderijo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Barão de Icaraí",
+              "obs": "tapume de obra deteriorado"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "CET-Rio",
+      "total": 13,
+      "fatores": [
+        {
+          "fator": "Ponto de retenção do tráfego",
+          "count": 13,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "SEOP",
+      "total": 10,
+      "fatores": [
+        {
+          "fator": "Comércio irregular obstruindo a visibilidade do passeio",
+          "count": 6,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Rui Barbosa",
+              "obs": "Três ambulantes no local , barracas de lanche. Sem alterações nos outros itens elencados no trecho referenciado."
+            },
+            {
+              "logradouro": "Rua Marquês de Abrantes",
+              "obs": "Local com 1 ambulante - carrinho de cocadas e doces em frente ao número 100A. Sem alterações nos outros itens elencados no trecho referenciado."
+            }
+          ]
+        },
+        {
+          "fator": "Estacionamento irregular forçando pedestres à pista",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Travessa dos Tamoios",
+              "obs": "carro em sinal de abandono"
+            }
+          ]
+        },
+        {
+          "fator": "Veículos de grande porte obstruindo a visibilidade",
+          "count": 1,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "Não atribuído",
+      "total": 7,
+      "fatores": [
+        {
+          "fator": "Sem ocorrência",
+          "count": 6,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Venceslau Braz",
+              "obs": "97713"
+            },
+            {
+              "logradouro": "Rua Paissandu",
+              "obs": "101182"
+            }
+          ]
+        },
+        {
+          "fator": "Praças e Parques",
+          "count": 1,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "GM-Rio",
+      "total": 3,
+      "fatores": [
+        {
+          "fator": "Motocicletas trafegando no passeio",
+          "count": 3,
+          "exemplos": []
+        }
+      ]
+    }
+  ],
+  "total_fatores": 146
+}

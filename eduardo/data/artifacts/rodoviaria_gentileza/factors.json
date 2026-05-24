@@ -1,0 +1,202 @@
+{
+  "orgaos": [
+    {
+      "orgao": "Comlurb",
+      "total": 11,
+      "fatores": [
+        {
+          "fator": "Vegetação obstruindo a visibilidade do passeio",
+          "count": 5,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Francisco Bicalho",
+              "obs": "Aproximadamente 80 árvores apresentando necessidade de poda"
+            },
+            {
+              "logradouro": "Avenida Francisco Bicalho",
+              "obs": "30 árvores apresentando necessidade de poda"
+            }
+          ]
+        },
+        {
+          "fator": "Vegetação encobrindo iluminação pública",
+          "count": 5,
+          "exemplos": [
+            {
+              "logradouro": "Rua Afonso Cavalcanti",
+              "obs": "10 árvores apresentando necessidade de poda"
+            },
+            {
+              "logradouro": "Avenida Francisco Bicalho",
+              "obs": "Aproximadamente 40 árvores apresentando necessidade de poda"
+            }
+          ]
+        },
+        {
+          "fator": "Lixo/entulho obstruindo a visibilidade",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Marquês de Sapucaí",
+              "obs": "dfdrgf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "RioLuz",
+      "total": 10,
+      "fatores": [
+        {
+          "fator": "Área mal iluminada com circulação de pedestres",
+          "count": 10,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "Melhoria: Implementação de 49 projetores"
+            },
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "Melhoria: necessidade de implantação de 05 projetores. Manutenções programadas para o local."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "CET-Rio",
+      "total": 9,
+      "fatores": [
+        {
+          "fator": "Ponto de retenção do tráfego",
+          "count": 9,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Francisco Bicalho",
+              "obs": "Trânsito congestionado sentido túnel Rebouças"
+            },
+            {
+              "logradouro": "Avenida Francisco Bicalho",
+              "obs": "Trânsito congestionado sentido túnel Rebouças"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Seconserva",
+      "total": 7,
+      "fatores": [
+        {
+          "fator": "Mobiliário/estrutura servindo de esconderijo",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "Indivíduos acessam a área por entradas laterais localizadas sob a via férrea, o que lhes permite alcançar a parte superior da estrut. a partir desse ponto, praticam furtos e roubos. Área próxima ao morro do pinto"
+            }
+          ]
+        },
+        {
+          "fator": "Tapumes servindo de esconderijo",
+          "count": 1,
+          "exemplos": []
+        },
+        {
+          "fator": "Mobiliário abandonado servindo de esconderijo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Afonso Cavalcanti",
+              "obs": "Calçada com moradores de rua ,assaltando e sujando a calçada."
+            }
+          ]
+        },
+        {
+          "fator": "Vãos ou cavidades usados como esconderijo",
+          "count": 1,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "SMAS",
+      "total": 5,
+      "fatores": [
+        {
+          "fator": "Pessoas em situação de rua",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Av Presidente Vargas",
+              "obs": "Duas pessoas em situação de rua dormindo em baixo da passarela do metrô"
+            }
+          ]
+        },
+        {
+          "fator": "Cena de uso de drogas",
+          "count": 1,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "GM-Rio",
+      "total": 4,
+      "fatores": [
+        {
+          "fator": "Motocicletas trafegando no passeio",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Av. Francisco Bicalho, trecho da RuaPedro Alves",
+              "obs": "Foi observado dezenas de motos estacionadas na Calçada, não foi observado trafegando."
+            },
+            {
+              "logradouro": "Avenida Francisco Bicalho",
+              "obs": "Perimetral trânsito fluindo bem, sem motos transitando na calça"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Não atribuído",
+      "total": 3,
+      "fatores": [
+        {
+          "fator": "Sem ocorrência",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Presidente Vargas",
+              "obs": "201401"
+            },
+            {
+              "logradouro": "Rua Afonso Cavalcanti",
+              "obs": "84198"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SEOP",
+      "total": 1,
+      "fatores": [
+        {
+          "fator": "Comércio irregular obstruindo a visibilidade do passeio",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Francisco Bicalho",
+              "obs": "Equipe verificou comércio de ambulante no local."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "total_fatores": 50
+}

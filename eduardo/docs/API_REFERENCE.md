@@ -1,8 +1,36 @@
 # Referência de API — CompStat Municipal RJ
 
-Documentação das rotas de API do frontend Next.js (`eduardo/frontend/app/api/`). Ambas são endpoints **POST** executados no servidor (App Router).
+Documentação das rotas de API do frontend Next.js (`eduardo/frontend/app/api/`). Ambas são endpoints **POST** executados server-side via App Router do Next.js 16.
+
+Estas rotas implementam os requisitos das seções 7 (Papel da IA) e 10.4 (Módulo de geração de relatório) do [briefing técnico](../../claude_impact_lab_compstat_rio/Briefing_Hackathon_Desenvolvedores_CompStat-2.pdf).
 
 **Base URL (desenvolvimento):** `http://localhost:3000`
+
+---
+
+## Fluxo Operacional
+
+As rotas fazem parte do fluxo de geração de relatório que substitui horas de trabalho manual:
+
+```
+┌───────────────────────┐     ┌───────────────────┐     ┌──────────────────┐
+│ 1. Seleção de área    │────→│ 2. POST           │────→│ 3. Exibição      │
+│    no dashboard       │     │    /api/synthesize │     │    plano de ação │
+│                       │     │    (Claude AI)     │     │    + Despachar   │
+└───────────────────────┘     └───────────────────┘     └────────┬─────────┘
+                                                                 │
+                                                        ┌────────┴─────────┐
+                                                        │ 4. POST          │
+                                                        │    /api/report   │
+                                                        │    (Python .docx)│
+                                                        └────────┬─────────┘
+                                                                 │
+                                                        ┌────────┴─────────┐
+                                                        │ 5. Download      │
+                                                        │    .docx para    │
+                                                        │    reunião       │
+                                                        └──────────────────┘
+```
 
 ---
 
@@ -10,9 +38,13 @@ Documentação das rotas de API do frontend Next.js (`eduardo/frontend/app/api/`
 
 ### Propósito
 
-Gera um **plano de ação executivo** via modelo Claude, sintetizando dinâmica criminal e ações priorizadas com base nos dados operacionais de uma área FM.
+Gera um **plano de ação executivo** via Claude Sonnet 4.5, sintetizando a dinâmica criminal e produzindo ações priorizadas por órgão. Implementa as três funções da IA definidas no briefing:
 
-### Autenticação e dependências
+1. **Síntese qualitativa** da dinâmica criminal (seção 7.1)
+2. **Cruzamento e identificação** de coincidências com priorização (seção 7.2)
+3. **Respostas às perguntas norteadoras** com sugestões operacionais (seção 7.3)
+
+### Autenticação e Dependências
 
 | Requisito | Detalhe |
 |---|---|
@@ -21,9 +53,9 @@ Gera um **plano de ação executivo** via modelo Claude, sintetizando dinâmica 
 | SDK | `@anthropic-ai/sdk` |
 | `max_tokens` | 1500 |
 
-### Corpo da requisição
+### Request
 
-`Content-Type: application/json`
+**Content-Type:** `application/json`
 
 ```json
 {
@@ -38,54 +70,55 @@ Gera um **plano de ação executivo** via modelo Claude, sintetizando dinâmica 
 
 | Campo | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
-| `nome` | `string` | sim | Nome completo da área FM |
-| `relint` | `string` | não | Texto do RELINT (`relint.full_text`); truncado em 3.000 caracteres no prompt |
-| `stats` | `AreaStats` | sim | Estatísticas agregadas da área (crimes, denúncias, modus, etc.) |
-| `top_trechos` | `Trecho[]` | sim | Trechos prioritários (frontend envia top 5) |
-| `fatores` | `FatorOrgao[]` | sim | Fatores urbanos agrupados por órgão |
-| `relatos` | `Relato[]` | não | Amostra de relatos Disque Denúncia (frontend envia top 5) |
+| `nome` | `string` | Sim | Nome completo da área FM |
+| `relint` | `string` | Nao | Texto do RELINT (`relint.full_text`); truncado em 3.000 chars no prompt |
+| `stats` | `AreaStats` | Sim | Estatísticas agregadas (crimes, denúncias, modus, etc.) |
+| `top_trechos` | `Trecho[]` | Sim | Trechos prioritários (frontend envia top 5) |
+| `fatores` | `FatorOrgao[]` | Sim | Fatores urbanos agrupados por órgão responsável |
+| `relatos` | `Relato[]` | Nao | Amostra de relatos do Disque Denúncia (frontend envia top 5) |
 
-### Resposta de sucesso
+### Response (200 OK)
 
-**Status:** `200 OK`  
 **Content-Type:** `application/json`
 
 ```json
 {
-  "dinamica": "Parágrafo de 80–100 palavras descrevendo o padrão criminal dominante.",
+  "dinamica": "Parágrafo de 80–100 palavras descrevendo o padrão criminal dominante, modus operandi, rotas de fuga e pontos de receptação.",
   "acoes": [
     {
       "prioridade": 1,
       "urgencia": "imediata",
       "orgao": "GM-Rio",
       "tipo_recurso": "patrulha_moto",
-      "acao": "Título curto da ação",
-      "local": "Logradouro específico",
-      "evidencia": "Dado concreto que justifica a ação",
+      "acao": "Patrulha motorizada no trecho da Av. Presidente Vargas",
+      "local": "Avenida Presidente Vargas",
+      "evidencia": "1.305 ocorrências no trecho, pico às 20h, 63% noturno",
       "prazo": "Esta semana"
     }
   ]
 }
 ```
 
+#### Campos de `dinamica`
+
+Parágrafo estruturado que compõe a seção "Dinâmica Criminal" do relatório, conforme seção 7.1 do briefing. Contém: modalidade predominante, modus operandi, rotas de fuga, pontos de receptação e influência de ORCRIM.
+
 #### Campos de `acoes[]`
 
-| Campo | Tipo | Valores permitidos |
-|---|---|---|
-| `prioridade` | `number` | 1–8 (1 = mais urgente) |
-| `urgencia` | `string` | `"imediata"` \| `"7_dias"` \| `"30_dias"` |
-| `orgao` | `string` | `"GM-Rio"` \| `"RioLuz"` \| `"Comlurb"` \| `"SEOP"` \| `"SECONSERVA"` \| `"SMAS"` \| `"CET-Rio"` \| `"SMTR"` |
-| `tipo_recurso` | `string` | `"patrulha_moto"` \| `"patrulha_pe"` \| `"viatura"` \| `"iluminacao"` \| `"limpeza"` \| `"ordenamento"` \| `"assistencia_social"` \| `"manutencao_via"` \| `"transporte"` |
-| `acao` | `string` | Título curto (máx. ~60 caracteres) |
-| `local` | `string` | Logradouro real da área |
-| `evidencia` | `string` | Justificativa com número dos dados |
-| `prazo` | `string` | Texto livre (ex.: `"Esta semana"`, `"Em 7 dias"`, `"Em 30 dias"`) |
+| Campo | Tipo | Valores permitidos | Mapeamento ao briefing |
+|---|---|---|---|
+| `prioridade` | `number` | 1–8 (1 = mais urgente) | Score de prioridade (seção 7.2) |
+| `urgencia` | `string` | `"imediata"`, `"7_dias"`, `"30_dias"` | Prazo da ação (seção 6.1) |
+| `orgao` | `string` | `"GM-Rio"`, `"RioLuz"`, `"Comlurb"`, `"SEOP"`, `"SECONSERVA"`, `"SMAS"`, `"CET-Rio"`, `"SMTR"` | Órgão responsável (seção 4) |
+| `tipo_recurso` | `string` | `"patrulha_moto"`, `"patrulha_pe"`, `"viatura"`, `"iluminacao"`, `"limpeza"`, `"ordenamento"`, `"assistencia_social"`, `"manutencao_via"`, `"transporte"` | Tipo de ação/recurso |
+| `acao` | `string` | Texto livre (~60 chars) | Título da ação acordada |
+| `local` | `string` | Logradouro real | Local específico da intervenção |
+| `evidencia` | `string` | Texto com dados | Justificativa textual com indicação dos fatores (seção 7.2) |
+| `prazo` | `string` | Texto livre | Ex.: `"Esta semana"`, `"Em 7 dias"` |
 
-O prompt instrui o modelo a gerar **5 a 8 ações**, com a primeira sempre para `GM-Rio`.
+O prompt instrui o modelo a gerar **5 a 8 ações**, com a primeira sempre para `GM-Rio` (Força Municipal), refletindo a prioridade operacional do CompStat.
 
-### Resposta de erro
-
-**Status:** `500 Internal Server Error`
+### Response de Erro (500)
 
 ```json
 {
@@ -93,7 +126,12 @@ O prompt instrui o modelo a gerar **5 a 8 ações**, com a primeira sempre para 
 }
 ```
 
-Erros comuns: chave Anthropic ausente/inválida, falha de parse JSON na resposta do modelo, timeout da API.
+| Causa | Quando ocorre |
+|---|---|
+| Chave ausente | `ANTHROPIC_API_KEY` não configurada em `.env.local` |
+| Chave inválida | Token expirado ou incorreto |
+| Falha de parse | Claude retornou texto que não é JSON válido |
+| Timeout | API Anthropic não respondeu no prazo |
 
 ### Exemplo cURL
 
@@ -102,7 +140,7 @@ curl -X POST http://localhost:3000/api/synthesize \
   -H "Content-Type: application/json" \
   -d '{
     "nome": "Presidente Vargas - Campo de Santana - Central do Brasil - Cinelândia",
-    "relint": "## AVENIDA PRESIDENTE VARGAS\nA Avenida Presidente Vargas concentra intenso fluxo...",
+    "relint": "## AVENIDA PRESIDENTE VARGAS\nConcentra intenso fluxo de pedestres...",
     "stats": {
       "crimes_total": 4011,
       "crimes_por_tipo": {
@@ -158,7 +196,16 @@ curl -X POST http://localhost:3000/api/synthesize \
 
 ### Propósito
 
-Gera o **Relatório Analítico de Área** no formato oficial CompStat (`.docx`), combinando dados estruturados da área com a síntese de dinâmica criminal.
+Gera o **Relatório Analítico de Área** no formato oficial CompStat (`.docx`), combinando dados estruturados com a síntese de dinâmica criminal gerada pela IA. O output segue a estrutura consolidada pelo CompStat Municipal conforme seção 6.1 do briefing:
+
+1. Identificação da Área (AISP, DP, BPM, domínio, base FM, subprefeitura)
+2. Indicadores do Período (volume de roubos e furtos, ranking, evolução)
+3. Distribuição por Tipo de Ocorrência
+4. Análise Temporal (hora, dia, período predominante)
+5. Dinâmica Criminal (síntese qualitativa gerada pela IA)
+6. Fatores de Incidência Criminal (por órgão responsável)
+7. Painel de Coincidências
+8. Plano de Ação e Responsabilização
 
 ### Dependências
 
@@ -168,9 +215,9 @@ Gera o **Relatório Analítico de Área** no formato oficial CompStat (`.docx`),
 | Pacote | `python-docx` (instalado via `backend/requirements.txt`) |
 | Script | `backend/generate_report.py` (invocado via `subprocess`) |
 
-### Corpo da requisição
+### Request
 
-`Content-Type: application/json`
+**Content-Type:** `application/json`
 
 ```json
 {
@@ -181,28 +228,32 @@ Gera o **Relatório Analítico de Área** no formato oficial CompStat (`.docx`),
 
 | Campo | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
-| `area` | `Area` | sim | Objeto completo da área (como em `areas_data.json`) |
-| `synthesis` | `string` | sim | Parágrafo de dinâmica criminal gerado pela IA (`dinamica` retornado por `/api/synthesize`) |
+| `area` | `Area` | Sim | Objeto completo da área (conforme schema em [DATA_DICTIONARY.md](DATA_DICTIONARY.md)) |
+| `synthesis` | `string` | Sim | Parágrafo de dinâmica criminal (`dinamica` retornado por `/api/synthesize`) |
 
-O script Python utiliza principalmente: `area.nome`, `area.stats`, `area.score`, `area.top_trechos`, `area.fatores_por_orgao` e o texto `synthesis`.
+O script Python consome: `area.nome`, `area.stats`, `area.score`, `area.top_trechos`, `area.fatores_por_orgao` e o texto `synthesis`.
 
-### Resposta de sucesso
+### Response (200 OK)
 
-**Status:** `200 OK`  
 **Content-Type:** `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
-
-Corpo: arquivo binário `.docx`
-
-**Headers de resposta:**
 
 | Header | Valor |
 |---|---|
 | `Content-Type` | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` |
 | `Content-Disposition` | `attachment; filename="CompStat_{nome_area}.docx"` |
 
-### Resposta de erro
+O corpo da resposta é o arquivo binário `.docx` pronto para download e uso na reunião semanal do CompStat.
 
-**Status:** `500 Internal Server Error`
+### Fluxo Interno
+
+```
+1. Gera UUID → grava payload JSON em /tmp/compstat_input_{uuid}.json
+2. Executa: python3 backend/generate_report.py --input {tmp} --output {tmp}.docx
+3. Lê o .docx gerado → retorna como resposta binária
+4. Remove arquivos temporários (cleanup)
+```
+
+### Response de Erro (500)
 
 ```json
 {
@@ -210,14 +261,12 @@ Corpo: arquivo binário `.docx`
 }
 ```
 
-Erros comuns: Python não instalado, `python-docx` ausente, falha na execução de `generate_report.py`, arquivo de saída não gerado.
-
-### Fluxo interno
-
-1. Gera UUID e grava payload JSON em arquivo temporário (`/tmp/compstat_input_{uuid}.json`)
-2. Executa: `python3 backend/generate_report.py --input {tmp} --output {tmp}.docx`
-3. Lê o `.docx` gerado e retorna como resposta binária
-4. Remove arquivos temporários
+| Causa | Quando ocorre |
+|---|---|
+| Python não encontrado | `python3` não está no PATH |
+| Dependência ausente | `python-docx` não instalado |
+| Falha no script | `generate_report.py` retornou exit code != 0 |
+| Arquivo não gerado | Script executou mas não produziu o `.docx` |
 
 ### Exemplo cURL
 
@@ -281,29 +330,30 @@ EOF
 
 ---
 
-## Fluxo recomendado (frontend)
-
-```
-1. Carregar areas_data.json
-2. Usuário seleciona área → aba Relatório
-3. POST /api/synthesize  →  { dinamica, acoes }
-4. Exibir plano de ação + botões Despachar (mailto)
-5. POST /api/report        →  download .docx
-```
-
----
-
-## Configuração local
+## Configuração Local
 
 ```bash
-# frontend/.env.local
-ANTHROPIC_API_KEY=sk-ant-...
+# 1. Chave da Anthropic (para /api/synthesize)
+echo "ANTHROPIC_API_KEY=sk-ant-..." > eduardo/frontend/.env.local
 
-# backend (para /api/report)
+# 2. Dependências Python (para /api/report)
 cd eduardo/backend
 pip install -r requirements.txt
+
+# 3. Frontend
+cd eduardo/frontend
+npm install
+npm run dev
 ```
 
 ---
 
-*CompStat Municipal RJ · Hackathon Claude Impact Lab · Grupo 7*
+## Referências
+
+- [Arquitetura](ARCHITECTURE.md) — fluxo de dados completo e decisões técnicas
+- [Dicionário de Dados](DATA_DICTIONARY.md) — schema do `areas_data.json` e tipos TypeScript
+- [Guia de Contribuição](CONTRIBUTING.md) — como estender as rotas e adicionar funcionalidades
+
+---
+
+*CompStat Municipal RJ · Claude Impact Lab Rio · Grupo 7*

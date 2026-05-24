@@ -1,0 +1,184 @@
+{
+  "areas": [
+    {
+      "area_id": "presidente_vargas",
+      "display_name": "Presidente Vargas – Campo de Santana – Central do Brasil – Cinelândia",
+      "total_ocorrencias": 1533,
+      "n_trechos_criticos": 4,
+      "n_bingo_cells": 31,
+      "n_triple_bingo": 8,
+      "coverage": {
+        "has_polygon": true,
+        "has_relint": true,
+        "has_cameras": true
+      },
+      "ranking": {
+        "posicao": 1,
+        "de": 10,
+        "share_pct": 31.8
+      }
+    },
+    {
+      "area_id": "estacoes_sfx_afonso_pena",
+      "display_name": "Estações São Francisco Xavier – Afonso Pena",
+      "total_ocorrencias": 741,
+      "n_trechos_criticos": 2,
+      "n_bingo_cells": 34,
+      "n_triple_bingo": 13,
+      "coverage": {
+        "has_polygon": true,
+        "has_relint": true,
+        "has_cameras": true
+      },
+      "ranking": {
+        "posicao": 2,
+        "de": 10,
+        "share_pct": 15.4
+      }
+    },
+    {
+      "area_id": "rodoviaria_gentileza",
+      "display_name": "Rodoviária – Terminal Gentileza – Estação Leopoldina",
+      "total_ocorrencias": 727,
+      "n_trechos_criticos": 5,
+      "n_bingo_cells": 22,
+      "n_triple_bingo": 1,
+      "coverage": {
+        "has_polygon": true,
+        "has_relint": true,
+        "has_cameras": true
+      },
+      "ranking": {
+        "posicao": 3,
+        "de": 10,
+        "share_pct": 15.1
+      }
+    },
+    {
+      "area_id": "praia_botafogo",
+      "display_name": "Praia de Botafogo – Rua Marquês de Abrantes",
+      "total_ocorrencias": 566,
+      "n_trechos_criticos": 2,
+      "n_bingo_cells": 36,
+      "n_triple_bingo": 11,
+      "coverage": {
+        "has_polygon": true,
+        "has_relint": true,
+        "has_cameras": true
+      },
+      "ranking": {
+        "posicao": 4,
+        "de": 10,
+        "share_pct": 11.7
+      }
+    },
+    {
+      "area_id": "metro_botafogo",
+      "display_name": "Metrô Botafogo – Rua São Clemente – Rua Voluntários da Pátria",
+      "total_ocorrencias": 432,
+      "n_trechos_criticos": 2,
+      "n_bingo_cells": 23,
+      "n_triple_bingo": 8,
+      "coverage": {
+        "has_polygon": true,
+        "has_relint": true,
+        "has_cameras": true
+      },
+      "ranking": {
+        "posicao": 5,
+        "de": 10,
+        "share_pct": 9.0
+      }
+    },
+    {
+      "area_id": "lauro_muller",
+      "display_name": "Rua Lauro Müller – Avenida General Severiano – Avenida Venceslau Brás",
+      "total_ocorrencias": 275,
+      "n_trechos_criticos": 4,
+      "n_bingo_cells": 25,
+      "n_triple_bingo": 6,
+      "coverage": {
+        "has_polygon": false,
+        "has_relint": false,
+        "has_cameras": true
+      },
+      "ranking": {
+        "posicao": 6,
+        "de": 10,
+        "share_pct": 5.7
+      }
+    },
+    {
+      "area_id": "rio_sul",
+      "display_name": "Rio Sul",
+      "total_ocorrencias": 211,
+      "n_trechos_criticos": 2,
+      "n_bingo_cells": 11,
+      "n_triple_bingo": 4,
+      "coverage": {
+        "has_polygon": true,
+        "has_relint": true,
+        "has_cameras": false
+      },
+      "ranking": {
+        "posicao": 7,
+        "de": 10,
+        "share_pct": 4.4
+      }
+    },
+    {
+      "area_id": "bangu_calcadao",
+      "display_name": "Bangu: Calçadão – Bangu Shopping",
+      "total_ocorrencias": 139,
+      "n_trechos_criticos": 1,
+      "n_bingo_cells": 19,
+      "n_triple_bingo": 5,
+      "coverage": {
+        "has_polygon": false,
+        "has_relint": false,
+        "has_cameras": true
+      },
+      "ranking": {
+        "posicao": 8,
+        "de": 10,
+        "share_pct": 2.9
+      }
+    },
+    {
+      "area_id": "campo_grande_calcadao",
+      "display_name": "Campo Grande: Estação de Trem – Calçadão",
+      "total_ocorrencias": 109,
+      "n_trechos_criticos": 1,
+      "n_bingo_cells": 20,
+      "n_triple_bingo": 7,
+      "coverage": {
+        "has_polygon": true,
+        "has_relint": true,
+        "has_cameras": true
+      },
+      "ranking": {
+        "posicao": 9,
+        "de": 10,
+        "share_pct": 2.3
+      }
+    },
+    {
+      "area_id": "jardim_de_alah",
+      "display_name": "Jardim de Alah",
+      "total_ocorrencias": 91,
+      "n_trechos_criticos": 1,
+      "n_bingo_cells": 8,
+      "n_triple_bingo": 6,
+      "coverage": {
+        "has_polygon": true,
+        "has_relint": true,
+        "has_cameras": true
+      },
+      "ranking": {
+        "posicao": 10,
+        "de": 10,
+        "share_pct": 1.9
+      }
+    }
+  ]
+}

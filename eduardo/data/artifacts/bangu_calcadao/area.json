@@ -1,0 +1,171 @@
+{
+  "area_id": "bangu_calcadao",
+  "display_name": "Bangu: Calçadão – Bangu Shopping",
+  "polygon_source": "camera_hull",
+  "coverage": {
+    "has_polygon": false,
+    "has_relint": false,
+    "has_cameras": true
+  },
+  "identificacao": {
+    "aisp": "14",
+    "bairro": "Bangu",
+    "area_orcrim": "32 território(s) sob influência nas proximidades"
+  },
+  "indicadores": {
+    "periodo": "2023-2024",
+    "total_ocorrencias": 139,
+    "por_tipo": {
+      "Roubo a transeunte": 84,
+      "Roubo de aparelho celular": 52,
+      "Roubo em coletivo": 3
+    },
+    "ranking": {
+      "posicao": 8,
+      "de": 10,
+      "share_pct": 2.9
+    },
+    "n_trechos_criticos": 1
+  },
+  "trechos": [
+    {
+      "cells": [
+        "8aa8a0663c87fff",
+        "8aa8a0663c8ffff",
+        "8aa8a0663527fff",
+        "8aa8a066352ffff",
+        "8aa8a0663cdffff",
+        "8aa8a0663ccffff",
+        "8aa8a0663ceffff",
+        "8aa8a0663c57fff",
+        "8aa8a0663c77fff",
+        "8aa8a0663c0ffff",
+        "8aa8a0663c2ffff",
+        "8aa8a0663507fff",
+        "8aa8a0663517fff",
+        "8aa8a0663537fff",
+        "8aa8a0663c9ffff",
+        "8aa8a066226ffff",
+        "8aa8a0663c97fff",
+        "8aa8a066224ffff"
+      ],
+      "logradouro": "Avenida De Santa Cruz",
+      "n_cells": 18,
+      "crime_total": 83,
+      "max_bingo_count": 3,
+      "score": 9.7485,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "SEOP",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Calçada estreita forçando pedestres à pista",
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Vegetação encobrindo iluminação pública",
+        "Veículos de grande porte obstruindo a visibilidade"
+      ],
+      "rank": 1
+    }
+  ],
+  "orcrim": {
+    "intersecting": [],
+    "nearby": [
+      {
+        "territorio": "FAVELA DAS ALMAS",
+        "orcrim": "ADA"
+      },
+      {
+        "territorio": "VILA VINTÉM",
+        "orcrim": "ADA"
+      },
+      {
+        "territorio": "MORRO DO SETE SETE",
+        "orcrim": "ADA"
+      },
+      {
+        "territorio": "FAVELA DO LIMITE",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "VILA DA USINA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DO BICHO SOLTO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "FAVELA DO MARCO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DO SANDÁ",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "CONJUNTÃO",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "MORRO DO SÃO BENTO",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "FAVELA DA SELVINHA",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "CASINHAS DO CONJUNTÃO",
+        "orcrim": "Milícia"
+      },
+      {
+        "territorio": "SELVA DE PEDRA - CAMARÁ",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "IRAQUE CAMARÁ",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "FUNDÃO",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "SENADOR CAMARA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "VILA MORETH",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "ARAUJO - CAMARÁ",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "DIVISA - CPX DE CAMARÁ X VK",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MANGUEIRAL",
+        "orcrim": "TCP"
+      }
+    ],
+    "factions": [
+      "ADA",
+      "CV",
+      "Milícia",
+      "TCP"
+    ],
+    "summary": "32 território(s) sob influência nas proximidades"
+  },
+  "n_bingo_cells": 19,
+  "n_triple_bingo": 5
+}

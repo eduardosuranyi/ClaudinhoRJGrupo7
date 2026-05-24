@@ -1,0 +1,142 @@
+{
+  "area_id": "rio_sul",
+  "display_name": "Rio Sul",
+  "polygon_source": "shapefile",
+  "coverage": {
+    "has_polygon": true,
+    "has_relint": true,
+    "has_cameras": false
+  },
+  "identificacao": {
+    "aisp": "2",
+    "bairro": "Botafogo",
+    "area_orcrim": "7 território(s) sob influência nas proximidades"
+  },
+  "indicadores": {
+    "periodo": "2023-2024",
+    "total_ocorrencias": 211,
+    "por_tipo": {
+      "Roubo a transeunte": 104,
+      "Roubo de aparelho celular": 94,
+      "Roubo em coletivo": 13
+    },
+    "ranking": {
+      "posicao": 7,
+      "de": 10,
+      "share_pct": 4.4
+    },
+    "n_trechos_criticos": 2
+  },
+  "trechos": [
+    {
+      "cells": [
+        "8aa8a078a9affff",
+        "8aa8a078a917fff",
+        "8aa8a078a91ffff",
+        "8aa8a078a827fff",
+        "8aa8a078a837fff",
+        "8aa8a078a817fff",
+        "8aa8a078a9a7fff",
+        "8aa8a078e64ffff"
+      ],
+      "logradouro": "Rua Lauro Muller",
+      "n_cells": 8,
+      "crime_total": 68,
+      "max_bingo_count": 3,
+      "score": 6.4705,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz",
+        "SEOP",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Estacionamento irregular forçando pedestres à pista",
+        "Mobiliário urbano desviando pedestres para a pista",
+        "Mobiliário/estrutura servindo de esconderijo",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Praças e Parques",
+        "Sem ocorrência",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Vãos ou cavidades usados como esconderijo",
+        "Área mal iluminada com circulação de pedestres"
+      ],
+      "rank": 1
+    },
+    {
+      "cells": [
+        "8aa8a078a887fff",
+        "8aa8a078a897fff",
+        "8aa8a078a8b7fff"
+      ],
+      "logradouro": "Avenida Pasteur",
+      "n_cells": 3,
+      "crime_total": 24,
+      "max_bingo_count": 3,
+      "score": 2.2953,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "RioLuz",
+        "SEOP",
+        "SMAS"
+      ],
+      "factors": [
+        "Comércio irregular obstruindo a visibilidade do passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Vegetação encobrindo iluminação pública",
+        "Área mal iluminada com circulação de pedestres",
+        "Área mal iluminada com parada de veículos"
+      ],
+      "rank": 2
+    }
+  ],
+  "orcrim": {
+    "intersecting": [],
+    "nearby": [
+      {
+        "territorio": "MORRO DO AZUL",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DONA MARTA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "FAVELA FUNDÃO DA BALANÇA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "LADEIRA DOS TABAJARAS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DOS CABRITOS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "CHAPÉU MANGUEIRA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "BABILÔNIA",
+        "orcrim": "TCP"
+      }
+    ],
+    "factions": [
+      "CV",
+      "TCP"
+    ],
+    "summary": "7 território(s) sob influência nas proximidades"
+  },
+  "n_bingo_cells": 11,
+  "n_triple_bingo": 4
+}
