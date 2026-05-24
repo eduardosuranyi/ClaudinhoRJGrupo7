@@ -1,0 +1,255 @@
+{
+  "area_id": "rodoviaria_gentileza",
+  "display_name": "Rodoviária – Terminal Gentileza – Estação Leopoldina",
+  "polygon_source": "shapefile",
+  "coverage": {
+    "has_polygon": true,
+    "has_relint": true,
+    "has_cameras": true
+  },
+  "identificacao": {
+    "aisp": "4",
+    "bairro": "Cidade Nova",
+    "area_orcrim": "sob domínio direto de TCP; 17 território(s) sob influência nas proximidades"
+  },
+  "indicadores": {
+    "periodo": "2023-2024",
+    "total_ocorrencias": 727,
+    "por_tipo": {
+      "Roubo a transeunte": 295,
+      "Roubo em coletivo": 228,
+      "Roubo de aparelho celular": 204
+    },
+    "ranking": {
+      "posicao": 3,
+      "de": 10,
+      "share_pct": 15.1
+    },
+    "n_trechos_criticos": 5
+  },
+  "trechos": [
+    {
+      "cells": [
+        "8aa8a06a5adffff",
+        "8aa8a06a5ac7fff",
+        "8aa8a06a5acffff",
+        "8aa8a06a5ad7fff",
+        "8aa8a06a5af7fff",
+        "8aa8a06a532ffff",
+        "8aa8a06a530ffff",
+        "8aa8a06a531ffff",
+        "8aa8a06a5307fff",
+        "8aa8a06a5317fff"
+      ],
+      "logradouro": "Avenida Presidente Vargas",
+      "n_cells": 10,
+      "crime_total": 212,
+      "max_bingo_count": 3,
+      "score": 5.2379,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "RioLuz",
+        "SMAS",
+        "Seconserva"
+      ],
+      "factors": [
+        "Mobiliário abandonado servindo de esconderijo",
+        "Mobiliário/estrutura servindo de esconderijo",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Sem ocorrência",
+        "Tapumes servindo de esconderijo",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Área mal iluminada com circulação de pedestres"
+      ],
+      "rank": 1
+    },
+    {
+      "cells": [
+        "8aa8a0612cdffff",
+        "8aa8a061252ffff",
+        "8aa8a0612cd7fff"
+      ],
+      "logradouro": "Avenida Francisco Bicalho",
+      "n_cells": 3,
+      "crime_total": 119,
+      "max_bingo_count": 2,
+      "score": 1.6034,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb"
+      ],
+      "factors": [
+        "Ponto de retenção do tráfego",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio"
+      ],
+      "rank": 2
+    },
+    {
+      "cells": [
+        "8aa8a061242ffff",
+        "8aa8a0612557fff",
+        "8aa8a0612477fff",
+        "8aa8a061240ffff"
+      ],
+      "logradouro": "Avenida Francisco Bicalho",
+      "n_cells": 4,
+      "crime_total": 82,
+      "max_bingo_count": 2,
+      "score": 1.5457,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz",
+        "SMAS"
+      ],
+      "factors": [
+        "Cena de uso de drogas",
+        "Motocicletas trafegando no passeio",
+        "Pessoas em situação de rua",
+        "Ponto de retenção do tráfego",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Área mal iluminada com circulação de pedestres"
+      ],
+      "rank": 3
+    },
+    {
+      "cells": [
+        "8aa8a06a5a2ffff",
+        "8aa8a06a5a77fff",
+        "8aa8a06a5a67fff"
+      ],
+      "logradouro": "Rua Ulysses Guimaraes",
+      "n_cells": 3,
+      "crime_total": 24,
+      "max_bingo_count": 2,
+      "score": 0.6864,
+      "agencies": [
+        "RioLuz",
+        "Seconserva"
+      ],
+      "factors": [
+        "Mobiliário/estrutura servindo de esconderijo",
+        "Sem ocorrência",
+        "Vãos ou cavidades usados como esconderijo",
+        "Área mal iluminada com circulação de pedestres"
+      ],
+      "rank": 4
+    },
+    {
+      "cells": [
+        "8aa8a0612c17fff",
+        "8aa8a0612caffff"
+      ],
+      "logradouro": "Avenida Francisco Bicalho",
+      "n_cells": 2,
+      "crime_total": 40,
+      "max_bingo_count": 2,
+      "score": 0.5807,
+      "agencies": [
+        "CET-Rio",
+        "Comlurb",
+        "GM-Rio",
+        "RioLuz"
+      ],
+      "factors": [
+        "Motocicletas trafegando no passeio",
+        "Ponto de retenção do tráfego",
+        "Vegetação encobrindo iluminação pública",
+        "Vegetação obstruindo a visibilidade do passeio",
+        "Área mal iluminada com circulação de pedestres"
+      ],
+      "rank": 5
+    }
+  ],
+  "orcrim": {
+    "intersecting": [
+      {
+        "territorio": "FAVELA DA LAURA",
+        "orcrim": "TCP"
+      }
+    ],
+    "nearby": [
+      {
+        "territorio": "PROVIDÊNCIA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DO TURANO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DO LIVRAMENTO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DA CONCEIÇÃO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "PREDINHOS DO SÃO CARLOS",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DA FALLET",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DO FOGUETEIRO",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "VILA ANCHIETA",
+        "orcrim": "CV"
+      },
+      {
+        "territorio": "MORRO DO SÃO CARLOS",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DA COROA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DO QUEROSENE",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DA MINEIRA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "FAVELA PAULA MATOS",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "VILA MIMOSA",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DO SÃO CARLOS (BAIXO)",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "R. ITAPIRU - DIVISA (CPX DO SÃO CARLOS X FALLET FOGUETEIRO)",
+        "orcrim": "TCP"
+      },
+      {
+        "territorio": "MORRO DO ZINCO",
+        "orcrim": "TCP"
+      }
+    ],
+    "factions": [
+      "CV",
+      "TCP"
+    ],
+    "summary": "sob domínio direto de TCP; 17 território(s) sob influência nas proximidades"
+  },
+  "n_bingo_cells": 22,
+  "n_triple_bingo": 1
+}

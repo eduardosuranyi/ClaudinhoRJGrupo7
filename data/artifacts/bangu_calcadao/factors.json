@@ -1,0 +1,113 @@
+{
+  "orgaos": [
+    {
+      "orgao": "GM-Rio",
+      "total": 13,
+      "fatores": [
+        {
+          "fator": "Motocicletas trafegando no passeio",
+          "count": 13,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Cônego Vasconcelos",
+              "obs": "Moto trafegou e estacionou na calçada do Banco Bradesco."
+            },
+            {
+              "logradouro": "Avenida Cônego Vasconcelos",
+              "obs": "Motos trafegaram e estacionaram na calçada ao lado do banco Bradesco."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SEOP",
+      "total": 8,
+      "fatores": [
+        {
+          "fator": "Comércio irregular obstruindo a visibilidade do passeio",
+          "count": 5,
+          "exemplos": [
+            {
+              "logradouro": "Avenida de Santa Cruz",
+              "obs": "Equipe verificou que os comerciantes irregulares estavam vendendo suas mercadorias no lado oposto ao comércio. lado do muro da via férrea. Porém, alguns comerciantes regulares ocupam parte do passeio público para expor mercadorias."
+            },
+            {
+              "logradouro": "Rua Coronel Tamarindo",
+              "obs": "Equipe verificou que existe comércio irregular obstruindo a visibilidade do passeio."
+            }
+          ]
+        },
+        {
+          "fator": "Veículos de grande porte obstruindo a visibilidade",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Avenida de Santa Cruz",
+              "obs": "No dia em que a equipe foi até o local fazer a vistoria não foi visto veículos de grande porte obstruindo a visibilidade. Porém foi observado que vans passam pelo local coma utilização de aparelhos sonoros para chamar os passageiros e anunc"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SMAS",
+      "total": 3,
+      "fatores": [
+        {
+          "fator": "Pessoas em situação de rua",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Rua Coronel Tamarindo",
+              "obs": "Data: 17/01/2026 Horário: 14h"
+            },
+            {
+              "logradouro": "Avenida Cônego Vasconcelos",
+              "obs": "Data: 17/01/2026 Horário: 14h"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "CET-Rio",
+      "total": 2,
+      "fatores": [
+        {
+          "fator": "Ponto de retenção do tráfego",
+          "count": 2,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "Seconserva",
+      "total": 1,
+      "fatores": [
+        {
+          "fator": "Calçada estreita forçando pedestres à pista",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Fonseca",
+              "obs": "Calçada muito danificada, estreitando o pedestre a ir para pista"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Comlurb",
+      "total": 1,
+      "fatores": [
+        {
+          "fator": "Vegetação encobrindo iluminação pública",
+          "count": 1,
+          "exemplos": []
+        }
+      ]
+    }
+  ],
+  "total_fatores": 28
+}

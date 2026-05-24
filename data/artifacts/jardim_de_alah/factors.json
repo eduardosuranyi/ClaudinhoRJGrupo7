@@ -1,0 +1,262 @@
+{
+  "orgaos": [
+    {
+      "orgao": "SMAS",
+      "total": 56,
+      "fatores": [
+        {
+          "fator": "Pessoas em situação de rua",
+          "count": 53,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Ataulfo de Paiva",
+              "obs": "Uma pessoa em situação de rua e sem alterações nos outros itens elencados no trecho referenciado."
+            },
+            {
+              "logradouro": "Rua Borges de Medeiros",
+              "obs": "Cena de uso"
+            }
+          ]
+        },
+        {
+          "fator": "Cena de uso de drogas",
+          "count": 3,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "RioLuz",
+      "total": 33,
+      "fatores": [
+        {
+          "fator": "Área mal iluminada com circulação de pedestres",
+          "count": 32,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Afrânio de Melo Franco",
+              "obs": "Manutenção e implantação de PRJ LEDs"
+            },
+            {
+              "logradouro": "Avenida Epitácio Pessoa",
+              "obs": "Manutenção das luminárias apagadas e implantação de projetores."
+            }
+          ]
+        },
+        {
+          "fator": "Área mal iluminada com parada de veículos",
+          "count": 1,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "Comlurb",
+      "total": 24,
+      "fatores": [
+        {
+          "fator": "Vegetação encobrindo iluminação pública",
+          "count": 18,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Epitácio Pessoa",
+              "obs": "vegetacao encobrindo iluminacao publica"
+            },
+            {
+              "logradouro": "Avenida Borges de Medeiros",
+              "obs": "Vegetação arbórea existente no local está prejudicando a visibilidade da iluminação, comprometendo a adequada visualização e a segurança da via"
+            }
+          ]
+        },
+        {
+          "fator": "Vegetação obstruindo a visibilidade do passeio",
+          "count": 5,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Epitácio Pessoa",
+              "obs": "vegetacao obstruindo visibilidade do passeio"
+            }
+          ]
+        },
+        {
+          "fator": "Lixo/entulho forçando pedestres à pista",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Praça Paul Claudel",
+              "obs": "Portão da comlurb aberto causa aglomeração de PSR e desordem, espantando pedestres"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Seconserva",
+      "total": 17,
+      "fatores": [
+        {
+          "fator": "Vãos ou cavidades usados como esconderijo",
+          "count": 7,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Epitácio Pessoa",
+              "obs": "GUARDA CORPO DANIFICADO CONTRIBUINDO PARA REFUGIO"
+            },
+            {
+              "logradouro": "Avenida Borges de Medeiros",
+              "obs": "galeria obstruída em frente a borges de Medeiros"
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário/estrutura servindo de esconderijo",
+          "count": 4,
+          "exemplos": []
+        },
+        {
+          "fator": "Mobiliário urbano desviando pedestres para a pista",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Borges de Medeiros",
+              "obs": "Carrinhos de alimentos abandonados, estruta de Food Truck, sendo usado como depósito. Obstrução de logradouro público obstruindo a calçada e uso indevido de estacionamento"
+            }
+          ]
+        },
+        {
+          "fator": "Calçada estreita forçando pedestres à pista",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Epitácio Pessoa",
+              "obs": "Obra parada da concessionária"
+            },
+            {
+              "logradouro": "Avenida Epitácio Pessoa",
+              "obs": "Calçadas em estágio precário de conservação….obras de manutenção levando transtorno a população que precisa desviar para a rua"
+            }
+          ]
+        },
+        {
+          "fator": "Tapumes servindo de esconderijo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Borges de Medeiros",
+              "obs": "TAPUMES AGLOMERANDO PSR"
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário abandonado servindo de esconderijo",
+          "count": 1,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "SEOP",
+      "total": 9,
+      "fatores": [
+        {
+          "fator": "Comércio irregular obstruindo a visibilidade do passeio",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Afrânio de Melo Franco",
+              "obs": "Equipe verificou comércio irregular na Avenida Afrânio de Melo Franco vendendo mercadorias no ponto de ônibus ao lado oposto do número 445."
+            },
+            {
+              "logradouro": "Avenida Afrânio de Melo Franco",
+              "obs": "Uma barraca na calçada. Sem alterações nos outros itens elencados no trecho referenciado."
+            }
+          ]
+        },
+        {
+          "fator": "Estacionamento irregular forçando pedestres à pista",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Ataulfo de Paiva",
+              "obs": "Estacionamento irregular de taxi/carros de aplicativo devido ao espaço disponível e à venda de quentinhas irregulares no mesmo local. Destaca-se também a proximidade com trecho mal ocupado do canal do Jardim de Alah."
+            },
+            {
+              "logradouro": "Avenida Borges de Medeiros",
+              "obs": "SEOP RETIROU"
+            }
+          ]
+        },
+        {
+          "fator": "Veículos de grande porte obstruindo a visibilidade",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Borges de Medeiros",
+              "obs": "Foram observados veículos estacionados em desacordo com a legislação vigente e cabine de fiscalização de ônibus abandonada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "CET-Rio",
+      "total": 6,
+      "fatores": [
+        {
+          "fator": "Ponto de retenção do tráfego",
+          "count": 6,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Ataulfo de Paiva",
+              "obs": "Ponto de retenção de trânsito até a esquina da Epitacio Pessoa, grande fluxo de veículos"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "GM-Rio",
+      "total": 1,
+      "fatores": [
+        {
+          "fator": "Motocicletas trafegando no passeio",
+          "count": 1,
+          "exemplos": []
+        }
+      ]
+    },
+    {
+      "orgao": "SMTR",
+      "total": 1,
+      "fatores": [
+        {
+          "fator": "Ponto de ônibus com histórico de vandalismo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Afrânio de Melo Franco",
+              "obs": "Trecho com pouco comércio e, portanto, pouco movimento, gerando risco para o passante. Há ponto de ônibus no local que gera obstrução da calçada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Não atribuído",
+      "total": 1,
+      "fatores": [
+        {
+          "fator": "Sem ocorrência",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Vieira Souto",
+              "obs": "97333"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "total_fatores": 148
+}

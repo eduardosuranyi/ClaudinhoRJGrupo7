@@ -1,0 +1,240 @@
+{
+  "orgaos": [
+    {
+      "orgao": "RioLuz",
+      "total": 25,
+      "fatores": [
+        {
+          "fator": "Área mal iluminada com circulação de pedestres",
+          "count": 22,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Venceslau Brás",
+              "obs": "Entrada e saída de universidade. Necessidade de melhorar a iluminação das calçadas."
+            },
+            {
+              "logradouro": "Rua General Severiano",
+              "obs": "Melhoria da iluminação das calçadas. Grande circulação de pedestres por conta de ponto de ônibus."
+            }
+          ]
+        },
+        {
+          "fator": "Área mal iluminada com parada de veículos",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Pasteur",
+              "obs": "Área de parada de veículos, entradas e saídas de centro médico e universidades. Necessidade de iluminação em ponto de onibus e ciclovias."
+            },
+            {
+              "logradouro": "Avenida Pasteur",
+              "obs": "poste apagado"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Comlurb",
+      "total": 16,
+      "fatores": [
+        {
+          "fator": "Vegetação encobrindo iluminação pública",
+          "count": 8,
+          "exemplos": [
+            {
+              "logradouro": "Rua General Severiano",
+              "obs": "GALHO DE ÁRVORE CAINDO"
+            }
+          ]
+        },
+        {
+          "fator": "Vegetação obstruindo a visibilidade do passeio",
+          "count": 7,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Lauro Sodré",
+              "obs": "poda e capina em cima do tunel, onde há um acampamento constante de psr"
+            },
+            {
+              "logradouro": "Avenida Lauro Sodré",
+              "obs": "vegetação como refúgio para psr"
+            }
+          ]
+        },
+        {
+          "fator": "Lixo/entulho forçando pedestres à pista",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua da Passagem",
+              "obs": "lixo e entulhos abandonados"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SEOP",
+      "total": 8,
+      "fatores": [
+        {
+          "fator": "Comércio irregular obstruindo a visibilidade do passeio",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Venceslau Brás",
+              "obs": "Uma barraca de ambulante na frente do shopping."
+            },
+            {
+              "logradouro": "Avenida Lauro Sodré",
+              "obs": "Um vendedor ambulante (de coco) sem a TUAP visível. Outro ambulante em frente a saída e do metrô Botafogo."
+            }
+          ]
+        },
+        {
+          "fator": "Estacionamento irregular forçando pedestres à pista",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Rua Lauro Müller",
+              "obs": "Estacionamento na calçada. ⛔ ODJUS = Pedras soltas no calçadão. Sem alterações nos outros aspectos."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "CET-Rio",
+      "total": 7,
+      "fatores": [
+        {
+          "fator": "Ponto de retenção do tráfego",
+          "count": 7,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Lauro Sodré",
+              "obs": "Não foi identificado o Fator de Incidência Criminal."
+            },
+            {
+              "logradouro": "Avenida Pasteur",
+              "obs": "Não foi identificado o Fator de Incidência Criminal."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Seconserva",
+      "total": 6,
+      "fatores": [
+        {
+          "fator": "Calçada estreita forçando pedestres à pista",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Pasteur",
+              "obs": "Pedestre com dificuldade de andar na calçada . E índice de assalto também"
+            }
+          ]
+        },
+        {
+          "fator": "Vãos ou cavidades usados como esconderijo",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Lauro Sodré",
+              "obs": "gradil constantemente vandalizado para acesso indevido de motos; avaliar colocação de cadeado e soldagem"
+            },
+            {
+              "logradouro": "Avenida Lauro Sodré",
+              "obs": "túnel do pasmado com acampamento de psr, verificar possibilidade de construção de barreira"
+            }
+          ]
+        },
+        {
+          "fator": "Mobiliário urbano desviando pedestres para a pista",
+          "count": 1,
+          "exemplos": []
+        },
+        {
+          "fator": "Mobiliário/estrutura servindo de esconderijo",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Lauro Sodré",
+              "obs": "Passagem pode Servir como esconderijo ou rota de fuga."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "Não atribuído",
+      "total": 5,
+      "fatores": [
+        {
+          "fator": "Praças e Parques",
+          "count": 4,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Lauro Sodré",
+              "obs": "Não foi identificado o Fator de Incidência Criminal."
+            },
+            {
+              "logradouro": "Avenida Pasteur",
+              "obs": "Não foi identificado o Fator de Incidência Criminal."
+            }
+          ]
+        },
+        {
+          "fator": "Sem ocorrência",
+          "count": 1,
+          "exemplos": [
+            {
+              "logradouro": "Rua Lauro Muller",
+              "obs": "97968"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "SMAS",
+      "total": 3,
+      "fatores": [
+        {
+          "fator": "Pessoas em situação de rua",
+          "count": 3,
+          "exemplos": [
+            {
+              "logradouro": "Rua General Góis Monteiro",
+              "obs": "Morador de rua dormindo no papelão ocupando a calçada"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "orgao": "GM-Rio",
+      "total": 2,
+      "fatores": [
+        {
+          "fator": "Motocicletas trafegando no passeio",
+          "count": 2,
+          "exemplos": [
+            {
+              "logradouro": "Avenida Pasteur",
+              "obs": "Não foi identificado o Fator de Incidência Criminal."
+            },
+            {
+              "logradouro": "Avenida Lauro Sodré",
+              "obs": "Não identificado Fator de Incidência Criminal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "total_fatores": 72
+}

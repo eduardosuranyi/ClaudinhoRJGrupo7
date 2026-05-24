@@ -1,0 +1,3231 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46029137206849,
+              -22.87802294637679
+            ],
+            [
+              -43.459695648179284,
+              -22.877594965730683
+            ],
+            [
+              -43.4598257627061,
+              -22.87692655694376
+            ],
+            [
+              -43.46055159962196,
+              -22.876686129543216
+            ],
+            [
+              -43.46114732280272,
+              -22.877114111578226
+            ],
+            [
+              -43.4610172097761,
+              -22.87778251962485
+            ],
+            [
+              -43.46029137206849,
+              -22.87802294637679
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a066220ffff",
+        "crime_count": 3,
+        "crime_score": 0.1613,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1119,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.4599010285736,
+              -22.88002813259927
+            ],
+            [
+              -43.45930530286711,
+              -22.8796001608692
+            ],
+            [
+              -43.45943541825979,
+              -22.878931767693533
+            ],
+            [
+              -43.46016125785882,
+              -22.878691346988127
+            ],
+            [
+              -43.460756982856985,
+              -22.879119320107165
+            ],
+            [
+              -43.46062686896448,
+              -22.87978771254261
+            ],
+            [
+              -43.4599010285736,
+              -22.88002813259927
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0662227fff",
+        "crime_count": 0,
+        "crime_score": 0.0,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.0625,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.460756982856985,
+              -22.879119320107165
+            ],
+            [
+              -43.46016125785882,
+              -22.878691346988127
+            ],
+            [
+              -43.46029137206849,
+              -22.87802294637679
+            ],
+            [
+              -43.4610172097761,
+              -22.87778251962485
+            ],
+            [
+              -43.461612934065684,
+              -22.878210494132865
+            ],
+            [
+              -43.46148282135626,
+              -22.878878894003805
+            ],
+            [
+              -43.460756982856985,
+              -22.879119320107165
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a066222ffff",
+        "crime_count": 0,
+        "crime_score": 0.0806,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.0716,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46246888219934,
+              -22.87730165467714
+            ],
+            [
+              -43.4618731586186,
+              -22.876873678780157
+            ],
+            [
+              -43.46200327046211,
+              -22.876205263298665
+            ],
+            [
+              -43.46272910438596,
+              -22.87596482445487
+            ],
+            [
+              -43.46332482725758,
+              -22.87639280174083
+            ],
+            [
+              -43.4631947169145,
+              -22.877061216481593
+            ],
+            [
+              -43.46246888219934,
+              -22.87730165467714
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0662247fff",
+        "crime_count": 0,
+        "crime_score": 0.2581,
+        "factor_count": 4,
+        "factor_score": 0.5714,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.2719,
+        "top_crime_type": "",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Ponto de retenção do tráfego",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "GM-Rio",
+          "SEOP"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46332482725758,
+              -22.87639280174083
+            ],
+            [
+              -43.46272910438596,
+              -22.87596482445487
+            ],
+            [
+              -43.4628592150463,
+              -22.875296401538897
+            ],
+            [
+              -43.4635850470778,
+              -22.87505595664976
+            ],
+            [
+              -43.46418076924004,
+              -22.875483935324713
+            ],
+            [
+              -43.464050660080204,
+              -22.876152357499777
+            ],
+            [
+              -43.46332482725758,
+              -22.87639280174083
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a066224ffff",
+        "crime_count": 4,
+        "crime_score": 0.5161,
+        "factor_count": 5,
+        "factor_score": 0.7143,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.4366,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "SEOP"
+        ],
+        "justification": "BINGO 2/3: 4 ocorrências (predom. roubo a transeunte) + Comércio irregular obstruindo a visibilidade do passeio (+4) [CET-Rio, Comlurb, GM-Rio, SEOP]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46114732280272,
+              -22.877114111578226
+            ],
+            [
+              -43.46055159962196,
+              -22.876686129543216
+            ],
+            [
+              -43.460681712965744,
+              -22.87601771332125
+            ],
+            [
+              -43.461407547990056,
+              -22.87577727987474
+            ],
+            [
+              -43.46200327046211,
+              -22.876205263298665
+            ],
+            [
+              -43.4618731586186,
+              -22.876873678780157
+            ],
+            [
+              -43.46114732280272,
+              -22.877114111578226
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0662257fff",
+        "crime_count": 2,
+        "crime_score": 0.1935,
+        "factor_count": 1,
+        "factor_score": 0.1429,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1637,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Motocicletas trafegando no passeio"
+        ],
+        "factor_agencies": [
+          "GM-Rio"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46200327046211,
+              -22.876205263298665
+            ],
+            [
+              -43.461407547990056,
+              -22.87577727987474
+            ],
+            [
+              -43.46153766015076,
+              -22.875108856218123
+            ],
+            [
+              -43.46226349328321,
+              -22.874868416726045
+            ],
+            [
+              -43.4628592150463,
+              -22.875296401538897
+            ],
+            [
+              -43.46272910438596,
+              -22.87596482445487
+            ],
+            [
+              -43.46200327046211,
+              -22.876205263298665
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a066225ffff",
+        "crime_count": 3,
+        "crime_score": 0.1935,
+        "factor_count": 4,
+        "factor_score": 0.5714,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.2396,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Ponto de retenção do tráfego",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "GM-Rio",
+          "SEOP"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.462934495362404,
+              -22.87839803035289
+            ],
+            [
+              -43.46233877067307,
+              -22.8779700619832
+            ],
+            [
+              -43.46246888219934,
+              -22.87730165467714
+            ],
+            [
+              -43.4631947169145,
+              -22.877061216481593
+            ],
+            [
+              -43.46379044089457,
+              -22.877489186240332
+            ],
+            [
+              -43.46366033086878,
+              -22.878157592805554
+            ],
+            [
+              -43.462934495362404,
+              -22.87839803035289
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0662267fff",
+        "crime_count": 3,
+        "crime_score": 0.1935,
+        "factor_count": 1,
+        "factor_score": 0.1429,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1637,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Motocicletas trafegando no passeio"
+        ],
+        "factor_agencies": [
+          "GM-Rio"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46379044089457,
+              -22.877489186240332
+            ],
+            [
+              -43.4631947169145,
+              -22.877061216481593
+            ],
+            [
+              -43.46332482725758,
+              -22.87639280174083
+            ],
+            [
+              -43.464050660080204,
+              -22.876152357499777
+            ],
+            [
+              -43.464646383350754,
+              -22.87658032864757
+            ],
+            [
+              -43.46451627450823,
+              -22.877248742647325
+            ],
+            [
+              -43.46379044089457,
+              -22.877489186240332
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a066226ffff",
+        "crime_count": 2,
+        "crime_score": 0.5806,
+        "factor_count": 6,
+        "factor_score": 0.8571,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.5358,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": "BINGO 2/3: 2 ocorrências (predom. roubo a transeunte) + Comércio irregular obstruindo a visibilidade do passeio (+5) [CET-Rio, Comlurb, GM-Rio, SEOP, SMAS]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.461612934065684,
+              -22.878210494132865
+            ],
+            [
+              -43.4610172097761,
+              -22.87778251962485
+            ],
+            [
+              -43.46114732280272,
+              -22.877114111578226
+            ],
+            [
+              -43.4618731586186,
+              -22.876873678780157
+            ],
+            [
+              -43.46246888219934,
+              -22.87730165467714
+            ],
+            [
+              -43.46233877067307,
+              -22.8779700619832
+            ],
+            [
+              -43.461612934065684,
+              -22.878210494132865
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0662277fff",
+        "crime_count": 2,
+        "crime_score": 0.1935,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.128,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46036664031357,
+              -22.88112448180139
+            ],
+            [
+              -43.45977091349805,
+              -22.880696517598807
+            ],
+            [
+              -43.4599010285736,
+              -22.88002813259927
+            ],
+            [
+              -43.46062686896448,
+              -22.87978771254261
+            ],
+            [
+              -43.46122259507153,
+              -22.880215678134217
+            ],
+            [
+              -43.46109248149621,
+              -22.880884062393434
+            ],
+            [
+              -43.46036664031357,
+              -22.88112448180139
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a066230ffff",
+        "crime_count": 0,
+        "crime_score": 0.0,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 4,
+        "signal_score": 0.5,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.125,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 4 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.4625441608694,
+              -22.88040321213234
+            ],
+            [
+              -43.461948434362405,
+              -22.8799752526794
+            ],
+            [
+              -43.46207854675459,
+              -22.879306860984464
+            ],
+            [
+              -43.46280438415338,
+              -22.879066429483174
+            ],
+            [
+              -43.46340010995123,
+              -22.87949439032522
+            ],
+            [
+              -43.463269999059484,
+              -22.880162781279395
+            ],
+            [
+              -43.4625441608694,
+              -22.88040321213234
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0662347fff",
+        "crime_count": 1,
+        "crime_score": 0.0968,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 4,
+        "signal_score": 0.5,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.1734,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 4 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46340010995123,
+              -22.87949439032522
+            ],
+            [
+              -43.46280438415338,
+              -22.879066429483174
+            ],
+            [
+              -43.462934495362404,
+              -22.87839803035289
+            ],
+            [
+              -43.46366033086878,
+              -22.878157592805554
+            ],
+            [
+              -43.46425605595722,
+              -22.878585555036693
+            ],
+            [
+              -43.464125946248735,
+              -22.879253953426048
+            ],
+            [
+              -43.46340010995123,
+              -22.87949439032522
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a066234ffff",
+        "crime_count": 1,
+        "crime_score": 0.1774,
+        "factor_count": 1,
+        "factor_score": 0.1429,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1557,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Motocicletas trafegando no passeio"
+        ],
+        "factor_agencies": [
+          "GM-Rio"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46122259507153,
+              -22.880215678134217
+            ],
+            [
+              -43.46062686896448,
+              -22.87978771254261
+            ],
+            [
+              -43.460756982856985,
+              -22.879119320107165
+            ],
+            [
+              -43.46148282135626,
+              -22.878878894003805
+            ],
+            [
+              -43.46207854675459,
+              -22.879306860984464
+            ],
+            [
+              -43.461948434362405,
+              -22.8799752526794
+            ],
+            [
+              -43.46122259507153,
+              -22.880215678134217
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0662357fff",
+        "crime_count": 0,
+        "crime_score": 0.0161,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 4,
+        "signal_score": 0.5,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.133,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 4 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46207854675459,
+              -22.879306860984464
+            ],
+            [
+              -43.46148282135626,
+              -22.878878894003805
+            ],
+            [
+              -43.461612934065684,
+              -22.878210494132865
+            ],
+            [
+              -43.46233877067307,
+              -22.8779700619832
+            ],
+            [
+              -43.462934495362404,
+              -22.87839803035289
+            ],
+            [
+              -43.46280438415338,
+              -22.879066429483174
+            ],
+            [
+              -43.46207854675459,
+              -22.879306860984464
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a066235ffff",
+        "crime_count": 0,
+        "crime_score": 0.1129,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.0877,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46300977641003,
+              -22.881499547575817
+            ],
+            [
+              -43.462414048794436,
+              -22.881071595650962
+            ],
+            [
+              -43.4625441608694,
+              -22.88040321213234
+            ],
+            [
+              -43.463269999059484,
+              -22.880162781279395
+            ],
+            [
+              -43.46386572596579,
+              -22.88059073459343
+            ],
+            [
+              -43.46373561539132,
+              -22.881259117371197
+            ],
+            [
+              -43.46300977641003,
+              -22.881499547575817
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0662367fff",
+        "crime_count": 0,
+        "crime_score": 0.0645,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 3,
+        "signal_score": 0.375,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.126,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 3 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46386572596579,
+              -22.88059073459343
+            ],
+            [
+              -43.463269999059484,
+              -22.880162781279395
+            ],
+            [
+              -43.46340010995123,
+              -22.87949439032522
+            ],
+            [
+              -43.464125946248735,
+              -22.879253953426048
+            ],
+            [
+              -43.46472167244548,
+              -22.879681908129246
+            ],
+            [
+              -43.46459156305432,
+              -22.880350298342414
+            ],
+            [
+              -43.46386572596579,
+              -22.88059073459343
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a066236ffff",
+        "crime_count": 3,
+        "crime_score": 0.2581,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.1916,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "BINGO 2/3: 3 ocorrências (predom. roubo de celular) + 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46168820871208,
+              -22.88131202045727
+            ],
+            [
+              -43.46109248149621,
+              -22.880884062393434
+            ],
+            [
+              -43.46122259507153,
+              -22.880215678134217
+            ],
+            [
+              -43.461948434362405,
+              -22.8799752526794
+            ],
+            [
+              -43.4625441608694,
+              -22.88040321213234
+            ],
+            [
+              -43.462414048794436,
+              -22.881071595650962
+            ],
+            [
+              -43.46168820871208,
+              -22.88131202045727
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0662377fff",
+        "crime_count": 0,
+        "crime_score": 0.0161,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 5,
+        "signal_score": 0.625,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.1643,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 5 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.470322907456826,
+              -22.8753250565989
+            ],
+            [
+              -43.469727184415625,
+              -22.874897101088532
+            ],
+            [
+              -43.469857286705974,
+              -22.874228666271375
+            ],
+            [
+              -43.47058311053633,
+              -22.873988187706836
+            ],
+            [
+              -43.47117883286598,
+              -22.874416144606446
+            ],
+            [
+              -43.471048732076845,
+              -22.875084578681307
+            ],
+            [
+              -43.470322907456826,
+              -22.8753250565989
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663197fff",
+        "crime_count": 0,
+        "crime_score": 0.1129,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.119,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.47211007958588,
+              -22.87660889579513
+            ],
+            [
+              -43.47151435504208,
+              -22.876180953952318
+            ],
+            [
+              -43.47164445551361,
+              -22.8755125280527
+            ],
+            [
+              -43.472370279027565,
+              -22.87527204473852
+            ],
+            [
+              -43.47296600285925,
+              -22.87569998797072
+            ],
+            [
+              -43.47283590388914,
+              -22.87636841312767
+            ],
+            [
+              -43.47211007958588,
+              -22.87660889579513
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a06631a7fff",
+        "crime_count": 0,
+        "crime_score": 0.0806,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.1028,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.470788529632486,
+              -22.876421431222983
+            ],
+            [
+              -43.47019280548402,
+              -22.87599348324092
+            ],
+            [
+              -43.470322907456826,
+              -22.8753250565989
+            ],
+            [
+              -43.471048732076845,
+              -22.875084578681307
+            ],
+            [
+              -43.47164445551361,
+              -22.8755125280527
+            ],
+            [
+              -43.47151435504208,
+              -22.876180953952318
+            ],
+            [
+              -43.470788529632486,
+              -22.876421431222983
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a06631b7fff",
+        "crime_count": 4,
+        "crime_score": 0.2419,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 8,
+        "signal_score": 1.0,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.371,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 8 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46550232273057,
+              -22.875671457575404
+            ],
+            [
+              -43.46490660016981,
+              -22.87524348503857
+            ],
+            [
+              -43.46503670814636,
+              -22.8745750554296
+            ],
+            [
+              -43.46576253718296,
+              -22.874334599098752
+            ],
+            [
+              -43.46635825903366,
+              -22.874762573024643
+            ],
+            [
+              -43.466228152557846,
+              -22.87543100189228
+            ],
+            [
+              -43.46550232273057,
+              -22.875671457575404
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663507fff",
+        "crime_count": 9,
+        "crime_score": 0.7581,
+        "factor_count": 6,
+        "factor_score": 0.8571,
+        "signal_count": 3,
+        "signal_score": 0.375,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.0306,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "GM-Rio",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 3/3: 9 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+5) [Comlurb, GM-Rio, SEOP, SMAS, Seconserva] + 3 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46418076924004,
+              -22.875483935324713
+            ],
+            [
+              -43.4635850470778,
+              -22.87505595664976
+            ],
+            [
+              -43.46371515655494,
+              -22.874387526299714
+            ],
+            [
+              -43.46444098669375,
+              -22.874147075365652
+            ],
+            [
+              -43.46503670814636,
+              -22.8745750554296
+            ],
+            [
+              -43.46490660016981,
+              -22.87524348503857
+            ],
+            [
+              -43.46418076924004,
+              -22.875483935324713
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663517fff",
+        "crime_count": 5,
+        "crime_score": 0.5968,
+        "factor_count": 6,
+        "factor_score": 0.8571,
+        "signal_count": 3,
+        "signal_score": 0.375,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 0.9096,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": "BINGO 3/3: 5 ocorrências (predom. roubo a transeunte) + Comércio irregular obstruindo a visibilidade do passeio (+5) [CET-Rio, Comlurb, GM-Rio, SEOP, SMAS] + 3 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.465967938740214,
+              -22.876767844018676
+            ],
+            [
+              -43.465372215071376,
+              -22.876339879009297
+            ],
+            [
+              -43.46550232273057,
+              -22.875671457575404
+            ],
+            [
+              -43.466228152557846,
+              -22.87543100189228
+            ],
+            [
+              -43.46682387551648,
+              -22.87585896829077
+            ],
+            [
+              -43.46669376935807,
+              -22.876527388983234
+            ],
+            [
+              -43.465967938740214,
+              -22.876767844018676
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663527fff",
+        "crime_count": 4,
+        "crime_score": 0.7581,
+        "factor_count": 7,
+        "factor_score": 1.0,
+        "signal_count": 4,
+        "signal_score": 0.5,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.1311,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 3/3: 4 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+6) [CET-Rio, Comlurb, GM-Rio, SEOP, SMAS, Seconserva] + 4 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46682387551648,
+              -22.87585896829077
+            ],
+            [
+              -43.466228152557846,
+              -22.87543100189228
+            ],
+            [
+              -43.46635825903366,
+              -22.874762573024643
+            ],
+            [
+              -43.467084086967276,
+              -22.874522111297075
+            ],
+            [
+              -43.46767980921545,
+              -22.874950079084677
+            ],
+            [
+              -43.4675497042405,
+              -22.875618507210703
+            ],
+            [
+              -43.46682387551648,
+              -22.87585896829077
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a066352ffff",
+        "crime_count": 6,
+        "crime_score": 0.5645,
+        "factor_count": 2,
+        "factor_score": 0.2857,
+        "signal_count": 3,
+        "signal_score": 0.375,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.4474,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Pessoas em situação de rua"
+        ],
+        "factor_agencies": [
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 6 ocorrências (predom. roubo a transeunte) + 3 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.464646383350754,
+              -22.87658032864757
+            ],
+            [
+              -43.464050660080204,
+              -22.876152357499777
+            ],
+            [
+              -43.46418076924004,
+              -22.875483935324713
+            ],
+            [
+              -43.46490660016981,
+              -22.87524348503857
+            ],
+            [
+              -43.46550232273057,
+              -22.875671457575404
+            ],
+            [
+              -43.465372215071376,
+              -22.876339879009297
+            ],
+            [
+              -43.464646383350754,
+              -22.87658032864757
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663537fff",
+        "crime_count": 14,
+        "crime_score": 1.0,
+        "factor_count": 7,
+        "factor_score": 1.0,
+        "signal_count": 4,
+        "signal_score": 0.5,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.3125,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 3/3: 14 ocorrências (predom. roubo de celular) + Calçada estreita forçando pedestres à pista (+6) [CET-Rio, Comlurb, GM-Rio, SEOP, SMAS, Seconserva] + 4 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.468686355699845,
+              -22.88024439231904
+            ],
+            [
+              -43.46809062831023,
+              -22.87981645603375
+            ],
+            [
+              -43.468220733516304,
+              -22.879148059868783
+            ],
+            [
+              -43.46894656461095,
+              -22.87890760073106
+            ],
+            [
+              -43.469542291289514,
+              -22.879335538405734
+            ],
+            [
+              -43.46941218758452,
+              -22.88000393382871
+            ],
+            [
+              -43.468686355699845,
+              -22.88024439231904
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c07fff",
+        "crime_count": 2,
+        "crime_score": 0.1774,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.0887,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.469542291289514,
+              -22.879335538405734
+            ],
+            [
+              -43.46894656461095,
+              -22.87890760073106
+            ],
+            [
+              -43.46907666863346,
+              -22.87823919713183
+            ],
+            [
+              -43.469802497833406,
+              -22.87799873194939
+            ],
+            [
+              -43.47039822380066,
+              -22.87842667101344
+            ],
+            [
+              -43.4702681212793,
+              -22.879095073870513
+            ],
+            [
+              -43.469542291289514,
+              -22.879335538405734
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c0ffff",
+        "crime_count": 2,
+        "crime_score": 0.3065,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.2158,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "BINGO 2/3: 2 ocorrências (predom. roubo a transeunte) + 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.467364795321195,
+              -22.88005690912635
+            ],
+            [
+              -43.46676906832857,
+              -22.879628966701517
+            ],
+            [
+              -43.466899175035586,
+              -22.87896056979483
+            ],
+            [
+              -43.46762500723432,
+              -22.87872011605465
+            ],
+            [
+              -43.468220733516304,
+              -22.879148059868783
+            ],
+            [
+              -43.46809062831023,
+              -22.87981645603375
+            ],
+            [
+              -43.467364795321195,
+              -22.88005690912635
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c17fff",
+        "crime_count": 0,
+        "crime_score": 0.1129,
+        "factor_count": 1,
+        "factor_score": 0.1429,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1234,
+        "top_crime_type": "",
+        "factor_types": [
+          "Pessoas em situação de rua"
+        ],
+        "factor_agencies": [
+          "SMAS"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.468220733516304,
+              -22.879148059868783
+            ],
+            [
+              -43.46762500723432,
+              -22.87872011605465
+            ],
+            [
+              -43.46775511275786,
+              -22.87805171171352
+            ],
+            [
+              -43.468480943062396,
+              -22.87781125192839
+            ],
+            [
+              -43.46907666863346,
+              -22.87823919713183
+            ],
+            [
+              -43.46894656461095,
+              -22.87890760073106
+            ],
+            [
+              -43.468220733516304,
+              -22.879148059868783
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c1ffff",
+        "crime_count": 0,
+        "crime_score": 0.1129,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.0877,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46915197930843,
+              -22.881340709063643
+            ],
+            [
+              -43.468556250811254,
+              -22.88091278030754
+            ],
+            [
+              -43.468686355699845,
+              -22.88024439231904
+            ],
+            [
+              -43.46941218758452,
+              -22.88000393382871
+            ],
+            [
+              -43.47000791537048,
+              -22.880431863974252
+            ],
+            [
+              -43.46987781198303,
+              -22.881100251220648
+            ],
+            [
+              -43.46915197930843,
+              -22.881340709063643
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c27fff",
+        "crime_count": 2,
+        "crime_score": 0.1774,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.0887,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.47000791537048,
+              -22.880431863974252
+            ],
+            [
+              -43.46941218758452,
+              -22.88000393382871
+            ],
+            [
+              -43.469542291289514,
+              -22.879335538405734
+            ],
+            [
+              -43.4702681212793,
+              -22.879095073870513
+            ],
+            [
+              -43.47086384835381,
+              -22.879523005405478
+            ],
+            [
+              -43.470733746150025,
+              -22.88019140008621
+            ],
+            [
+              -43.47000791537048,
+              -22.880431863974252
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c2ffff",
+        "crime_count": 2,
+        "crime_score": 0.2903,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.2076,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "BINGO 2/3: 2 ocorrências (predom. roubo a transeunte) + 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46783041703201,
+              -22.88115323275259
+            ],
+            [
+              -43.467234688931605,
+              -22.880725297856667
+            ],
+            [
+              -43.467364795321195,
+              -22.88005690912635
+            ],
+            [
+              -43.46809062831023,
+              -22.87981645603375
+            ],
+            [
+              -43.468686355699845,
+              -22.88024439231904
+            ],
+            [
+              -43.468556250811254,
+              -22.88091278030754
+            ],
+            [
+              -43.46783041703201,
+              -22.88115323275259
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c37fff",
+        "crime_count": 1,
+        "crime_score": 0.1613,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.0806,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.47171977825801,
+              -22.878614133358152
+            ],
+            [
+              -43.471124051895245,
+              -22.878186200433735
+            ],
+            [
+              -43.47125415323289,
+              -22.877517790142978
+            ],
+            [
+              -43.47197997943197,
+              -22.877277313519183
+            ],
+            [
+              -43.47257570508275,
+              -22.87770524783306
+            ],
+            [
+              -43.47244560524648,
+              -22.87837365738122
+            ],
+            [
+              -43.47171977825801,
+              -22.878614133358152
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c47fff",
+        "crime_count": 0,
+        "crime_score": 0.1452,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.1351,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.47257570508275,
+              -22.87770524783306
+            ],
+            [
+              -43.47197997943197,
+              -22.877277313519183
+            ],
+            [
+              -43.47211007958588,
+              -22.87660889579513
+            ],
+            [
+              -43.47283590388914,
+              -22.87636841312767
+            ],
+            [
+              -43.47343162882765,
+              -22.87679634883099
+            ],
+            [
+              -43.473301530175206,
+              -22.87746476581228
+            ],
+            [
+              -43.47257570508275,
+              -22.87770524783306
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c4ffff",
+        "crime_count": 0,
+        "crime_score": 0.0161,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.0706,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.47039822380066,
+              -22.87842667101344
+            ],
+            [
+              -43.469802497833406,
+              -22.87799873194939
+            ],
+            [
+              -43.46993260067231,
+              -22.877330320916297
+            ],
+            [
+              -43.47065842797724,
+              -22.877089849689547
+            ],
+            [
+              -43.47125415323289,
+              -22.877517790142978
+            ],
+            [
+              -43.471124051895245,
+              -22.878186200433735
+            ],
+            [
+              -43.47039822380066,
+              -22.87842667101344
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c57fff",
+        "crime_count": 4,
+        "crime_score": 0.3387,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 6,
+        "signal_score": 0.75,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.3568,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "BINGO 2/3: 4 ocorrências (predom. roubo de celular) + 6 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.47125415323289,
+              -22.877517790142978
+            ],
+            [
+              -43.47065842797724,
+              -22.877089849689547
+            ],
+            [
+              -43.470788529632486,
+              -22.876421431222983
+            ],
+            [
+              -43.47151435504208,
+              -22.876180953952318
+            ],
+            [
+              -43.47211007958588,
+              -22.87660889579513
+            ],
+            [
+              -43.47197997943197,
+              -22.877277313519183
+            ],
+            [
+              -43.47125415323289,
+              -22.877517790142978
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c5ffff",
+        "crime_count": 1,
+        "crime_score": 0.2097,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 6,
+        "signal_score": 0.75,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.2924,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 6 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.47086384835381,
+              -22.879523005405478
+            ],
+            [
+              -43.4702681212793,
+              -22.879095073870513
+            ],
+            [
+              -43.47039822380066,
+              -22.87842667101344
+            ],
+            [
+              -43.471124051895245,
+              -22.878186200433735
+            ],
+            [
+              -43.47171977825801,
+              -22.878614133358152
+            ],
+            [
+              -43.47158967723796,
+              -22.87928253547279
+            ],
+            [
+              -43.47086384835381,
+              -22.879523005405478
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c77fff",
+        "crime_count": 4,
+        "crime_score": 0.2903,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.2076,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "BINGO 2/3: 4 ocorrências (predom. roubo de celular) + 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46557761584875,
+              -22.878773068184078
+            ],
+            [
+              -43.46498189036183,
+              -22.8783451120917
+            ],
+            [
+              -43.465111998887004,
+              -22.877676706267582
+            ],
+            [
+              -43.465837831398396,
+              -22.877436257277164
+            ],
+            [
+              -43.46643355617524,
+              -22.877864214758713
+            ],
+            [
+              -43.46630344915081,
+              -22.87853261984146
+            ],
+            [
+              -43.46557761584875,
+              -22.878773068184078
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c87fff",
+        "crime_count": 0,
+        "crime_score": 0.1935,
+        "factor_count": 5,
+        "factor_score": 0.7143,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.3378,
+        "top_crime_type": "",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "GM-Rio",
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": "BINGO 2/3: Comércio irregular obstruindo a visibilidade do passeio (+4) [CET-Rio, GM-Rio, SEOP, SMAS] + 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46643355617524,
+              -22.877864214758713
+            ],
+            [
+              -43.465837831398396,
+              -22.877436257277164
+            ],
+            [
+              -43.465967938740214,
+              -22.876767844018676
+            ],
+            [
+              -43.46669376935807,
+              -22.876527388983234
+            ],
+            [
+              -43.46728949342456,
+              -22.876955347853954
+            ],
+            [
+              -43.46715938758358,
+              -22.877623760370913
+            ],
+            [
+              -43.46643355617524,
+              -22.877864214758713
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c8ffff",
+        "crime_count": 0,
+        "crime_score": 0.2258,
+        "factor_count": 6,
+        "factor_score": 0.8571,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.3897,
+        "top_crime_type": "",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "GM-Rio",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: Calçada estreita forçando pedestres à pista (+5) [CET-Rio, GM-Rio, SEOP, SMAS, Seconserva] + 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46425605595722,
+              -22.878585555036693
+            ],
+            [
+              -43.46366033086878,
+              -22.878157592805554
+            ],
+            [
+              -43.46379044089457,
+              -22.877489186240332
+            ],
+            [
+              -43.46451627450823,
+              -22.877248742647325
+            ],
+            [
+              -43.465111998887004,
+              -22.877676706267582
+            ],
+            [
+              -43.46498189036183,
+              -22.8783451120917
+            ],
+            [
+              -43.46425605595722,
+              -22.878585555036693
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c97fff",
+        "crime_count": 1,
+        "crime_score": 0.3065,
+        "factor_count": 5,
+        "factor_score": 0.7143,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 0.5915,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "GM-Rio",
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": "BINGO 3/3: 1 ocorrências (predom. roubo a transeunte) + Comércio irregular obstruindo a visibilidade do passeio (+4) [CET-Rio, GM-Rio, SEOP, SMAS] + 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.465111998887004,
+              -22.877676706267582
+            ],
+            [
+              -43.46451627450823,
+              -22.877248742647325
+            ],
+            [
+              -43.464646383350754,
+              -22.87658032864757
+            ],
+            [
+              -43.465372215071376,
+              -22.876339879009297
+            ],
+            [
+              -43.465967938740214,
+              -22.876767844018676
+            ],
+            [
+              -43.465837831398396,
+              -22.877436257277164
+            ],
+            [
+              -43.465111998887004,
+              -22.877676706267582
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663c9ffff",
+        "crime_count": 10,
+        "crime_score": 0.6613,
+        "factor_count": 7,
+        "factor_score": 1.0,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.6119,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 10 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+6) [CET-Rio, Comlurb, GM-Rio, SEOP, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46604323423593,
+              -22.879869414396353
+            ],
+            [
+              -43.465447507640924,
+              -22.879441465832233
+            ],
+            [
+              -43.46557761584875,
+              -22.878773068184078
+            ],
+            [
+              -43.46630344915081,
+              -22.87853261984146
+            ],
+            [
+              -43.466899175035586,
+              -22.87896056979483
+            ],
+            [
+              -43.46676906832857,
+              -22.879628966701517
+            ],
+            [
+              -43.46604323423593,
+              -22.879869414396353
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663ca7fff",
+        "crime_count": 0,
+        "crime_score": 0.1935,
+        "factor_count": 2,
+        "factor_score": 0.2857,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1994,
+        "top_crime_type": "",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Pessoas em situação de rua"
+        ],
+        "factor_agencies": [
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.466899175035586,
+              -22.87896056979483
+            ],
+            [
+              -43.46630344915081,
+              -22.87853261984146
+            ],
+            [
+              -43.46643355617524,
+              -22.877864214758713
+            ],
+            [
+              -43.46715938758358,
+              -22.877623760370913
+            ],
+            [
+              -43.46775511275786,
+              -22.87805171171352
+            ],
+            [
+              -43.46762500723432,
+              -22.87872011605465
+            ],
+            [
+              -43.466899175035586,
+              -22.87896056979483
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663caffff",
+        "crime_count": 0,
+        "crime_score": 0.0,
+        "factor_count": 2,
+        "factor_score": 0.2857,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1027,
+        "top_crime_type": "",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Pessoas em situação de rua"
+        ],
+        "factor_agencies": [
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46472167244548,
+              -22.879681908129246
+            ],
+            [
+              -43.464125946248735,
+              -22.879253953426048
+            ],
+            [
+              -43.46425605595722,
+              -22.878585555036693
+            ],
+            [
+              -43.46498189036183,
+              -22.8783451120917
+            ],
+            [
+              -43.46557761584875,
+              -22.878773068184078
+            ],
+            [
+              -43.465447507640924,
+              -22.879441465832233
+            ],
+            [
+              -43.46472167244548,
+              -22.879681908129246
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663cb7fff",
+        "crime_count": 1,
+        "crime_score": 0.2258,
+        "factor_count": 3,
+        "factor_score": 0.4286,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.2513,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua"
+        ],
+        "factor_agencies": [
+          "GM-Rio",
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46861104740239,
+              -22.877142840153226
+            ],
+            [
+              -43.46801532293889,
+              -22.876714887421375
+            ],
+            [
+              -43.468145427596376,
+              -22.87604646747062
+            ],
+            [
+              -43.46887125521636,
+              -22.87580600099365
+            ],
+            [
+              -43.46946697896884,
+              -22.876233955114753
+            ],
+            [
+              -43.4693368758124,
+              -22.876902374323546
+            ],
+            [
+              -43.46861104740239,
+              -22.877142840153226
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663cc7fff",
+        "crime_count": 0,
+        "crime_score": 0.3065,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 6,
+        "signal_score": 0.75,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.3408,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 6 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46946697896884,
+              -22.876233955114753
+            ],
+            [
+              -43.46887125521636,
+              -22.87580600099365
+            ],
+            [
+              -43.469001358690306,
+              -22.87513757360949
+            ],
+            [
+              -43.469727184415625,
+              -22.874897101088532
+            ],
+            [
+              -43.470322907456826,
+              -22.8753250565989
+            ],
+            [
+              -43.47019280548402,
+              -22.87599348324092
+            ],
+            [
+              -43.46946697896884,
+              -22.876233955114753
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663ccffff",
+        "crime_count": 3,
+        "crime_score": 0.371,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 6,
+        "signal_score": 0.75,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.373,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "BINGO 2/3: 3 ocorrências (predom. roubo de celular) + 6 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46728949342456,
+              -22.876955347853954
+            ],
+            [
+              -43.46669376935807,
+              -22.876527388983234
+            ],
+            [
+              -43.46682387551648,
+              -22.87585896829077
+            ],
+            [
+              -43.4675497042405,
+              -22.875618507210703
+            ],
+            [
+              -43.468145427596376,
+              -22.87604646747062
+            ],
+            [
+              -43.46801532293889,
+              -22.876714887421375
+            ],
+            [
+              -43.46728949342456,
+              -22.876955347853954
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663cd7fff",
+        "crime_count": 0,
+        "crime_score": 0.3226,
+        "factor_count": 1,
+        "factor_score": 0.1429,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.197,
+        "top_crime_type": "",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista"
+        ],
+        "factor_agencies": [
+          "Seconserva"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.468145427596376,
+              -22.87604646747062
+            ],
+            [
+              -43.4675497042405,
+              -22.875618507210703
+            ],
+            [
+              -43.46767980921545,
+              -22.874950079084677
+            ],
+            [
+              -43.468405636045304,
+              -22.87470961196039
+            ],
+            [
+              -43.469001358690306,
+              -22.87513757360949
+            ],
+            [
+              -43.46887125521636,
+              -22.87580600099365
+            ],
+            [
+              -43.468145427596376,
+              -22.87604646747062
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663cdffff",
+        "crime_count": 10,
+        "crime_score": 0.4677,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.2964,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "BINGO 2/3: 10 ocorrências (predom. roubo a transeunte) + 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46907666863346,
+              -22.87823919713183
+            ],
+            [
+              -43.468480943062396,
+              -22.87781125192839
+            ],
+            [
+              -43.46861104740239,
+              -22.877142840153226
+            ],
+            [
+              -43.4693368758124,
+              -22.876902374323546
+            ],
+            [
+              -43.46993260067231,
+              -22.877330320916297
+            ],
+            [
+              -43.469802497833406,
+              -22.87799873194939
+            ],
+            [
+              -43.46907666863346,
+              -22.87823919713183
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663ce7fff",
+        "crime_count": 3,
+        "crime_score": 0.2419,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 4,
+        "signal_score": 0.5,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.246,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 4 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46993260067231,
+              -22.877330320916297
+            ],
+            [
+              -43.4693368758124,
+              -22.876902374323546
+            ],
+            [
+              -43.46946697896884,
+              -22.876233955114753
+            ],
+            [
+              -43.47019280548402,
+              -22.87599348324092
+            ],
+            [
+              -43.470788529632486,
+              -22.876421431222983
+            ],
+            [
+              -43.47065842797724,
+              -22.877089849689547
+            ],
+            [
+              -43.46993260067231,
+              -22.877330320916297
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663ceffff",
+        "crime_count": 3,
+        "crime_score": 0.3387,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 6,
+        "signal_score": 0.75,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.3568,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "BINGO 2/3: 3 ocorrências (predom. roubo a transeunte) + 6 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46775511275786,
+              -22.87805171171352
+            ],
+            [
+              -43.46715938758358,
+              -22.877623760370913
+            ],
+            [
+              -43.46728949342456,
+              -22.876955347853954
+            ],
+            [
+              -43.46801532293889,
+              -22.876714887421375
+            ],
+            [
+              -43.46861104740239,
+              -22.877142840153226
+            ],
+            [
+              -43.468480943062396,
+              -22.87781125192839
+            ],
+            [
+              -43.46775511275786,
+              -22.87805171171352
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663cf7fff",
+        "crime_count": 0,
+        "crime_score": 0.0484,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 1,
+        "signal_score": 0.125,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.0554,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.47047354087634,
+              -22.88152817383669
+            ],
+            [
+              -43.46987781198303,
+              -22.881100251220648
+            ],
+            [
+              -43.47000791537048,
+              -22.880431863974252
+            ],
+            [
+              -43.470733746150025,
+              -22.88019140008621
+            ],
+            [
+              -43.47132947433171,
+              -22.880619324091754
+            ],
+            [
+              -43.471199372445525,
+              -22.881287710595796
+            ],
+            [
+              -43.47047354087634,
+              -22.88152817383669
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663d57fff",
+        "crime_count": 2,
+        "crime_score": 0.1613,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.0806,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.47132947433171,
+              -22.880619324091754
+            ],
+            [
+              -43.470733746150025,
+              -22.88019140008621
+            ],
+            [
+              -43.47086384835381,
+              -22.879523005405478
+            ],
+            [
+              -43.47158967723796,
+              -22.87928253547279
+            ],
+            [
+              -43.47218540470777,
+              -22.879710460867855
+            ],
+            [
+              -43.47205530400534,
+              -22.880378854806047
+            ],
+            [
+              -43.47132947433171,
+              -22.880619324091754
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663d5ffff",
+        "crime_count": 2,
+        "crime_score": 0.1935,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 2,
+        "signal_score": 0.25,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.1592,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": "sinal 1/3: 2 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.4665088540485,
+              -22.88096574490375
+            ],
+            [
+              -43.46591312634549,
+              -22.880537803868222
+            ],
+            [
+              -43.46604323423593,
+              -22.879869414396353
+            ],
+            [
+              -43.46676906832857,
+              -22.879628966701517
+            ],
+            [
+              -43.467364795321195,
+              -22.88005690912635
+            ],
+            [
+              -43.467234688931605,
+              -22.880725297856667
+            ],
+            [
+              -43.4665088540485,
+              -22.88096574490375
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663d8ffff",
+        "crime_count": 4,
+        "crime_score": 0.2581,
+        "factor_count": 1,
+        "factor_score": 0.1429,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.1648,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Pessoas em situação de rua"
+        ],
+        "factor_agencies": [
+          "SMAS"
+        ],
+        "justification": "sinal 1/3: 4 ocorrências (predom. roubo de celular)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.46518729035929,
+              -22.8807782455173
+            ],
+            [
+              -43.46459156305432,
+              -22.880350298342414
+            ],
+            [
+              -43.46472167244548,
+              -22.879681908129246
+            ],
+            [
+              -43.465447507640924,
+              -22.879441465832233
+            ],
+            [
+              -43.46604323423593,
+              -22.879869414396353
+            ],
+            [
+              -43.46591312634549,
+              -22.880537803868222
+            ],
+            [
+              -43.46518729035929,
+              -22.8807782455173
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a0663d9ffff",
+        "crime_count": 7,
+        "crime_score": 0.3548,
+        "factor_count": 1,
+        "factor_score": 0.1429,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.2131,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Pessoas em situação de rua"
+        ],
+        "factor_agencies": [
+          "SMAS"
+        ],
+        "justification": "sinal 1/3: 7 ocorrências (predom. roubo a transeunte)"
+      }
+    }
+  ]
+}

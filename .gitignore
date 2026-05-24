@@ -9,3 +9,6 @@ __pycache__/
 
 # Local tool state
 .DS_Store
+
+# Full unfiltered logradouros backup (exceeds GitHub 100 MB limit)
+data/external/logradouros_rio.full.geojson

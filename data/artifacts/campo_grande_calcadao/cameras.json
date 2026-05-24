@@ -1,0 +1,383 @@
+{
+  "n_cameras": 45,
+  "coverage_radius_m": 50,
+  "cameras": [
+    {
+      "id": "39ffc1cc-7c87-4359-9b6c-0a8daeba0e05",
+      "lat": -22.904233860960986,
+      "lng": -43.559386102256106
+    },
+    {
+      "id": "4f349fa9-829a-4af9-b21a-b43c50dbd975",
+      "lat": -22.90199566082749,
+      "lng": -43.55824275876527
+    },
+    {
+      "id": "21d007f9-d4c5-4f68-b117-e31253f88eed",
+      "lat": -22.90254919415775,
+      "lng": -43.56025855766201
+    },
+    {
+      "id": "51e90282-af23-438b-8d5c-a5f7008660cc",
+      "lat": -22.897105132234127,
+      "lng": -43.54807402977525
+    },
+    {
+      "id": "4eb05716-8fad-43c8-9461-e42d304bf4c2",
+      "lat": -22.899014696666537,
+      "lng": -43.5492651067611
+    },
+    {
+      "id": "828208fd-9caf-4157-bdb8-bc6eb1caade2",
+      "lat": -22.902660012134294,
+      "lng": -43.550175537343456
+    },
+    {
+      "id": "b0a4a704-61f0-4e8e-a240-8d863e907b2a",
+      "lat": -22.898142757017748,
+      "lng": -43.54874703342554
+    },
+    {
+      "id": "131dc336-2c8c-41c2-9e6a-ab2011e7adb3",
+      "lat": -22.902647808621925,
+      "lng": -43.55008041375406
+    },
+    {
+      "id": "456750e0-04ec-4528-b6b0-a4cfc1704e30",
+      "lat": -22.904196562917623,
+      "lng": -43.55789153376698
+    },
+    {
+      "id": "dadc8a83-5246-4ae4-91c4-c50938b79b64",
+      "lat": -22.89828621163782,
+      "lng": -43.558857105230196
+    },
+    {
+      "id": "27ebb77d-34ea-4e02-9126-ea143c747a05",
+      "lat": -22.9010406911362,
+      "lng": -43.552772256825044
+    },
+    {
+      "id": "95ccae19-f165-406c-b449-cddfe5c039ba",
+      "lat": -22.90408690023998,
+      "lng": -43.56400111197651
+    },
+    {
+      "id": "16c18f9f-df1b-4189-9429-303f083a7581",
+      "lat": -22.90236054848129,
+      "lng": -43.55770390508288
+    },
+    {
+      "id": "d7c52d9f-8e01-4c07-b73c-52e43625c882",
+      "lat": -22.9009548138601,
+      "lng": -43.55092751197519
+    },
+    {
+      "id": "2b710170-3fa3-4343-9d7b-df2b22ee763c",
+      "lat": -22.897228106545093,
+      "lng": -43.55734397350367
+    },
+    {
+      "id": "58f722a9-52c1-4032-b26c-3c66b116383f",
+      "lat": -22.899638214779078,
+      "lng": -43.54939460157452
+    },
+    {
+      "id": "75a5b8cc-71ca-4551-a050-927511d6f5af",
+      "lat": -22.89983860471961,
+      "lng": -43.55549174070702
+    },
+    {
+      "id": "a21bf335-1532-4ed8-820d-dcfd13ae3b0b",
+      "lat": -22.897437382978644,
+      "lng": -43.54845076534723
+    },
+    {
+      "id": "eebd72f0-5b4a-4c1e-847d-42387de593e0",
+      "lat": -22.907160309925256,
+      "lng": -43.56136351019483
+    },
+    {
+      "id": "27b5f273-5565-4752-803e-dda2100dc59f",
+      "lat": -22.900096002000236,
+      "lng": -43.549565562726926
+    },
+    {
+      "id": "8adbf221-e79b-4b59-900e-88673315da67",
+      "lat": -22.897716041968614,
+      "lng": -43.558814878183696
+    },
+    {
+      "id": "db3f2374-1c43-4358-a314-c89cd982c0a7",
+      "lat": -22.901038256645165,
+      "lng": -43.55002486385713
+    },
+    {
+      "id": "134d036b-743f-4e1a-a261-4905edbed954",
+      "lat": -22.900388422157313,
+      "lng": -43.55901268304129
+    },
+    {
+      "id": "a5b37a78-e4e4-462c-8cec-d8bf53006041",
+      "lat": -22.901087735624905,
+      "lng": -43.553459485502536
+    },
+    {
+      "id": "659bfe61-a817-4393-babb-37ee5f617e34",
+      "lat": -22.89869267115082,
+      "lng": -43.54905865940903
+    },
+    {
+      "id": "426635a0-2166-437d-9a32-6c7d78037cbf",
+      "lat": -22.899638158160975,
+      "lng": -43.55138690949014
+    },
+    {
+      "id": "e47cd403-85de-4073-9f30-6f25ae754107",
+      "lat": -22.89904223010833,
+      "lng": -43.554899790384475
+    },
+    {
+      "id": "244f640f-29ec-431b-b78f-d644949cc870",
+      "lat": -22.898209781210813,
+      "lng": -43.55117693304115
+    },
+    {
+      "id": "58864d43-b2c3-47e6-914a-ba43a760a4f7",
+      "lat": -22.90159333325434,
+      "lng": -43.55605128235511
+    },
+    {
+      "id": "4d09a727-b330-4bd2-a50a-5c8eaf6ab157",
+      "lat": -22.89741585207674,
+      "lng": -43.54839533305215
+    },
+    {
+      "id": "5557496e-db9f-4273-99b5-0860c72be01b",
+      "lat": -22.90133557766005,
+      "lng": -43.55429491033487
+    },
+    {
+      "id": "7d77eb37-395c-48df-94ac-845522de61af",
+      "lat": -22.903935182606272,
+      "lng": -43.559113911030764
+    },
+    {
+      "id": "a6b28d82-71f1-4577-86e9-cf108657a8ee",
+      "lat": -22.90415355331524,
+      "lng": -43.557757144535984
+    },
+    {
+      "id": "240f0029-e993-436f-9d10-2ed51ebc4748",
+      "lat": -22.900946775102636,
+      "lng": -43.552724631877076
+    },
+    {
+      "id": "93338154-dfb5-4f1d-a858-9145da649983",
+      "lat": -22.9053737027454,
+      "lng": -43.558112629889024
+    },
+    {
+      "id": "48550a23-65e9-4398-963d-4c93002a7d67",
+      "lat": -22.897412236098795,
+      "lng": -43.54838681616005
+    },
+    {
+      "id": "bb753232-04da-480f-a551-f152894fb3dd",
+      "lat": -22.899635546977187,
+      "lng": -43.55831704673542
+    },
+    {
+      "id": "6675b8e3-5310-4bf3-bac0-5d58c8e5cfdd",
+      "lat": -22.901359686242873,
+      "lng": -43.55034862175449
+    },
+    {
+      "id": "8c35e77c-1961-444c-b3ba-7567f1916817",
+      "lat": -22.89989020775456,
+      "lng": -43.561946215114105
+    },
+    {
+      "id": "6110f2da-112c-46cb-8910-2e22e94c28e6",
+      "lat": -22.898286514575602,
+      "lng": -43.55884191064997
+    },
+    {
+      "id": "b9addb35-7ec0-477d-b689-88c0680450d9",
+      "lat": -22.90229170274464,
+      "lng": -43.55151208084954
+    },
+    {
+      "id": "ad6417de-b58e-4fb3-a824-83696ac9dd17",
+      "lat": -22.90180680690506,
+      "lng": -43.55366982590872
+    },
+    {
+      "id": "c262cdfb-e40b-402a-acf1-dc7496af374e",
+      "lat": -22.896996251637987,
+      "lng": -43.54783629207896
+    },
+    {
+      "id": "e5881223-fa65-4f50-870e-f100a9a81254",
+      "lat": -22.897352029641326,
+      "lng": -43.54837993494792
+    },
+    {
+      "id": "53ace221-2c5d-4bf6-96f1-d15706c308bb",
+      "lat": -22.89670507570656,
+      "lng": -43.55858302950777
+    }
+  ],
+  "gaps": [
+    {
+      "h3": "8aa8a02956cffff",
+      "lat": -22.902695756365397,
+      "lng": -43.55937372342383,
+      "uncovered_crimes": 7,
+      "nearest_camera_m": 92.2,
+      "rank": 1,
+      "recommendation": "remanejar",
+      "justification": "7 ocorrências sem cobertura; câmera mais próxima a 92 m"
+    },
+    {
+      "h3": "8aa8a0295677fff",
+      "lat": -22.90598286679598,
+      "lng": -43.56077100679962,
+      "uncovered_crimes": 5,
+      "nearest_camera_m": 143.8,
+      "rank": 2,
+      "recommendation": "instalar",
+      "justification": "5 ocorrências sem cobertura; câmera mais próxima a 144 m"
+    },
+    {
+      "h3": "8aa8a0295647fff",
+      "lat": -22.905073818130003,
+      "lng": -43.56162677575326,
+      "uncovered_crimes": 5,
+      "nearest_camera_m": 232.6,
+      "rank": 3,
+      "recommendation": "instalar",
+      "justification": "5 ocorrências sem cobertura; câmera mais próxima a 233 m"
+    },
+    {
+      "h3": "8aa8a02956e7fff",
+      "lat": -22.904700528430183,
+      "lng": -43.55898371196322,
+      "uncovered_crimes": 4,
+      "nearest_camera_m": 66.1,
+      "rank": 4,
+      "recommendation": "remanejar",
+      "justification": "4 ocorrências sem cobertura; câmera mais próxima a 66 m"
+    },
+    {
+      "h3": "8aa8a0291db7fff",
+      "lat": -22.901575596275038,
+      "lng": -43.55144453998218,
+      "uncovered_crimes": 4,
+      "nearest_camera_m": 79.6,
+      "rank": 5,
+      "recommendation": "remanejar",
+      "justification": "4 ocorrências sem cobertura; câmera mais próxima a 80 m"
+    },
+    {
+      "h3": "8aa8a0291997fff",
+      "lat": -22.90178668123869,
+      "lng": -43.560229491028224,
+      "uncovered_crimes": 4,
+      "nearest_camera_m": 84.5,
+      "rank": 6,
+      "recommendation": "remanejar",
+      "justification": "4 ocorrências sem cobertura; câmera mais próxima a 84 m"
+    },
+    {
+      "h3": "8aa8a0291d77fff",
+      "lat": -22.901413350032133,
+      "lng": -43.55758643841866,
+      "uncovered_crimes": 4,
+      "nearest_camera_m": 93.2,
+      "rank": 7,
+      "recommendation": "remanejar",
+      "justification": "4 ocorrências sem cobertura; câmera mais próxima a 93 m"
+    },
+    {
+      "h3": "8aa8a02956d7fff",
+      "lat": -22.903418148934716,
+      "lng": -43.55719642146359,
+      "uncovered_crimes": 4,
+      "nearest_camera_m": 99.7,
+      "rank": 8,
+      "recommendation": "remanejar",
+      "justification": "4 ocorrências sem cobertura; câmera mais próxima a 100 m"
+    },
+    {
+      "h3": "8aa8a0291d2ffff",
+      "lat": -22.902322415884758,
+      "lng": -43.55673066547955,
+      "uncovered_crimes": 4,
+      "nearest_camera_m": 99.9,
+      "rank": 9,
+      "recommendation": "remanejar",
+      "justification": "4 ocorrências sem cobertura; câmera mais próxima a 100 m"
+    },
+    {
+      "h3": "8aa8a0291d27fff",
+      "lat": -22.90323146827962,
+      "lng": -43.55587488942358,
+      "uncovered_crimes": 4,
+      "nearest_camera_m": 182.3,
+      "rank": 10,
+      "recommendation": "instalar",
+      "justification": "4 ocorrências sem cobertura; câmera mais próxima a 182 m"
+    },
+    {
+      "h3": "8aa8a0290a5ffff",
+      "lat": -22.90267135698828,
+      "lng": -43.551910288504594,
+      "uncovered_crimes": 3,
+      "nearest_camera_m": 58.6,
+      "rank": 11,
+      "recommendation": "remanejar",
+      "justification": "3 ocorrências sem cobertura; câmera mais próxima a 59 m"
+    },
+    {
+      "h3": "8aa8a0291d67fff",
+      "lat": -22.901600021412435,
+      "lng": -43.55890796512543,
+      "uncovered_crimes": 3,
+      "nearest_camera_m": 81.1,
+      "rank": 12,
+      "recommendation": "remanejar",
+      "justification": "3 ocorrências sem cobertura; câmera mais próxima a 81 m"
+    },
+    {
+      "h3": "8aa8a029574ffff",
+      "lat": -22.9072651640286,
+      "lng": -43.56255830596934,
+      "uncovered_crimes": 3,
+      "nearest_camera_m": 123.1,
+      "rank": 13,
+      "recommendation": "instalar",
+      "justification": "3 ocorrências sem cobertura; câmera mais próxima a 123 m"
+    },
+    {
+      "h3": "8aa8a029560ffff",
+      "lat": -22.905796223086636,
+      "lng": -43.559449472638526,
+      "uncovered_crimes": 3,
+      "nearest_camera_m": 144.9,
+      "rank": 14,
+      "recommendation": "instalar",
+      "justification": "3 ocorrências sem cobertura; câmera mais próxima a 145 m"
+    },
+    {
+      "h3": "8aa8a029568ffff",
+      "lat": -22.90432719250902,
+      "lng": -43.55634064495688,
+      "uncovered_crimes": 3,
+      "nearest_camera_m": 146.6,
+      "rank": 15,
+      "recommendation": "instalar",
+      "justification": "3 ocorrências sem cobertura; câmera mais próxima a 147 m"
+    }
+  ]
+}

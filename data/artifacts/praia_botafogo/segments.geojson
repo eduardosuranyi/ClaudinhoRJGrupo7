@@ -1,0 +1,5077 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17804120932843,
+              -22.93559151616487
+            ],
+            [
+              -43.17744549353737,
+              -22.935162736192012
+            ],
+            [
+              -43.17757594544181,
+              -22.93449492854015
+            ],
+            [
+              -43.17830211166603,
+              -22.93425590154509
+            ],
+            [
+              -43.178897826836554,
+              -22.93468468289661
+            ],
+            [
+              -43.17876737640343,
+              -22.935352489864506
+            ],
+            [
+              -43.17804120932843,
+              -22.93559151616487
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a06a4907fff",
+        "crime_count": 5,
+        "crime_score": 0.3291,
+        "factor_count": 8,
+        "factor_score": 0.8,
+        "signal_count": 6,
+        "signal_score": 0.4,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.4646,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: Calçada estreita forçando pedestres à pista (+7) [Comlurb, RioLuz, SEOP, SMAS, Seconserva] + 6 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.176719325527436,
+              -22.935401757067257
+            ],
+            [
+              -43.17612361027303,
+              -22.934972970985477
+            ],
+            [
+              -43.17625406364864,
+              -22.934305162649892
+            ],
+            [
+              -43.17698023080752,
+              -22.93406614107977
+            ],
+            [
+              -43.17757594544181,
+              -22.93449492854015
+            ],
+            [
+              -43.17744549353737,
+              -22.935162736192012
+            ],
+            [
+              -43.176719325527436,
+              -22.935401757067257
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a06a4917fff",
+        "crime_count": 13,
+        "crime_score": 0.519,
+        "factor_count": 9,
+        "factor_score": 0.9,
+        "signal_count": 9,
+        "signal_score": 0.6,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.6345,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: Calçada estreita forçando pedestres à pista (+8) [CET-Rio, Comlurb, RioLuz, SEOP, SMAS, Seconserva] + 9 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17850647467763,
+              -22.93668808811927
+            ],
+            [
+              -43.17791075772986,
+              -22.936259315634278
+            ],
+            [
+              -43.17804120932843,
+              -22.93559151616487
+            ],
+            [
+              -43.17876737640343,
+              -22.935352489864506
+            ],
+            [
+              -43.179363092730505,
+              -22.935781263728213
+            ],
+            [
+              -43.17923264260331,
+              -22.936449062513542
+            ],
+            [
+              -43.17850647467763,
+              -22.93668808811927
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a06a4927fff",
+        "crime_count": 0,
+        "crime_score": 0.4937,
+        "factor_count": 9,
+        "factor_score": 0.9,
+        "signal_count": 9,
+        "signal_score": 0.6,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.6218,
+        "top_crime_type": "",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: Calçada estreita forçando pedestres à pista (+8) [Comlurb, GM-Rio, RioLuz, SEOP, SMAS, Seconserva] + 9 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.177184588868975,
+              -22.936498335814665
+            ],
+            [
+              -43.17658887245765,
+              -22.936069557220478
+            ],
+            [
+              -43.176719325527436,
+              -22.935401757067257
+            ],
+            [
+              -43.17744549353737,
+              -22.935162736192012
+            ],
+            [
+              -43.17804120932843,
+              -22.93559151616487
+            ],
+            [
+              -43.17791075772986,
+              -22.936259315634278
+            ],
+            [
+              -43.177184588868975,
+              -22.936498335814665
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a06a4937fff",
+        "crime_count": 3,
+        "crime_score": 0.5443,
+        "factor_count": 10,
+        "factor_score": 1.0,
+        "signal_count": 12,
+        "signal_score": 0.8,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.0832,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 3/3: 3 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+9) [CET-Rio, Comlurb, RioLuz, SEOP, SMAS, Seconserva] + 12 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.174932181458466,
+              -22.93411538522607
+            ],
+            [
+              -43.17433646789857,
+              -22.933686585548703
+            ],
+            [
+              -43.17446692305097,
+              -22.933018768347726
+            ],
+            [
+              -43.175193090292325,
+              -22.93277975150744
+            ],
+            [
+              -43.175788803232656,
+              -22.933208552563293
+            ],
+            [
+              -43.17565834955125,
+              -22.933876369080906
+            ],
+            [
+              -43.174932181458466,
+              -22.93411538522607
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a06a4987fff",
+        "crime_count": 7,
+        "crime_score": 0.3165,
+        "factor_count": 2,
+        "factor_score": 0.2,
+        "signal_count": 12,
+        "signal_score": 0.8,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.4082,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Vegetação encobrindo iluminação pública"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "SMAS"
+        ],
+        "justification": "sinal 1/3: 12 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17539744132894,
+              -22.935211986435554
+            ],
+            [
+              -43.17480172661181,
+              -22.9347831942451
+            ],
+            [
+              -43.174932181458466,
+              -22.93411538522607
+            ],
+            [
+              -43.17565834955125,
+              -22.933876369080906
+            ],
+            [
+              -43.17625406364864,
+              -22.934305162649892
+            ],
+            [
+              -43.17612361027303,
+              -22.934972970985477
+            ],
+            [
+              -43.17539744132894,
+              -22.935211986435554
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a06a49a7fff",
+        "crime_count": 7,
+        "crime_score": 0.7722,
+        "factor_count": 8,
+        "factor_score": 0.8,
+        "signal_count": 14,
+        "signal_score": 0.9333,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.2291,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": "BINGO 3/3: 7 ocorrências (predom. roubo de celular) + Comércio irregular obstruindo a visibilidade do passeio (+7) [CET-Rio, Comlurb, RioLuz, SEOP, SMAS] + 14 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17407555673433,
+              -22.93502220426998
+            ],
+            [
+              -43.17347984255512,
+              -22.934593405971082
+            ],
+            [
+              -43.17361029887267,
+              -22.933925596268864
+            ],
+            [
+              -43.17433646789857,
+              -22.933686585548703
+            ],
+            [
+              -43.174932181458466,
+              -22.93411538522607
+            ],
+            [
+              -43.17480172661181,
+              -22.9347831942451
+            ],
+            [
+              -43.17407555673433,
+              -22.93502220426998
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a06a49b7fff",
+        "crime_count": 4,
+        "crime_score": 0.5696,
+        "factor_count": 4,
+        "factor_score": 0.4,
+        "signal_count": 12,
+        "signal_score": 0.8,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.5848,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": "BINGO 2/3: 4 ocorrências (predom. roubo de celular) + 12 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17515386978111,
+              -22.94341501388284
+            ],
+            [
+              -43.17455814741924,
+              -22.942986263268917
+            ],
+            [
+              -43.174688604232756,
+              -22.942318517665985
+            ],
+            [
+              -43.17541478193712,
+              -22.94207952336038
+            ],
+            [
+              -43.17601050367934,
+              -22.942508275353156
+            ],
+            [
+              -43.17588004833687,
+              -22.943176020272645
+            ],
+            [
+              -43.17515386978111,
+              -22.94341501388284
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a0c7fff",
+        "crime_count": 3,
+        "crime_score": 0.0886,
+        "factor_count": 1,
+        "factor_score": 0.1,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.0693,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Ponto de retenção do tráfego"
+        ],
+        "factor_agencies": [
+          "CET-Rio"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17601050367934,
+              -22.942508275353156
+            ],
+            [
+              -43.17541478193712,
+              -22.94207952336038
+            ],
+            [
+              -43.17554523758539,
+              -22.941411770256547
+            ],
+            [
+              -43.176271413504764,
+              -22.941172769829052
+            ],
+            [
+              -43.17686713462706,
+              -22.941601523200656
+            ],
+            [
+              -43.17673668044994,
+              -22.94226927562089
+            ],
+            [
+              -43.17601050367934,
+              -22.942508275353156
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a0cffff",
+        "crime_count": 0,
+        "crime_score": 0.2785,
+        "factor_count": 4,
+        "factor_score": 0.4,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.2392,
+        "top_crime_type": "",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SMAS"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.174688604232756,
+              -22.942318517665985
+            ],
+            [
+              -43.17409288302818,
+              -22.941889759563143
+            ],
+            [
+              -43.17422334014744,
+              -22.941222005775963
+            ],
+            [
+              -43.174949517000314,
+              -22.94098301077493
+            ],
+            [
+              -43.17554523758539,
+              -22.941411770256547
+            ],
+            [
+              -43.17541478193712,
+              -22.94207952336038
+            ],
+            [
+              -43.174688604232756,
+              -22.942318517665985
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a0dffff",
+        "crime_count": 0,
+        "crime_score": 0.1772,
+        "factor_count": 2,
+        "factor_score": 0.2,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1719,
+        "top_crime_type": "",
+        "factor_types": [
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17647577123616,
+              -22.9436047647762
+            ],
+            [
+              -43.17588004833687,
+              -22.943176020272645
+            ],
+            [
+              -43.17601050367934,
+              -22.942508275353156
+            ],
+            [
+              -43.17673668044994,
+              -22.94226927562089
+            ],
+            [
+              -43.17733240272916,
+              -22.942698021503354
+            ],
+            [
+              -43.17720194885788,
+              -22.94336576573915
+            ],
+            [
+              -43.17647577123616,
+              -22.9436047647762
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a0effff",
+        "crime_count": 1,
+        "crime_score": 0.0633,
+        "factor_count": 3,
+        "factor_score": 0.3,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1066,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "SMAS"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.181224170929866,
+              -22.940167430340423
+            ],
+            [
+              -43.180628449977306,
+              -22.939738686431582
+            ],
+            [
+              -43.1807588991866,
+              -22.939070912195877
+            ],
+            [
+              -43.18148506787682,
+              -22.938831882553632
+            ],
+            [
+              -43.182080788207834,
+              -22.93926062784147
+            ],
+            [
+              -43.1819503404702,
+              -22.93992840139253
+            ],
+            [
+              -43.181224170929866,
+              -22.940167430340423
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a207fff",
+        "crime_count": 0,
+        "crime_score": 0.1266,
+        "factor_count": 2,
+        "factor_score": 0.2,
+        "signal_count": 1,
+        "signal_score": 0.0667,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.13,
+        "top_crime_type": "",
+        "factor_types": [
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "RioLuz",
+          "Seconserva"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.182080788207834,
+              -22.93926062784147
+            ],
+            [
+              -43.18148506787682,
+              -22.938831882553632
+            ],
+            [
+              -43.18161551592049,
+              -22.938164100818934
+            ],
+            [
+              -43.18234168282346,
+              -22.937925065056845
+            ],
+            [
+              -43.18293740253267,
+              -22.938353811723662
+            ],
+            [
+              -43.18280695596074,
+              -22.939021592773546
+            ],
+            [
+              -43.182080788207834,
+              -22.93926062784147
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a20ffff",
+        "crime_count": 0,
+        "crime_score": 0.1899,
+        "factor_count": 1,
+        "factor_score": 0.1,
+        "signal_count": 1,
+        "signal_score": 0.0667,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1366,
+        "top_crime_type": "",
+        "factor_types": [
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "RioLuz"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17990227950016,
+              -22.939977709953567
+            ],
+            [
+              -43.179306559082725,
+              -22.939548959934374
+            ],
+            [
+              -43.17943700976355,
+              -22.938881185014303
+            ],
+            [
+              -43.1801631793903,
+              -22.938642160797762
+            ],
+            [
+              -43.1807588991866,
+              -22.939070912195877
+            ],
+            [
+              -43.180628449977306,
+              -22.939738686431582
+            ],
+            [
+              -43.17990227950016,
+              -22.939977709953567
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a217fff",
+        "crime_count": 2,
+        "crime_score": 0.1899,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 1,
+        "signal_score": 0.0667,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.2616,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": "sinal 1/3: Estacionamento irregular forçando pedestres à pista (+5) [Comlurb, RioLuz, SEOP, SMAS]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1807588991866,
+              -22.939070912195877
+            ],
+            [
+              -43.1801631793903,
+              -22.938642160797762
+            ],
+            [
+              -43.18029362890559,
+              -22.937974378378527
+            ],
+            [
+              -43.18101979674558,
+              -22.937735348041908
+            ],
+            [
+              -43.18161551592049,
+              -22.938164100818934
+            ],
+            [
+              -43.18148506787682,
+              -22.938831882553632
+            ],
+            [
+              -43.1807588991866,
+              -22.939070912195877
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a21ffff",
+        "crime_count": 0,
+        "crime_score": 0.0886,
+        "factor_count": 1,
+        "factor_score": 0.1,
+        "signal_count": 1,
+        "signal_score": 0.0667,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.086,
+        "top_crime_type": "",
+        "factor_types": [
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "RioLuz"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18168944413532,
+              -22.941263932811502
+            ],
+            [
+              -43.18109372202658,
+              -22.94083519639227
+            ],
+            [
+              -43.181224170929866,
+              -22.940167430340423
+            ],
+            [
+              -43.1819503404702,
+              -22.93992840139253
+            ],
+            [
+              -43.18254606195727,
+              -22.940357139190805
+            ],
+            [
+              -43.1824156145257,
+              -22.94102490455791
+            ],
+            [
+              -43.18168944413532,
+              -22.941263932811502
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a227fff",
+        "crime_count": 2,
+        "crime_score": 0.2785,
+        "factor_count": 3,
+        "factor_score": 0.3,
+        "signal_count": 4,
+        "signal_score": 0.2667,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.2809,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18254606195727,
+              -22.940357139190805
+            ],
+            [
+              -43.1819503404702,
+              -22.93992840139253
+            ],
+            [
+              -43.182080788207834,
+              -22.93926062784147
+            ],
+            [
+              -43.18280695596074,
+              -22.939021592773546
+            ],
+            [
+              -43.18340267682585,
+              -22.939450331950873
+            ],
+            [
+              -43.18327223056002,
+              -22.940118104817028
+            ],
+            [
+              -43.18254606195727,
+              -22.940357139190805
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a22ffff",
+        "crime_count": 1,
+        "crime_score": 0.0506,
+        "factor_count": 2,
+        "factor_score": 0.2,
+        "signal_count": 1,
+        "signal_score": 0.0667,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.092,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "RioLuz",
+          "Seconserva"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18036755069913,
+              -22.94107421921976
+            ],
+            [
+              -43.17977182912529,
+              -22.94064547668989
+            ],
+            [
+              -43.17990227950016,
+              -22.939977709953567
+            ],
+            [
+              -43.180628449977306,
+              -22.939738686431582
+            ],
+            [
+              -43.181224170929866,
+              -22.940167430340423
+            ],
+            [
+              -43.18109372202658,
+              -22.94083519639227
+            ],
+            [
+              -43.18036755069913,
+              -22.94107421921976
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a237fff",
+        "crime_count": 5,
+        "crime_score": 0.4684,
+        "factor_count": 7,
+        "factor_score": 0.7,
+        "signal_count": 3,
+        "signal_score": 0.2,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.4592,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: Motocicletas trafegando no passeio (+6) [CET-Rio, Comlurb, GM-Rio, RioLuz, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18293740253267,
+              -22.938353811723662
+            ],
+            [
+              -43.18234168282346,
+              -22.937925065056845
+            ],
+            [
+              -43.18247212970145,
+              -22.93725727582355
+            ],
+            [
+              -43.183198294816854,
+              -22.937018233942013
+            ],
+            [
+              -43.18379401390399,
+              -22.937446981987815
+            ],
+            [
+              -43.183663568497835,
+              -22.938114770536146
+            ],
+            [
+              -43.18293740253267,
+              -22.938353811723662
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a257fff",
+        "crime_count": 9,
+        "crime_score": 0.2911,
+        "factor_count": 1,
+        "factor_score": 0.1,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1706,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "RioLuz"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17811511994008,
+              -22.938691446296954
+            ],
+            [
+              -43.17751940121513,
+              -22.938262682678985
+            ],
+            [
+              -43.177649853673216,
+              -22.93759489889147
+            ],
+            [
+              -43.17837602338496,
+              -22.937355879405885
+            ],
+            [
+              -43.17897174148935,
+              -22.937784644402633
+            ],
+            [
+              -43.1788412905026,
+              -22.938452427506142
+            ],
+            [
+              -43.17811511994008,
+              -22.938691446296954
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a287fff",
+        "crime_count": 6,
+        "crime_score": 0.4684,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 10,
+        "signal_score": 0.6667,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.5509,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: Estacionamento irregular forçando pedestres à pista (+5) [Comlurb, RioLuz, SEOP, SMAS, Seconserva] + 10 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17897174148935,
+              -22.937784644402633
+            ],
+            [
+              -43.17837602338496,
+              -22.937355879405885
+            ],
+            [
+              -43.17850647467763,
+              -22.93668808811927
+            ],
+            [
+              -43.17923264260331,
+              -22.936449062513542
+            ],
+            [
+              -43.179828360086866,
+              -22.93687782888908
+            ],
+            [
+              -43.17969791026561,
+              -22.937545619491523
+            ],
+            [
+              -43.17897174148935,
+              -22.937784644402633
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a28ffff",
+        "crime_count": 0,
+        "crime_score": 0.4684,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 6,
+        "signal_score": 0.4,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.4842,
+        "top_crime_type": "",
+        "factor_types": [
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: Motocicletas trafegando no passeio (+5) [Comlurb, GM-Rio, RioLuz, SMAS, Seconserva] + 6 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17679322971762,
+              -22.938501696044035
+            ],
+            [
+              -43.176197511529274,
+              -22.938072926316497
+            ],
+            [
+              -43.17632796545856,
+              -22.93740514184523
+            ],
+            [
+              -43.17705413610503,
+              -22.937166127785204
+            ],
+            [
+              -43.177649853673216,
+              -22.93759489889147
+            ],
+            [
+              -43.17751940121513,
+              -22.938262682678985
+            ],
+            [
+              -43.17679322971762,
+              -22.938501696044035
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a297fff",
+        "crime_count": 2,
+        "crime_score": 0.557,
+        "factor_count": 5,
+        "factor_score": 0.5,
+        "signal_count": 13,
+        "signal_score": 0.8667,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.6202,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Vegetação encobrindo iluminação pública",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 2 ocorrências (predom. roubo de celular) + 13 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.177649853673216,
+              -22.93759489889147
+            ],
+            [
+              -43.17705413610503,
+              -22.937166127785204
+            ],
+            [
+              -43.177184588868975,
+              -22.936498335814665
+            ],
+            [
+              -43.17791075772986,
+              -22.936259315634278
+            ],
+            [
+              -43.17850647467763,
+              -22.93668808811927
+            ],
+            [
+              -43.17837602338496,
+              -22.937355879405885
+            ],
+            [
+              -43.177649853673216,
+              -22.93759489889147
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a29ffff",
+        "crime_count": 17,
+        "crime_score": 0.5949,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 15,
+        "signal_score": 1.0,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.0462,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Pessoas em situação de rua",
+          "Vegetação encobrindo iluminação pública",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 3/3: 17 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+5) [Comlurb, RioLuz, SEOP, SMAS, Seconserva] + 15 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.178580387669534,
+              -22.93978797803044
+            ],
+            [
+              -43.177984667787875,
+              -22.939359221901142
+            ],
+            [
+              -43.17811511994008,
+              -22.938691446296954
+            ],
+            [
+              -43.1788412905026,
+              -22.938452427506142
+            ],
+            [
+              -43.17943700976355,
+              -22.938881185014303
+            ],
+            [
+              -43.179306559082725,
+              -22.939548959934374
+            ],
+            [
+              -43.178580387669534,
+              -22.93978797803044
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a2a7fff",
+        "crime_count": 3,
+        "crime_score": 0.2911,
+        "factor_count": 7,
+        "factor_score": 0.7,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.3539,
+        "top_crime_type": "Roubo em coletivo",
+        "factor_types": [
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: Estacionamento irregular forçando pedestres à pista (+6) [Comlurb, RioLuz, SEOP, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17943700976355,
+              -22.938881185014303
+            ],
+            [
+              -43.1788412905026,
+              -22.938452427506142
+            ],
+            [
+              -43.17897174148935,
+              -22.937784644402633
+            ],
+            [
+              -43.17969791026561,
+              -22.937545619491523
+            ],
+            [
+              -43.18029362890559,
+              -22.937974378378527
+            ],
+            [
+              -43.1801631793903,
+              -22.938642160797762
+            ],
+            [
+              -43.17943700976355,
+              -22.938881185014303
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a2affff",
+        "crime_count": 0,
+        "crime_score": 0.1392,
+        "factor_count": 4,
+        "factor_score": 0.4,
+        "signal_count": 3,
+        "signal_score": 0.2,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.2196,
+        "top_crime_type": "",
+        "factor_types": [
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Sem ocorrência",
+          "Vãos ou cavidades usados como esconderijo"
+        ],
+        "factor_agencies": [
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17725849543942,
+              -22.939598234571243
+            ],
+            [
+              -43.17666277609415,
+              -22.939169472332065
+            ],
+            [
+              -43.17679322971762,
+              -22.938501696044035
+            ],
+            [
+              -43.17751940121513,
+              -22.938262682678985
+            ],
+            [
+              -43.17811511994008,
+              -22.938691446296954
+            ],
+            [
+              -43.177984667787875,
+              -22.939359221901142
+            ],
+            [
+              -43.17725849543942,
+              -22.939598234571243
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a2b7fff",
+        "crime_count": 3,
+        "crime_score": 0.519,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 7,
+        "signal_score": 0.4667,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.5262,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública",
+          "Vãos ou cavidades usados como esconderijo"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: Calçada estreita forçando pedestres à pista (+5) [Comlurb, SEOP, SMAS, Seconserva] + 7 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.181150245095274,
+              -22.93706755812391
+            ],
+            [
+              -43.18055452707655,
+              -22.936638797858055
+            ],
+            [
+              -43.18068497573225,
+              -22.93597099975707
+            ],
+            [
+              -43.181411140935055,
+              -22.935731962606518
+            ],
+            [
+              -43.18200685833226,
+              -22.936160724251234
+            ],
+            [
+              -43.18187641114821,
+              -22.936828521667614
+            ],
+            [
+              -43.181150245095274,
+              -22.93706755812391
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a2c7fff",
+        "crime_count": 10,
+        "crime_score": 0.4937,
+        "factor_count": 4,
+        "factor_score": 0.4,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.3468,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Sem ocorrência",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "GM-Rio",
+          "RioLuz",
+          "SMAS"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.179828360086866,
+              -22.93687782888908
+            ],
+            [
+              -43.17923264260331,
+              -22.936449062513542
+            ],
+            [
+              -43.179363092730505,
+              -22.935781263728213
+            ],
+            [
+              -43.180089258869785,
+              -22.935542232002742
+            ],
+            [
+              -43.18068497573225,
+              -22.93597099975707
+            ],
+            [
+              -43.18055452707655,
+              -22.936638797858055
+            ],
+            [
+              -43.179828360086866,
+              -22.93687782888908
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a2d7fff",
+        "crime_count": 14,
+        "crime_score": 0.481,
+        "factor_count": 5,
+        "factor_score": 0.5,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.3988,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Sem ocorrência",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "GM-Rio",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18161551592049,
+              -22.938164100818934
+            ],
+            [
+              -43.18101979674558,
+              -22.937735348041908
+            ],
+            [
+              -43.181150245095274,
+              -22.93706755812391
+            ],
+            [
+              -43.18187641114821,
+              -22.936828521667614
+            ],
+            [
+              -43.18247212970145,
+              -22.93725727582355
+            ],
+            [
+              -43.18234168282346,
+              -22.937925065056845
+            ],
+            [
+              -43.18161551592049,
+              -22.938164100818934
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a2e7fff",
+        "crime_count": 5,
+        "crime_score": 0.3671,
+        "factor_count": 1,
+        "factor_score": 0.1,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.2086,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "RioLuz"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18029362890559,
+              -22.937974378378527
+            ],
+            [
+              -43.17969791026561,
+              -22.937545619491523
+            ],
+            [
+              -43.179828360086866,
+              -22.93687782888908
+            ],
+            [
+              -43.18055452707655,
+              -22.936638797858055
+            ],
+            [
+              -43.181150245095274,
+              -22.93706755812391
+            ],
+            [
+              -43.18101979674558,
+              -22.937735348041908
+            ],
+            [
+              -43.18029362890559,
+              -22.937974378378527
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a2f7fff",
+        "crime_count": 0,
+        "crime_score": 0.3671,
+        "factor_count": 5,
+        "factor_score": 0.5,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.3419,
+        "top_crime_type": "",
+        "factor_types": [
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Sem ocorrência",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "GM-Rio",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18129809748393,
+              -22.943267190730165
+            ],
+            [
+              -43.180702373597505,
+              -22.942838463180006
+            ],
+            [
+              -43.180832823360404,
+              -22.942170712812192
+            ],
+            [
+              -43.181558995538076,
+              -22.941931690679166
+            ],
+            [
+              -43.18215471880293,
+              -22.94236041960842
+            ],
+            [
+              -43.18202427051172,
+              -22.94302816929157
+            ],
+            [
+              -43.18129809748393,
+              -22.943267190730165
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a307fff",
+        "crime_count": 27,
+        "crime_score": 0.9873,
+        "factor_count": 8,
+        "factor_score": 0.8,
+        "signal_count": 3,
+        "signal_score": 0.2,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.7436,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 27 ocorrências (predom. roubo a transeunte) + Pessoas em situação de rua (+7) [CET-Rio, Comlurb, RioLuz, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18215471880293,
+              -22.94236041960842
+            ],
+            [
+              -43.181558995538076,
+              -22.941931690679166
+            ],
+            [
+              -43.18168944413532,
+              -22.941263932811502
+            ],
+            [
+              -43.1824156145257,
+              -22.94102490455791
+            ],
+            [
+              -43.183011337168715,
+              -22.94145363486627
+            ],
+            [
+              -43.18288089004324,
+              -22.94212139204909
+            ],
+            [
+              -43.18215471880293,
+              -22.94236041960842
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a30ffff",
+        "crime_count": 2,
+        "crime_score": 0.6203,
+        "factor_count": 7,
+        "factor_score": 0.7,
+        "signal_count": 3,
+        "signal_score": 0.2,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.5352,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Sem ocorrência",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 2 ocorrências (predom. roubo a transeunte) + Pessoas em situação de rua (+6) [CET-Rio, Comlurb, RioLuz, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17997619963286,
+              -22.94307747919206
+            ],
+            [
+              -43.17938047628154,
+              -22.942648745530906
+            ],
+            [
+              -43.179510927515985,
+              -22.94198099447868
+            ],
+            [
+              -43.18023710063024,
+              -22.941741977771983
+            ],
+            [
+              -43.180832823360404,
+              -22.942170712812192
+            ],
+            [
+              -43.180702373597505,
+              -22.942838463180006
+            ],
+            [
+              -43.17997619963286,
+              -22.94307747919206
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a317fff",
+        "crime_count": 5,
+        "crime_score": 0.7215,
+        "factor_count": 7,
+        "factor_score": 0.7,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.5691,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Sem ocorrência",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 5 ocorrências (predom. roubo a transeunte) + Motocicletas trafegando no passeio (+6) [CET-Rio, Comlurb, GM-Rio, RioLuz, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.180832823360404,
+              -22.942170712812192
+            ],
+            [
+              -43.18023710063024,
+              -22.941741977771983
+            ],
+            [
+              -43.18036755069913,
+              -22.94107421921976
+            ],
+            [
+              -43.18109372202658,
+              -22.94083519639227
+            ],
+            [
+              -43.18168944413532,
+              -22.941263932811502
+            ],
+            [
+              -43.181558995538076,
+              -22.941931690679166
+            ],
+            [
+              -43.180832823360404,
+              -22.942170712812192
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a31ffff",
+        "crime_count": 10,
+        "crime_score": 0.8987,
+        "factor_count": 7,
+        "factor_score": 0.7,
+        "signal_count": 3,
+        "signal_score": 0.2,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.6744,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Sem ocorrência",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 10 ocorrências (predom. roubo a transeunte) + Motocicletas trafegando no passeio (+6) [CET-Rio, Comlurb, GM-Rio, RioLuz, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.181763373069664,
+              -22.944363652972985
+            ],
+            [
+              -43.18116764802705,
+              -22.943934932913237
+            ],
+            [
+              -43.18129809748393,
+              -22.943267190730165
+            ],
+            [
+              -43.18202427051172,
+              -22.94302816929157
+            ],
+            [
+              -43.18261999493261,
+              -22.943456890730477
+            ],
+            [
+              -43.18248954694747,
+              -22.944124632228792
+            ],
+            [
+              -43.181763373069664,
+              -22.944363652972985
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a327fff",
+        "crime_count": 1,
+        "crime_score": 0.8101,
+        "factor_count": 8,
+        "factor_score": 0.8,
+        "signal_count": 1,
+        "signal_score": 0.0667,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.6217,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 1 ocorrências (predom. roubo a transeunte) + Pessoas em situação de rua (+7) [CET-Rio, Comlurb, RioLuz, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18261999493261,
+              -22.943456890730477
+            ],
+            [
+              -43.18202427051172,
+              -22.94302816929157
+            ],
+            [
+              -43.18215471880293,
+              -22.94236041960842
+            ],
+            [
+              -43.18288089004324,
+              -22.94212139204909
+            ],
+            [
+              -43.183476613842146,
+              -22.942550114867174
+            ],
+            [
+              -43.18334616702276,
+              -22.943217863865392
+            ],
+            [
+              -43.18261999493261,
+              -22.943456890730477
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a32ffff",
+        "crime_count": 6,
+        "crime_score": 0.7215,
+        "factor_count": 8,
+        "factor_score": 0.8,
+        "signal_count": 1,
+        "signal_score": 0.0667,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.5774,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 6 ocorrências (predom. roubo a transeunte) + Pessoas em situação de rua (+7) [CET-Rio, Comlurb, RioLuz, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17818903127107,
+              -22.94179126460811
+            ],
+            [
+              -43.17759330961218,
+              -22.941362517346732
+            ],
+            [
+              -43.17772376262392,
+              -22.94069475742616
+            ],
+            [
+              -43.17844993582323,
+              -22.94045574545096
+            ],
+            [
+              -43.179045656861526,
+              -22.94088449409125
+            ],
+            [
+              -43.17891520532113,
+              -22.941552253327778
+            ],
+            [
+              -43.17818903127107,
+              -22.94179126460811
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a387fff",
+        "crime_count": 4,
+        "crime_score": 0.4304,
+        "factor_count": 8,
+        "factor_score": 0.8,
+        "signal_count": 1,
+        "signal_score": 0.0667,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.4319,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: Motocicletas trafegando no passeio (+7) [CET-Rio, Comlurb, GM-Rio, RioLuz, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.179045656861526,
+              -22.94088449409125
+            ],
+            [
+              -43.17844993582323,
+              -22.94045574545096
+            ],
+            [
+              -43.178580387669534,
+              -22.93978797803044
+            ],
+            [
+              -43.179306559082725,
+              -22.939548959934374
+            ],
+            [
+              -43.17990227950016,
+              -22.939977709953567
+            ],
+            [
+              -43.17977182912529,
+              -22.94064547668989
+            ],
+            [
+              -43.179045656861526,
+              -22.94088449409125
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a38ffff",
+        "crime_count": 3,
+        "crime_score": 0.4177,
+        "factor_count": 10,
+        "factor_score": 1.0,
+        "signal_count": 1,
+        "signal_score": 0.0667,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.4755,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Estacionamento irregular forçando pedestres à pista",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: Estacionamento irregular forçando pedestres à pista (+9) [CET-Rio, Comlurb, GM-Rio, RioLuz, SEOP, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17686713462706,
+              -22.941601523200656
+            ],
+            [
+              -43.176271413504764,
+              -22.941172769829052
+            ],
+            [
+              -43.17640186798773,
+              -22.9405050092247
+            ],
+            [
+              -43.17712804212181,
+              -22.94026600267571
+            ],
+            [
+              -43.17772376262392,
+              -22.94069475742616
+            ],
+            [
+              -43.17759330961218,
+              -22.941362517346732
+            ],
+            [
+              -43.17686713462706,
+              -22.941601523200656
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a397fff",
+        "crime_count": 10,
+        "crime_score": 0.5696,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.4681,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 10 ocorrências (predom. roubo de celular) + Pessoas em situação de rua (+5) [CET-Rio, Comlurb, RioLuz, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17772376262392,
+              -22.94069475742616
+            ],
+            [
+              -43.17712804212181,
+              -22.94026600267571
+            ],
+            [
+              -43.17725849543942,
+              -22.939598234571243
+            ],
+            [
+              -43.177984667787875,
+              -22.939359221901142
+            ],
+            [
+              -43.178580387669534,
+              -22.93978797803044
+            ],
+            [
+              -43.17844993582323,
+              -22.94045574545096
+            ],
+            [
+              -43.17772376262392,
+              -22.94069475742616
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a39ffff",
+        "crime_count": 3,
+        "crime_score": 0.4937,
+        "factor_count": 8,
+        "factor_score": 0.8,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.4802,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: Estacionamento irregular forçando pedestres à pista (+7) [Comlurb, RioLuz, SEOP, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1786543013808,
+              -22.942887756116395
+            ],
+            [
+              -43.178058578565214,
+              -22.94245901634447
+            ],
+            [
+              -43.17818903127107,
+              -22.94179126460811
+            ],
+            [
+              -43.17891520532113,
+              -22.941552253327778
+            ],
+            [
+              -43.179510927515985,
+              -22.94198099447868
+            ],
+            [
+              -43.17938047628154,
+              -22.942648745530906
+            ],
+            [
+              -43.1786543013808,
+              -22.942887756116395
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a3a7fff",
+        "crime_count": 0,
+        "crime_score": 0.2405,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.2702,
+        "top_crime_type": "",
+        "factor_types": [
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SMAS"
+        ],
+        "justification": "sinal 1/3: Motocicletas trafegando no passeio (+5) [CET-Rio, Comlurb, GM-Rio, RioLuz, SMAS]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.179510927515985,
+              -22.94198099447868
+            ],
+            [
+              -43.17891520532113,
+              -22.941552253327778
+            ],
+            [
+              -43.179045656861526,
+              -22.94088449409125
+            ],
+            [
+              -43.17977182912529,
+              -22.94064547668989
+            ],
+            [
+              -43.18036755069913,
+              -22.94107421921976
+            ],
+            [
+              -43.18023710063024,
+              -22.941741977771983
+            ],
+            [
+              -43.179510927515985,
+              -22.94198099447868
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a3affff",
+        "crime_count": 10,
+        "crime_score": 0.5949,
+        "factor_count": 7,
+        "factor_score": 0.7,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.5058,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SMAS"
+        ],
+        "justification": "BINGO 2/3: 10 ocorrências (predom. roubo a transeunte) + Motocicletas trafegando no passeio (+6) [CET-Rio, Comlurb, GM-Rio, RioLuz, SMAS]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17733240272916,
+              -22.942698021503354
+            ],
+            [
+              -43.17673668044994,
+              -22.94226927562089
+            ],
+            [
+              -43.17686713462706,
+              -22.941601523200656
+            ],
+            [
+              -43.17759330961218,
+              -22.941362517346732
+            ],
+            [
+              -43.17818903127107,
+              -22.94179126460811
+            ],
+            [
+              -43.178058578565214,
+              -22.94245901634447
+            ],
+            [
+              -43.17733240272916,
+              -22.942698021503354
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a3b7fff",
+        "crime_count": 0,
+        "crime_score": 0.1899,
+        "factor_count": 5,
+        "factor_score": 0.5,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.22,
+        "top_crime_type": "",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SMAS"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1719709225521,
+              -22.938839145377734
+            ],
+            [
+              -43.17137520535878,
+              -22.938410358701383
+            ],
+            [
+              -43.171505664865855,
+              -22.937742579680634
+            ],
+            [
+              -43.1722318400956,
+              -22.93750358801897
+            ],
+            [
+              -43.17282755667027,
+              -22.93793237607383
+            ],
+            [
+              -43.172697098633876,
+              -22.938600154411805
+            ],
+            [
+              -43.1719709225521,
+              -22.938839145377734
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a607fff",
+        "crime_count": 0,
+        "crime_score": 0.1519,
+        "factor_count": 0,
+        "factor_score": 0.0,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.076,
+        "top_crime_type": "",
+        "factor_types": [],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17282755667027,
+              -22.93793237607383
+            ],
+            [
+              -43.1722318400956,
+              -22.93750358801897
+            ],
+            [
+              -43.17236229843765,
+              -22.936835801498056
+            ],
+            [
+              -43.17308847188363,
+              -22.936596803714927
+            ],
+            [
+              -43.17368418783938,
+              -22.937025593148316
+            ],
+            [
+              -43.17355373096811,
+              -22.937693378986275
+            ],
+            [
+              -43.17282755667027,
+              -22.93793237607383
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a60ffff",
+        "crime_count": 0,
+        "crime_score": 0.2278,
+        "factor_count": 2,
+        "factor_score": 0.2,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1639,
+        "top_crime_type": "",
+        "factor_types": [
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "RioLuz"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1724361817017,
+              -22.939935695404113
+            ],
+            [
+              -43.17184046335065,
+              -22.939506916215308
+            ],
+            [
+              -43.1719709225521,
+              -22.938839145377734
+            ],
+            [
+              -43.172697098633876,
+              -22.938600154411805
+            ],
+            [
+              -43.173292816366136,
+              -22.9390289349792
+            ],
+            [
+              -43.17316235863545,
+              -22.93969670513391
+            ],
+            [
+              -43.1724361817017,
+              -22.939935695404113
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a627fff",
+        "crime_count": 0,
+        "crime_score": 0.2152,
+        "factor_count": 1,
+        "factor_score": 0.1,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1659,
+        "top_crime_type": "",
+        "factor_types": [
+          "Sem ocorrência"
+        ],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.173292816366136,
+              -22.9390289349792
+            ],
+            [
+              -43.172697098633876,
+              -22.938600154411805
+            ],
+            [
+              -43.17282755667027,
+              -22.93793237607383
+            ],
+            [
+              -43.17355373096811,
+              -22.937693378986275
+            ],
+            [
+              -43.1741494480813,
+              -22.93812216093227
+            ],
+            [
+              -43.17401899151576,
+              -22.938789938587185
+            ],
+            [
+              -43.173292816366136,
+              -22.9390289349792
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a62ffff",
+        "crime_count": 8,
+        "crime_score": 0.3165,
+        "factor_count": 1,
+        "factor_score": 0.1,
+        "signal_count": 0,
+        "signal_score": 0.0,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1832,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Tapumes servindo de esconderijo"
+        ],
+        "factor_agencies": [
+          "Seconserva"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.171114285485224,
+              -22.939745901059197
+            ],
+            [
+              -43.170518567673525,
+              -22.939317115761387
+            ],
+            [
+              -43.170649028345586,
+              -22.93864934424119
+            ],
+            [
+              -43.17137520535878,
+              -22.938410358701383
+            ],
+            [
+              -43.1719709225521,
+              -22.938839145377734
+            ],
+            [
+              -43.17184046335065,
+              -22.939506916215308
+            ],
+            [
+              -43.171114285485224,
+              -22.939745901059197
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a637fff",
+        "crime_count": 4,
+        "crime_score": 0.1392,
+        "factor_count": 1,
+        "factor_score": 0.1,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1279,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Sem ocorrência"
+        ],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17500607684681,
+              -22.937215373264102
+            ],
+            [
+              -43.17441036035295,
+              -22.936786589939523
+            ],
+            [
+              -43.17454081605906,
+              -22.936118796601964
+            ],
+            [
+              -43.17526698678805,
+              -22.93587978727232
+            ],
+            [
+              -43.175862702662315,
+              -22.9363085719755
+            ],
+            [
+              -43.175732248427224,
+              -22.936976364629682
+            ],
+            [
+              -43.17500607684681,
+              -22.937215373264102
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a647fff",
+        "crime_count": 16,
+        "crime_score": 0.8608,
+        "factor_count": 7,
+        "factor_score": 0.7,
+        "signal_count": 6,
+        "signal_score": 0.4,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.0581,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 3/3: 16 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+6) [CET-Rio, Comlurb, RioLuz, SEOP, SMAS, Seconserva] + 6 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.175862702662315,
+              -22.9363085719755
+            ],
+            [
+              -43.17526698678805,
+              -22.93587978727232
+            ],
+            [
+              -43.17539744132894,
+              -22.935211986435554
+            ],
+            [
+              -43.17612361027303,
+              -22.934972970985477
+            ],
+            [
+              -43.176719325527436,
+              -22.935401757067257
+            ],
+            [
+              -43.17658887245765,
+              -22.936069557220478
+            ],
+            [
+              -43.175862702662315,
+              -22.9363085719755
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a64ffff",
+        "crime_count": 0,
+        "crime_score": 0.8101,
+        "factor_count": 9,
+        "factor_score": 0.9,
+        "signal_count": 11,
+        "signal_score": 0.7333,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.8134,
+        "top_crime_type": "",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Estacionamento irregular forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: Calçada estreita forçando pedestres à pista (+8) [CET-Rio, Comlurb, RioLuz, SEOP, SMAS, Seconserva] + 11 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17368418783938,
+              -22.937025593148316
+            ],
+            [
+              -43.17308847188363,
+              -22.936596803714927
+            ],
+            [
+              -43.173218929060596,
+              -22.935929009694238
+            ],
+            [
+              -43.173945100722484,
+              -22.935690005790043
+            ],
+            [
+              -43.17454081605906,
+              -22.936118796601964
+            ],
+            [
+              -43.17441036035295,
+              -22.936786589939523
+            ],
+            [
+              -43.17368418783938,
+              -22.937025593148316
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a657fff",
+        "crime_count": 6,
+        "crime_score": 0.6962,
+        "factor_count": 7,
+        "factor_score": 0.7,
+        "signal_count": 1,
+        "signal_score": 0.0667,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.5398,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 6 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+6) [CET-Rio, Comlurb, RioLuz, SEOP, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17454081605906,
+              -22.936118796601964
+            ],
+            [
+              -43.173945100722484,
+              -22.935690005790043
+            ],
+            [
+              -43.17407555673433,
+              -22.93502220426998
+            ],
+            [
+              -43.17480172661181,
+              -22.9347831942451
+            ],
+            [
+              -43.17539744132894,
+              -22.935211986435554
+            ],
+            [
+              -43.17526698678805,
+              -22.93587978727232
+            ],
+            [
+              -43.17454081605906,
+              -22.936118796601964
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a65ffff",
+        "crime_count": 23,
+        "crime_score": 1.0,
+        "factor_count": 7,
+        "factor_score": 0.7,
+        "signal_count": 6,
+        "signal_score": 0.4,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.1625,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Veículos de grande porte obstruindo a visibilidade",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 3/3: 23 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+6) [CET-Rio, Comlurb, RioLuz, SEOP, SMAS, Seconserva] + 6 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17547133909755,
+              -22.938311934255733
+            ],
+            [
+              -43.17487562144647,
+              -22.937883158418853
+            ],
+            [
+              -43.17500607684681,
+              -22.937215373264102
+            ],
+            [
+              -43.175732248427224,
+              -22.936976364629682
+            ],
+            [
+              -43.17632796545856,
+              -22.93740514184523
+            ],
+            [
+              -43.176197511529274,
+              -22.938072926316497
+            ],
+            [
+              -43.17547133909755,
+              -22.938311934255733
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a667fff",
+        "crime_count": 1,
+        "crime_score": 0.5063,
+        "factor_count": 4,
+        "factor_score": 0.4,
+        "signal_count": 10,
+        "signal_score": 0.6667,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.5198,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Tapumes servindo de esconderijo",
+          "Vegetação encobrindo iluminação pública"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: 10 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17632796545856,
+              -22.93740514184523
+            ],
+            [
+              -43.175732248427224,
+              -22.936976364629682
+            ],
+            [
+              -43.175862702662315,
+              -22.9363085719755
+            ],
+            [
+              -43.17658887245765,
+              -22.936069557220478
+            ],
+            [
+              -43.177184588868975,
+              -22.936498335814665
+            ],
+            [
+              -43.17705413610503,
+              -22.937166127785204
+            ],
+            [
+              -43.17632796545856,
+              -22.93740514184523
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a66ffff",
+        "crime_count": 2,
+        "crime_score": 0.5443,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 15,
+        "signal_score": 1.0,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.0082,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 3/3: 2 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+5) [CET-Rio, Comlurb, RioLuz, SEOP, SMAS, Seconserva] + 15 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1741494480813,
+              -22.93812216093227
+            ],
+            [
+              -43.17355373096811,
+              -22.937693378986275
+            ],
+            [
+              -43.17368418783938,
+              -22.937025593148316
+            ],
+            [
+              -43.17441036035295,
+              -22.936786589939523
+            ],
+            [
+              -43.17500607684681,
+              -22.937215373264102
+            ],
+            [
+              -43.17487562144647,
+              -22.937883158418853
+            ],
+            [
+              -43.1741494480813,
+              -22.93812216093227
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a677fff",
+        "crime_count": 4,
+        "crime_score": 0.5316,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 3,
+        "signal_score": 0.2,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.4658,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Pessoas em situação de rua",
+          "Tapumes servindo de esconderijo",
+          "Vegetação encobrindo iluminação pública",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 4 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+5) [Comlurb, RioLuz, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.172901442314625,
+              -22.941032229759127
+            ],
+            [
+              -43.17230572280591,
+              -22.9406034580582
+            ],
+            [
+              -43.1724361817017,
+              -22.939935695404113
+            ],
+            [
+              -43.17316235863545,
+              -22.93969670513391
+            ],
+            [
+              -43.173758077525214,
+              -22.940125478213467
+            ],
+            [
+              -43.17362762010023,
+              -22.94079324018458
+            ],
+            [
+              -43.172901442314625,
+              -22.941032229759127
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a70ffff",
+        "crime_count": 0,
+        "crime_score": 0.1013,
+        "factor_count": 2,
+        "factor_score": 0.2,
+        "signal_count": 4,
+        "signal_score": 0.2667,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1673,
+        "top_crime_type": "",
+        "factor_types": [
+          "Sem ocorrência",
+          "Vegetação encobrindo iluminação pública"
+        ],
+        "factor_agencies": [
+          "Comlurb"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17157954408836,
+              -22.940842442206215
+            ],
+            [
+              -43.17098382511877,
+              -22.940413664395994
+            ],
+            [
+              -43.171114285485224,
+              -22.939745901059197
+            ],
+            [
+              -43.17184046335065,
+              -22.939506916215308
+            ],
+            [
+              -43.1724361817017,
+              -22.939935695404113
+            ],
+            [
+              -43.17230572280591,
+              -22.9406034580582
+            ],
+            [
+              -43.17157954408836,
+              -22.940842442206215
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a71ffff",
+        "crime_count": 3,
+        "crime_score": 0.1266,
+        "factor_count": 1,
+        "factor_score": 0.1,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.1216,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Sem ocorrência"
+        ],
+        "factor_agencies": [],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17336670439081,
+              -22.942128748442062
+            ],
+            [
+              -43.172770983724504,
+              -22.941699984229384
+            ],
+            [
+              -43.172901442314625,
+              -22.941032229759127
+            ],
+            [
+              -43.17362762010023,
+              -22.94079324018458
+            ],
+            [
+              -43.17422334014744,
+              -22.941222005775963
+            ],
+            [
+              -43.17409288302818,
+              -22.941889759563143
+            ],
+            [
+              -43.17336670439081,
+              -22.942128748442062
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a72ffff",
+        "crime_count": 3,
+        "crime_score": 0.0759,
+        "factor_count": 1,
+        "factor_score": 0.1,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.0963,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Vegetação encobrindo iluminação pública"
+        ],
+        "factor_agencies": [
+          "Comlurb"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17507997295436,
+              -22.94031524948707
+            ],
+            [
+              -43.174484253526515,
+              -22.93988648251697
+            ],
+            [
+              -43.17461470978632,
+              -22.93921871304542
+            ],
+            [
+              -43.17534088400298,
+              -22.938979711227333
+            ],
+            [
+              -43.175936602811205,
+              -22.939408479576162
+            ],
+            [
+              -43.17580614802243,
+              -22.9400762483643
+            ],
+            [
+              -43.17507997295436,
+              -22.94031524948707
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a747fff",
+        "crime_count": 13,
+        "crime_score": 0.7595,
+        "factor_count": 4,
+        "factor_score": 0.4,
+        "signal_count": 4,
+        "signal_score": 0.2667,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.5464,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Mobiliário abandonado servindo de esconderijo",
+          "Tapumes servindo de esconderijo",
+          "Vegetação encobrindo iluminação pública"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: 13 ocorrências (predom. roubo a transeunte)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.175936602811205,
+              -22.939408479576162
+            ],
+            [
+              -43.17534088400298,
+              -22.938979711227333
+            ],
+            [
+              -43.17547133909755,
+              -22.938311934255733
+            ],
+            [
+              -43.176197511529274,
+              -22.938072926316497
+            ],
+            [
+              -43.17679322971762,
+              -22.938501696044035
+            ],
+            [
+              -43.17666277609415,
+              -22.939169472332065
+            ],
+            [
+              -43.175936602811205,
+              -22.939408479576162
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a74ffff",
+        "crime_count": 11,
+        "crime_score": 0.6835,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 10,
+        "signal_score": 0.6667,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 0.9876,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Estacionamento irregular forçando pedestres à pista",
+          "Mobiliário abandonado servindo de esconderijo",
+          "Pessoas em situação de rua",
+          "Tapumes servindo de esconderijo",
+          "Vegetação encobrindo iluminação pública"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 3/3: 11 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+5) [Comlurb, SEOP, SMAS, Seconserva] + 10 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.173758077525214,
+              -22.940125478213467
+            ],
+            [
+              -43.17316235863545,
+              -22.93969670513391
+            ],
+            [
+              -43.173292816366136,
+              -22.9390289349792
+            ],
+            [
+              -43.17401899151576,
+              -22.938789938587185
+            ],
+            [
+              -43.17461470978632,
+              -22.93921871304542
+            ],
+            [
+              -43.174484253526515,
+              -22.93988648251697
+            ],
+            [
+              -43.173758077525214,
+              -22.940125478213467
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a757fff",
+        "crime_count": 2,
+        "crime_score": 0.3544,
+        "factor_count": 2,
+        "factor_score": 0.2,
+        "signal_count": 3,
+        "signal_score": 0.2,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.2772,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Mobiliário abandonado servindo de esconderijo",
+          "Tapumes servindo de esconderijo"
+        ],
+        "factor_agencies": [
+          "Seconserva"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17461470978632,
+              -22.93921871304542
+            ],
+            [
+              -43.17401899151576,
+              -22.938789938587185
+            ],
+            [
+              -43.1741494480813,
+              -22.93812216093227
+            ],
+            [
+              -43.17487562144647,
+              -22.937883158418853
+            ],
+            [
+              -43.17547133909755,
+              -22.938311934255733
+            ],
+            [
+              -43.17534088400298,
+              -22.938979711227333
+            ],
+            [
+              -43.17461470978632,
+              -22.93921871304542
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a75ffff",
+        "crime_count": 3,
+        "crime_score": 0.5696,
+        "factor_count": 4,
+        "factor_score": 0.4,
+        "signal_count": 5,
+        "signal_score": 0.3333,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.4681,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Mobiliário abandonado servindo de esconderijo",
+          "Tapumes servindo de esconderijo",
+          "Vegetação encobrindo iluminação pública"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 3 ocorrências (predom. roubo a transeunte) + 5 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17554523758539,
+              -22.941411770256547
+            ],
+            [
+              -43.174949517000314,
+              -22.94098301077493
+            ],
+            [
+              -43.17507997295436,
+              -22.94031524948707
+            ],
+            [
+              -43.17580614802243,
+              -22.9400762483643
+            ],
+            [
+              -43.17640186798773,
+              -22.9405050092247
+            ],
+            [
+              -43.176271413504764,
+              -22.941172769829052
+            ],
+            [
+              -43.17554523758539,
+              -22.941411770256547
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a767fff",
+        "crime_count": 8,
+        "crime_score": 0.6203,
+        "factor_count": 4,
+        "factor_score": 0.4,
+        "signal_count": 4,
+        "signal_score": 0.2667,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.4768,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Mobiliário abandonado servindo de esconderijo",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: 8 ocorrências (predom. roubo a transeunte)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17640186798773,
+              -22.9405050092247
+            ],
+            [
+              -43.17580614802243,
+              -22.9400762483643
+            ],
+            [
+              -43.175936602811205,
+              -22.939408479576162
+            ],
+            [
+              -43.17666277609415,
+              -22.939169472332065
+            ],
+            [
+              -43.17725849543942,
+              -22.939598234571243
+            ],
+            [
+              -43.17712804212181,
+              -22.94026600267571
+            ],
+            [
+              -43.17640186798773,
+              -22.9405050092247
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a76ffff",
+        "crime_count": 10,
+        "crime_score": 0.8608,
+        "factor_count": 7,
+        "factor_score": 0.7,
+        "signal_count": 5,
+        "signal_score": 0.3333,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.0331,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Calçada estreita forçando pedestres à pista",
+          "Estacionamento irregular forçando pedestres à pista",
+          "Mobiliário abandonado servindo de esconderijo",
+          "Pessoas em situação de rua",
+          "Vegetação encobrindo iluminação pública",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 3/3: 10 ocorrências (predom. roubo a transeunte) + Calçada estreita forçando pedestres à pista (+6) [Comlurb, RioLuz, SEOP, SMAS, Seconserva] + 5 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.17422334014744,
+              -22.941222005775963
+            ],
+            [
+              -43.17362762010023,
+              -22.94079324018458
+            ],
+            [
+              -43.173758077525214,
+              -22.940125478213467
+            ],
+            [
+              -43.174484253526515,
+              -22.93988648251697
+            ],
+            [
+              -43.17507997295436,
+              -22.94031524948707
+            ],
+            [
+              -43.174949517000314,
+              -22.94098301077493
+            ],
+            [
+              -43.17422334014744,
+              -22.941222005775963
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078a777fff",
+        "crime_count": 0,
+        "crime_score": 0.3291,
+        "factor_count": 2,
+        "factor_score": 0.2,
+        "signal_count": 5,
+        "signal_score": 0.3333,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.2979,
+        "top_crime_type": "",
+        "factor_types": [
+          "Mobiliário abandonado servindo de esconderijo",
+          "Vegetação encobrindo iluminação pública"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: 5 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.1844811140711,
+              -22.947842618456495
+            ],
+            [
+              -43.183885385026805,
+              -22.947413926982552
+            ],
+            [
+              -43.18401583209362,
+              -22.9467462100407
+            ],
+            [
+              -43.18474200673273,
+              -22.94650718525809
+            ],
+            [
+              -43.185337735154455,
+              -22.946935878111447
+            ],
+            [
+              -43.18520728955967,
+              -22.947603594367976
+            ],
+            [
+              -43.1844811140711,
+              -22.947842618456495
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aa07fff",
+        "crime_count": 5,
+        "crime_score": 0.3165,
+        "factor_count": 3,
+        "factor_score": 0.3,
+        "signal_count": 8,
+        "signal_score": 0.5333,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.3666,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Vegetação encobrindo iluminação pública",
+          "Área mal iluminada com circulação de pedestres"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "RioLuz",
+          "SMAS"
+        ],
+        "justification": "sinal 1/3: 8 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.185337735154455,
+              -22.946935878111447
+            ],
+            [
+              -43.18474200673273,
+              -22.94650718525809
+            ],
+            [
+              -43.18487245263369,
+              -22.945839460815655
+            ],
+            [
+              -43.18559862548429,
+              -22.945600429912048
+            ],
+            [
+              -43.18619435328317,
+              -22.94602912414483
+            ],
+            [
+              -43.18606390885434,
+              -22.946696847901766
+            ],
+            [
+              -43.185337735154455,
+              -22.946935878111447
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aa0ffff",
+        "crime_count": 6,
+        "crime_score": 0.4304,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 8,
+        "signal_score": 0.5333,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.4985,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Vegetação encobrindo iluminação pública",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": "BINGO 2/3: Comércio irregular obstruindo a visibilidade do passeio (+5) [Comlurb, GM-Rio, RioLuz, SEOP, SMAS] + 8 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18315920859949,
+              -22.947652945643767
+            ],
+            [
+              -43.18256348008878,
+              -22.947224248057395
+            ],
+            [
+              -43.182693928627494,
+              -22.946556530430477
+            ],
+            [
+              -43.18342010420506,
+              -22.946317511074977
+            ],
+            [
+              -43.18401583209362,
+              -22.9467462100407
+            ],
+            [
+              -43.183885385026805,
+              -22.947413926982552
+            ],
+            [
+              -43.18315920859949,
+              -22.947652945643767
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aa17fff",
+        "crime_count": 0,
+        "crime_score": 0.6203,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 9,
+        "signal_score": 0.6,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.6102,
+        "top_crime_type": "",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vegetação encobrindo iluminação pública",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: Pessoas em situação de rua (+5) [CET-Rio, Comlurb, RioLuz, SMAS, Seconserva] + 9 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18401583209362,
+              -22.9467462100407
+            ],
+            [
+              -43.18342010420506,
+              -22.946317511074977
+            ],
+            [
+              -43.183550551578016,
+              -22.945649785947307
+            ],
+            [
+              -43.18427672536757,
+              -22.945410760470573
+            ],
+            [
+              -43.18487245263369,
+              -22.945839460815655
+            ],
+            [
+              -43.18474200673273,
+              -22.94650718525809
+            ],
+            [
+              -43.18401583209362,
+              -22.9467462100407
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aa1ffff",
+        "crime_count": 9,
+        "crime_score": 0.557,
+        "factor_count": 8,
+        "factor_score": 0.8,
+        "signal_count": 10,
+        "signal_score": 0.6667,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 0.9678,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Praças e Parques",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": "BINGO 3/3: 9 ocorrências (predom. roubo de celular) + Comércio irregular obstruindo a visibilidade do passeio (+7) [Comlurb, GM-Rio, RioLuz, SEOP, SMAS] + 10 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18619435328317,
+              -22.94602912414483
+            ],
+            [
+              -43.18559862548429,
+              -22.945600429912048
+            ],
+            [
+              -43.18572907021934,
+              -22.944932697969424
+            ],
+            [
+              -43.1864552412811,
+              -22.94469366094521
+            ],
+            [
+              -43.18705096845688,
+              -22.945122356557416
+            ],
+            [
+              -43.18692052519403,
+              -22.945790087814377
+            ],
+            [
+              -43.18619435328317,
+              -22.94602912414483
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aa57fff",
+        "crime_count": 3,
+        "crime_score": 0.2278,
+        "factor_count": 6,
+        "factor_score": 0.6,
+        "signal_count": 1,
+        "signal_score": 0.0667,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.2806,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Mobiliário abandonado servindo de esconderijo",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "GM-Rio",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: Comércio irregular obstruindo a visibilidade do passeio (+5) [GM-Rio, RioLuz, SEOP, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18222865011754,
+              -22.945460099539993
+            ],
+            [
+              -43.18163292391882,
+              -22.945031386971003
+            ],
+            [
+              -43.181763373069664,
+              -22.944363652972985
+            ],
+            [
+              -43.18248954694747,
+              -22.944124632228792
+            ],
+            [
+              -43.18308527252432,
+              -22.944553346177003
+            ],
+            [
+              -43.18295482484527,
+              -22.945221079490157
+            ],
+            [
+              -43.18222865011754,
+              -22.945460099539993
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aa8ffff",
+        "crime_count": 14,
+        "crime_score": 0.6835,
+        "factor_count": 9,
+        "factor_score": 0.9,
+        "signal_count": 3,
+        "signal_score": 0.2,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.6168,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Praças e Parques",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 14 ocorrências (predom. roubo a transeunte) + Comércio irregular obstruindo a visibilidade do passeio (+8) [CET-Rio, Comlurb, RioLuz, SEOP, SMAS, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18183730272351,
+              -22.947463261291276
+            ],
+            [
+              -43.181241574747006,
+              -22.947034557592698
+            ],
+            [
+              -43.181372024757486,
+              -22.946366839280984
+            ],
+            [
+              -43.18209820127274,
+              -22.946127825352608
+            ],
+            [
+              -43.182693928627494,
+              -22.946556530430477
+            ],
+            [
+              -43.18256348008878,
+              -22.947224248057395
+            ],
+            [
+              -43.18183730272351,
+              -22.947463261291276
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aaa7fff",
+        "crime_count": 27,
+        "crime_score": 0.7848,
+        "factor_count": 5,
+        "factor_score": 0.5,
+        "signal_count": 2,
+        "signal_score": 0.1333,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.5507,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "RioLuz",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: 27 ocorrências (predom. roubo a transeunte)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.182693928627494,
+              -22.946556530430477
+            ],
+            [
+              -43.18209820127274,
+              -22.946127825352608
+            ],
+            [
+              -43.18222865011754,
+              -22.945460099539993
+            ],
+            [
+              -43.18295482484527,
+              -22.945221079490157
+            ],
+            [
+              -43.183550551578016,
+              -22.945649785947307
+            ],
+            [
+              -43.18342010420506,
+              -22.946317511074977
+            ],
+            [
+              -43.182693928627494,
+              -22.946556530430477
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aaaffff",
+        "crime_count": 8,
+        "crime_score": 0.8608,
+        "factor_count": 9,
+        "factor_score": 0.9,
+        "signal_count": 10,
+        "signal_score": 0.6667,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.2331,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Pessoas em situação de rua",
+          "Ponto de retenção do tráfego",
+          "Praças e Parques",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 3/3: 8 ocorrências (predom. roubo de celular) + Comércio irregular obstruindo a visibilidade do passeio (+8) [CET-Rio, Comlurb, RioLuz, SEOP, SMAS, Seconserva] + 10 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18440717157468,
+              -22.944743027842556
+            ],
+            [
+              -43.18381144546422,
+              -22.94431432000611
+            ],
+            [
+              -43.18394189197748,
+              -22.94364657919283
+            ],
+            [
+              -43.18466806312923,
+              -22.943407546901256
+            ],
+            [
+              -43.18526378861714,
+              -22.943836256117
+            ],
+            [
+              -43.1851333435759,
+              -22.94450399624498
+            ],
+            [
+              -43.18440717157468,
+              -22.944743027842556
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aac7fff",
+        "crime_count": 3,
+        "crime_score": 0.3671,
+        "factor_count": 8,
+        "factor_score": 0.8,
+        "signal_count": 3,
+        "signal_score": 0.2,
+        "bingo_count": 1,
+        "is_bingo": false,
+        "bingo_score": 0.4336,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Mobiliário abandonado servindo de esconderijo",
+          "Motocicletas trafegando no passeio",
+          "Praças e Parques",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SEOP",
+          "Seconserva"
+        ],
+        "justification": "sinal 1/3: Comércio irregular obstruindo a visibilidade do passeio (+7) [Comlurb, GM-Rio, RioLuz, SEOP, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18308527252432,
+              -22.944553346177003
+            ],
+            [
+              -43.18248954694747,
+              -22.944124632228792
+            ],
+            [
+              -43.18261999493261,
+              -22.943456890730477
+            ],
+            [
+              -43.18334616702276,
+              -22.943217863865392
+            ],
+            [
+              -43.18394189197748,
+              -22.94364657919283
+            ],
+            [
+              -43.18381144546422,
+              -22.94431432000611
+            ],
+            [
+              -43.18308527252432,
+              -22.944553346177003
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aad7fff",
+        "crime_count": 15,
+        "crime_score": 0.7089,
+        "factor_count": 8,
+        "factor_score": 0.8,
+        "signal_count": 4,
+        "signal_score": 0.2667,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.6211,
+        "top_crime_type": "Roubo a transeunte",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Ponto de retenção do tráfego",
+          "Praças e Parques",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Vãos ou cavidades usados como esconderijo",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "CET-Rio",
+          "Comlurb",
+          "RioLuz",
+          "SEOP",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: 15 ocorrências (predom. roubo a transeunte) + Comércio irregular obstruindo a visibilidade do passeio (+7) [CET-Rio, Comlurb, RioLuz, SEOP, Seconserva]"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18487245263369,
+              -22.945839460815655
+            ],
+            [
+              -43.18427672536757,
+              -22.945410760470573
+            ],
+            [
+              -43.18440717157468,
+              -22.944743027842556
+            ],
+            [
+              -43.1851333435759,
+              -22.94450399624498
+            ],
+            [
+              -43.18572907021934,
+              -22.944932697969424
+            ],
+            [
+              -43.18559862548429,
+              -22.945600429912048
+            ],
+            [
+              -43.18487245263369,
+              -22.945839460815655
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aae7fff",
+        "crime_count": 5,
+        "crime_score": 0.4304,
+        "factor_count": 9,
+        "factor_score": 0.9,
+        "signal_count": 11,
+        "signal_score": 0.7333,
+        "bingo_count": 2,
+        "is_bingo": true,
+        "bingo_score": 0.6235,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Mobiliário abandonado servindo de esconderijo",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Praças e Parques",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SEOP",
+          "SMAS",
+          "Seconserva"
+        ],
+        "justification": "BINGO 2/3: Comércio irregular obstruindo a visibilidade do passeio (+8) [Comlurb, GM-Rio, RioLuz, SEOP, SMAS, Seconserva] + 11 denúncias relacionadas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.18572907021934,
+              -22.944932697969424
+            ],
+            [
+              -43.1851333435759,
+              -22.94450399624498
+            ],
+            [
+              -43.18526378861714,
+              -22.943836256117
+            ],
+            [
+              -43.18598995882971,
+              -22.943597218398985
+            ],
+            [
+              -43.18658568485019,
+              -22.944025921502796
+            ],
+            [
+              -43.1864552412811,
+              -22.94469366094521
+            ],
+            [
+              -43.18572907021934,
+              -22.944932697969424
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aaeffff",
+        "crime_count": 1,
+        "crime_score": 0.1646,
+        "factor_count": 5,
+        "factor_score": 0.5,
+        "signal_count": 3,
+        "signal_score": 0.2,
+        "bingo_count": 0,
+        "is_bingo": false,
+        "bingo_score": 0.2573,
+        "top_crime_type": "Roubo em coletivo",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Mobiliário abandonado servindo de esconderijo",
+          "Motocicletas trafegando no passeio",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "GM-Rio",
+          "RioLuz",
+          "SEOP",
+          "Seconserva"
+        ],
+        "justification": ""
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -43.183550551578016,
+              -22.945649785947307
+            ],
+            [
+              -43.18295482484527,
+              -22.945221079490157
+            ],
+            [
+              -43.18308527252432,
+              -22.944553346177003
+            ],
+            [
+              -43.18381144546422,
+              -22.94431432000611
+            ],
+            [
+              -43.18440717157468,
+              -22.944743027842556
+            ],
+            [
+              -43.18427672536757,
+              -22.945410760470573
+            ],
+            [
+              -43.183550551578016,
+              -22.945649785947307
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "h3": "8aa8a078aaf7fff",
+        "crime_count": 2,
+        "crime_score": 0.7342,
+        "factor_count": 8,
+        "factor_score": 0.8,
+        "signal_count": 13,
+        "signal_score": 0.8667,
+        "bingo_count": 3,
+        "is_bingo": true,
+        "bingo_score": 1.1757,
+        "top_crime_type": "Roubo de aparelho celular",
+        "factor_types": [
+          "Comércio irregular obstruindo a visibilidade do passeio",
+          "Motocicletas trafegando no passeio",
+          "Pessoas em situação de rua",
+          "Praças e Parques",
+          "Vegetação encobrindo iluminação pública",
+          "Vegetação obstruindo a visibilidade do passeio",
+          "Área mal iluminada com circulação de pedestres",
+          "Área mal iluminada com parada de veículos"
+        ],
+        "factor_agencies": [
+          "Comlurb",
+          "GM-Rio",
+          "RioLuz",
+          "SEOP",
+          "SMAS"
+        ],
+        "justification": "BINGO 3/3: 2 ocorrências (predom. roubo de celular) + Comércio irregular obstruindo a visibilidade do passeio (+7) [Comlurb, GM-Rio, RioLuz, SEOP, SMAS] + 13 denúncias relacionadas"
+      }
+    }
+  ]
+}
