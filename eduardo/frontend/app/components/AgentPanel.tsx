@@ -68,10 +68,24 @@ export default function AgentPanel({
 }: Props) {
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages.length, status])
+  }, [messages.length])
+
+  useEffect(() => {
+    if (status !== 'streaming') return
+    const interval = setInterval(() => {
+      const container = scrollContainerRef.current
+      if (!container) return
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150
+      if (isNearBottom) {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }
+    }, 300)
+    return () => clearInterval(interval)
+  }, [status])
 
   const isRunning = status === 'submitted' || status === 'streaming'
   const isComplete = findings !== null
@@ -169,7 +183,7 @@ export default function AgentPanel({
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div ref={scrollContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {visibleMessages.map(msg => (
           <MessageBubble key={msg.id} message={msg} />
         ))}
