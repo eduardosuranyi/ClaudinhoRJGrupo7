@@ -17,9 +17,14 @@ from __future__ import annotations
 import logging
 from typing import Iterable, Optional
 
+import json
+from pathlib import Path
+
+from valente_ontology.classified_store import ClassifiedTweetStore
 from valente_ontology.config import OntologySettings, settings as default_settings
 from valente_ontology.enums import ExtractionMethod, SourceKind
 from valente_ontology.extractors import llm as llm_extractor
+from valente_ontology.extractors import relevance as relevance_module
 from valente_ontology.extractors import structured
 from valente_ontology.loaders.base import RawSource
 from valente_ontology.loaders.compstat import (
@@ -30,6 +35,7 @@ from valente_ontology.loaders.fm_actions import FMActionLoader
 from valente_ontology.loaders.news import NewsLoader
 from valente_ontology.loaders.relints import RelintLoader
 from valente_ontology.loaders.tweets import TweetLoader
+from valente_ontology.loaders.tweets_classified import ClassifiedTweetLoader
 from valente_ontology.ontology import CrimeEvent
 from valente_ontology.storage import EventStore
 
@@ -51,6 +57,18 @@ def build_llm_extractor(cfg: OntologySettings) -> object:
         api_key=cfg.anthropic_api_key,
         model=cfg.anthropic_model,
         max_tokens=cfg.llm_max_tokens,
+        temperature=cfg.llm_temperature,
+    )
+
+
+def build_relevance_classifier(cfg: OntologySettings) -> object:
+    """Constrói o RelevanceClassifier real ou um stub offline."""
+    if not cfg.anthropic_api_key:
+        log.warning("ANTHROPIC_API_KEY ausente — relevance classifier em modo stub (descarta tudo).")
+        return relevance_module.build_offline_stub_classifier()
+    return relevance_module.RelevanceClassifier(
+        api_key=cfg.anthropic_api_key,
+        model=cfg.anthropic_model,
         temperature=cfg.llm_temperature,
     )
 
@@ -105,11 +123,114 @@ def run_tweets(
     cfg: OntologySettings = default_settings,
     limit: Optional[int] = None,
     llm=None,
+    use_classified: bool = True,
+    min_confidence: float = 0.5,
 ) -> int:
-    """LLM por tweet relevante."""
-    loader = TweetLoader(cfg.tweet_raw_dir)
+    """Extrai CrimeEvent dos tweets via LLM.
+
+    `use_classified` (default True): só processa tweets que a etapa de
+    classificação marcou como relevantes (lê `data/classified/tweets/`).
+    Isso evita gastar tokens caros do extractor ontológico em conteúdo
+    descartado. Requer rodar `classify-tweets` antes — se a pasta não
+    existir, processa zero tweets.
+
+    `use_classified=False` cai no comportamento antigo (TweetLoader com
+    keyword pre-filter). Útil pra debugging ou quando o classifier não
+    pode ser usado (sem API key).
+    """
+    if use_classified:
+        loader = ClassifiedTweetLoader(
+            cfg.classified_tweets_dir,
+            min_confidence=min_confidence,
+        )
+        if not cfg.classified_tweets_dir.exists():
+            log.warning(
+                "data/classified/tweets/ não existe — rode "
+                "`valente-ontology classify-tweets` primeiro, ou passe "
+                "use_classified=False para usar o keyword pre-filter."
+            )
+            return 0
+    else:
+        loader = TweetLoader(cfg.tweet_raw_dir)
     llm = llm or build_llm_extractor(cfg)
     return _drain_llm(loader.iter_sources(), store, llm=llm, limit=limit)
+
+
+def run_classify_tweets(
+    cfg: OntologySettings = default_settings,
+    limit_per_account: Optional[int] = None,
+    classifier=None,
+) -> dict[str, dict[str, int]]:
+    """Aplica RelevanceClassifier nos tweets brutos e grava em
+    `data/classified/tweets/{user}.jsonl`.
+
+    - Lê diretamente os JSONL de `data/raw/` (não passa pelo TweetLoader,
+      que faz keyword filtering — aqui queremos veredicto para TODO tweet
+      bruto, inclusive os que o keyword cortaria, para auditoria).
+    - Pula tweets já classificados (idempotente).
+
+    Returns:
+        {username: {"classified": N_novos, "relevantes": M, "descartados": K}}
+    """
+    cfg.ensure_dirs()
+    cstore = ClassifiedTweetStore(cfg.classified_tweets_dir)
+    classifier = classifier or build_relevance_classifier(cfg)
+
+    raw_dir = Path(cfg.tweet_raw_dir)
+    if not raw_dir.exists():
+        log.warning("Pasta de tweets brutos não existe: %s", raw_dir)
+        return {}
+
+    summary: dict[str, dict[str, int]] = {}
+    for raw_path in sorted(raw_dir.glob("*.jsonl")):
+        username = raw_path.stem
+        known = cstore.classified_ids(username)
+        n_classified = 0
+        n_rel = 0
+        n_disc = 0
+
+        with raw_path.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                if limit_per_account is not None and n_classified >= limit_per_account:
+                    break
+                try:
+                    tweet = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+
+                tid = tweet.get("tweet_id")
+                if not tid or tid in known:
+                    continue
+
+                verdict = classifier.classify(tweet)
+                if verdict is None:
+                    log.debug("Tweet %s sem veredicto (None) — pulando.", tid)
+                    continue
+
+                record = dict(tweet)
+                record["relevance"] = json.loads(verdict.to_jsonl_line())
+                if cstore.append(username, record):
+                    n_classified += 1
+                    known.add(tid)
+                    if verdict.is_relevant:
+                        n_rel += 1
+                    else:
+                        n_disc += 1
+
+        if n_classified:
+            log.info(
+                "[%s] classificados=%d relevantes=%d descartados=%d",
+                username, n_classified, n_rel, n_disc,
+            )
+        summary[username] = {
+            "classified": n_classified,
+            "relevantes": n_rel,
+            "descartados": n_disc,
+        }
+    return summary
 
 
 def run_news(

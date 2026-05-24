@@ -1,16 +1,18 @@
 """
-Loader dos tweets coletados pelo `valente_scraper` — lê os JSONL de
-`valente/data/raw/*.jsonl` (output do scraper irmão).
+Loader que lê os tweets **já classificados como relevantes** em
+`data/classified/tweets/*.jsonl` e os entrega como `RawSource` para o
+extractor ontológico.
 
-Cada tweet vira **um** RawSource. Aplica-se um filtro mínimo de relevância
-(palavras-chave de crime patrimonial + filtros estruturais), mas **não**
-faz extração ontológica — isso fica para o extractor LLM, que recebe o
-texto bruto.
+Por que existir em vez de filtrar dentro do TweetLoader original:
+    - Separação de fontes: o classificador é uma etapa explícita do pipeline.
+      Manter loaders dedicados (raw vs classified) torna o gráfico de
+      dependências legível e permite re-rodar só a parte que mudou.
+    - O extractor ontológico recebe categoria + reasoning como contexto
+      extra (em structured_fields), economizando inferência sobre o que
+      o classificador já decidiu.
 
-O filtro de relevância é intencionalmente permissivo: o LLM extractor
-descarta o que não for evento criminal (devolvendo `crime_type=DESCONHECIDO`
-+ `confidence=0`); o pré-filtro só serve para economizar tokens nos casos
-óbvios (ex.: tweet promocional, propaganda política).
+Pré-requisito: `valente-ontology classify-tweets` precisa ter rodado antes.
+Se não rodou, este loader emite zero `RawSource`s (não falha).
 """
 
 from __future__ import annotations
@@ -25,45 +27,31 @@ from valente_ontology.enums import SourceKind
 from valente_ontology.loaders.base import RawSource
 
 
-# Palavras-chave de pré-filtro alinhadas ao escopo: roubo, furto e fatores
-# urbanos que influenciem nesses crimes. NÃO inclui violência sem caráter
-# patrimonial (tiroteio, esfaqueamento) — esses são filtrados antes do
-# LLM caro. O classificador de relevância (extractors/relevance.py) faz
-# a decisão fina; este filtro só economiza tokens nos casos óbvios.
-_KW_RE = re.compile(
-    r"\b("
-    r"roub|assalt|furt|levaram|arrast[aã]o|abord(a|aram|ou)|"
-    r"perd[ie]u (a |o |meu |minha )?(celular|carteira|bolsa|mochila|carro|moto)|"
-    # fatores urbanos que costumam aparecer em contexto de
-    # roubo/furto (calçada, iluminação, abandono):
-    r"poste apagado|sem ilumin|rua escura|terreno baldio|caland[ãa]o|"
-    r"ponto cego|sem c[âa]mera|abandonad[ao]"
-    r")",
-    re.IGNORECASE,
-)
+class ClassifiedTweetLoader:
+    """Lê JSONL classificado e emite RawSource APENAS para os relevantes.
 
-
-class TweetLoader:
-    """Lê todos os *.jsonl de uma pasta `raw/`. Skipa retweets puros
-    quando solicitado (RTs costumam duplicar a informação)."""
+    Mesma semântica do TweetLoader original (skip retweets, kind=TWEET),
+    mas a decisão de incluir/excluir já está materializada no JSONL
+    classificado — não chama o classificador novamente.
+    """
 
     kind = SourceKind.TWEET
-    reliability = 0.5  # postagem pública não verificada
+    reliability = 0.5
 
     def __init__(
         self,
-        raw_dir: Path,
+        classified_dir: Path,
         skip_retweets: bool = True,
-        only_keyword_match: bool = True,
+        min_confidence: float = 0.0,
     ):
-        self.raw_dir = Path(raw_dir)
+        self.classified_dir = Path(classified_dir)
         self.skip_retweets = skip_retweets
-        self.only_keyword_match = only_keyword_match
+        self.min_confidence = min_confidence
 
     def iter_sources(self) -> Iterator[RawSource]:
-        if not self.raw_dir.exists():
+        if not self.classified_dir.exists():
             return
-        for path in sorted(self.raw_dir.glob("*.jsonl")):
+        for path in sorted(self.classified_dir.glob("*.jsonl")):
             with path.open("r", encoding="utf-8") as fh:
                 for line in fh:
                     line = line.strip()
@@ -73,12 +61,15 @@ class TweetLoader:
                         row = json.loads(line)
                     except json.JSONDecodeError:
                         continue
+                    rel = row.get("relevance") or {}
+                    if not rel.get("is_relevant"):
+                        continue
+                    if (rel.get("confidence") or 0.0) < self.min_confidence:
+                        continue
                     if self.skip_retweets and row.get("is_retweet"):
                         continue
                     text = (row.get("text") or "").strip()
                     if not text:
-                        continue
-                    if self.only_keyword_match and not _KW_RE.search(text):
                         continue
                     yield RawSource(
                         kind=self.kind,
@@ -96,6 +87,10 @@ class TweetLoader:
                             "retweet_count": row.get("retweet_count"),
                             "favorite_count": row.get("favorite_count"),
                             "source_url": row.get("source_url"),
+                            # Contexto da etapa anterior — o LLM extractor pode usar:
+                            "relevance_category": rel.get("category"),
+                            "relevance_reasoning": rel.get("reasoning"),
+                            "relevance_confidence": rel.get("confidence"),
                         },
                     )
 
