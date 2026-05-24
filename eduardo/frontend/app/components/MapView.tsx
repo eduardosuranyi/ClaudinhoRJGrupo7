@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { Map as MaplibreMap, Popup, Marker, GeoJSONSource } from 'maplibre-gl'
 import type { Area, AreasData, MapControl, AgentLayerKey, InspectedPoint } from '../types'
-import { fmt, scoreColor, faccaoColor } from '../lib/helpers'
+import { scoreColor } from '../lib/helpers'
 
 interface Props {
   data: AreasData
@@ -42,9 +43,11 @@ function computeScore(area: Area, w: Props['weights']): number {
 
 export default function MapView({ data, selected, weights, onSelectArea, mapControlRef, highlightedTrechos, onToggleTrecho, onSetHighlightedTrechos, onInspectPoint }: Props) {
   const mapRef   = useRef<HTMLDivElement>(null)
-  const mapInst  = useRef<any>(null)
-  const popupRef = useRef<any>(null)
-  const annotationsRef = useRef<any[]>([])
+  const mapInst  = useRef<MaplibreMap | null>(null)
+  const popupRef = useRef<Popup | null>(null)
+  const annotationsRef = useRef<Marker[]>([])
+  // Selected area mirror, so agent-control methods can look up trechos/bairros without stale closures
+  const selectedRef = useRef<Area | null>(null)
   const [mapReady, setMapReady] = useState(false)
   const [layerPanelOpen, setLayerPanelOpen] = useState(false)
   const [layers, setLayers] = useState<LayerVisibility>({
@@ -60,7 +63,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   // ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapRef.current || mapInst.current) return
-    let map: any
+    let map: MaplibreMap
     import('maplibre-gl').then(({ default: maplibregl }) => {
       // CARTO dark-matter GL vector style — full Rio map w/ streets + labels
       // No API key required
@@ -103,7 +106,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   // ─────────────────────────────────────────────────────────
   // 2. BUILD ALL VECTOR DATA LAYERS
   // ─────────────────────────────────────────────────────────
-  function buildDataLayers(map: any, data: AreasData) {
+  function buildDataLayers(map: MaplibreMap, data: AreasData) {
     // ── GeoJSON: area polygons ───────────────────────────
     const areasGJ = buildAreasGeoJSON(data, weights)
     map.addSource('areas', { type: 'geojson', data: areasGJ, promoteId: 'id' })
@@ -518,6 +521,101 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       },
     })
 
+    // ── Agent: highlighted street segments ───────────────
+    map.addSource('agent-highlights', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'agent-highlights-glow',
+      type: 'line',
+      source: 'agent-highlights',
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 12, 15, 22],
+        'line-opacity': 0.25,
+        'line-blur': 6,
+      },
+    })
+    map.addLayer({
+      id: 'agent-highlights-line',
+      type: 'line',
+      source: 'agent-highlights',
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 4, 15, 8],
+        'line-opacity': 0.95,
+      },
+    })
+    map.addLayer({
+      id: 'agent-highlights-label',
+      type: 'symbol',
+      source: 'agent-highlights',
+      layout: {
+        'text-field': ['get', 'label'],
+        'text-size': ['interpolate', ['linear'], ['zoom'], 11, 10, 15, 13],
+        'text-font': ['Open Sans Bold'],
+        'symbol-placement': 'line',
+        'text-allow-overlap': false,
+        'text-padding': 6,
+      },
+      paint: {
+        'text-color': '#fffbe6',
+        'text-halo-color': 'rgba(7,7,10,0.95)',
+        'text-halo-width': 2,
+      },
+    })
+
+    // ── Agent: temporary route lines (e.g. fuga from RELINT) ──
+    map.addSource('agent-routes', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'agent-routes-line',
+      type: 'line',
+      source: 'agent-routes',
+      paint: {
+        'line-color': '#22d3ee',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 3, 15, 5],
+        'line-opacity': 0.9,
+        'line-dasharray': [2, 1.5],
+      },
+    })
+    map.addLayer({
+      id: 'agent-routes-label',
+      type: 'symbol',
+      source: 'agent-routes',
+      layout: {
+        'text-field': ['get', 'label'],
+        'text-size': 11,
+        'text-font': ['Open Sans Semibold'],
+        'symbol-placement': 'line-center',
+        'text-allow-overlap': false,
+      },
+      paint: {
+        'text-color': '#a5f3fc',
+        'text-halo-color': 'rgba(7,7,10,0.95)',
+        'text-halo-width': 2,
+      },
+    })
+
+    // ── Agent: focused bairro highlight ──
+    map.addSource('agent-bairro-focus', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'agent-bairro-focus-fill',
+      type: 'fill',
+      source: 'agent-bairro-focus',
+      paint: {
+        'fill-color': '#38bdf8',
+        'fill-opacity': 0.22,
+      },
+    })
+    map.addLayer({
+      id: 'agent-bairro-focus-stroke',
+      type: 'line',
+      source: 'agent-bairro-focus',
+      paint: {
+        'line-color': '#38bdf8',
+        'line-width': 3,
+        'line-opacity': 0.95,
+      },
+    })
+
     // ── Interactions ─────────────────────────────────────
 
     const interactiveLayers = ['trechos-circle', 'fatores-dot', 'chamados-dot']
@@ -559,7 +657,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       const score = computeScore(area, weights)
       const scoreCol = scoreColor(score)
       popupRef.current
-        .setLngLat(e.lngLat)
+        ?.setLngLat(e.lngLat)
         .setHTML(`
           <div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:200px">
             <div style="font-size:10px;color:#ff6b35;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Área FM</div>
@@ -607,7 +705,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       const dd = Number(p.denuncias || 0)
       const ch = Number(p.chamados_1746 || 0)
       popupRef.current
-        .setLngLat(e.lngLat)
+        ?.setLngLat(e.lngLat)
         .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:180px">
           <div style="font-size:10px;color:#38bdf8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Bairro do Entorno</div>
           <div style="font-size:13px;font-weight:600;margin-bottom:6px">${p.nome}</div>
@@ -735,7 +833,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       map.getCanvas().style.cursor = 'pointer'
       const f = e.features[0].properties
       popupRef.current
-        .setLngLat(e.lngLat)
+        ?.setLngLat(e.lngLat)
         .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;max-width:220px">
           <div style="font-size:10px;color:${f.recommendation === 'instalar' ? '#ef4444' : '#fbb040'};text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">#${f.rank} ${f.recommendation}</div>
           <div style="font-size:11px;margin-bottom:4px">${f.uncovered_crimes} ocorrências sem cobertura</div>
@@ -763,13 +861,14 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   useEffect(() => {
     if (!mapInst.current || !mapReady) return
     const updated = buildAreasGeoJSON(data, weights)
-    mapInst.current.getSource('areas')?.setData(updated)
+    ;(mapInst.current.getSource('areas') as GeoJSONSource | undefined)?.setData(updated)
   }, [weights, mapReady, data])
 
   // ─────────────────────────────────────────────────────────
   // 4a. SYNC SELECTED AREA (polygon + bairros)
   // ─────────────────────────────────────────────────────────
   useEffect(() => {
+    selectedRef.current = selected
     if (!mapInst.current || !mapReady) return
     const map = mapInst.current
     map.setFilter('areas-selected', ['==', ['get', 'id'], selected?.id ?? -1])
@@ -781,7 +880,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
           geometry: b.geometry,
         }))
       : []
-    map.getSource('bairros')?.setData({ type: 'FeatureCollection', features: bairroFeatures })
+    ;(map.getSource('bairros') as GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: bairroFeatures })
   }, [selected, mapReady])
 
   // ─────────────────────────────────────────────────────────
@@ -812,7 +911,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
             geometry: { type: 'Point' as const, coordinates: [t.lng, t.lat] },
           }))
       : []
-    map.getSource('trechos')?.setData({ type: 'FeatureCollection', features: trechoPointFeatures })
+    ;(map.getSource('trechos') as GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: trechoPointFeatures })
 
     const trechoLineFeatures = selected
       ? selected.top_trechos
@@ -823,7 +922,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
             geometry: t.line_geometry!,
           }))
       : []
-    map.getSource('trechos-lines')?.setData({ type: 'FeatureCollection', features: trechoLineFeatures })
+    ;(map.getSource('trechos-lines') as GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: trechoLineFeatures })
 
     const hlLineFeatures = selected
       ? selected.top_trechos
@@ -835,7 +934,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
             geometry: t.line_geometry!,
           }))
       : []
-    map.getSource('trechos-hl-lines')?.setData({ type: 'FeatureCollection', features: hlLineFeatures })
+    ;(map.getSource('trechos-hl-lines') as GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: hlLineFeatures })
   }, [selected, mapReady, highlightedTrechos])
 
   // ─────────────────────────────────────────────────────────
@@ -858,9 +957,10 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       layersRef.current = next
       return next
     })
-    if (!mapInst.current) return
+    const map = mapInst.current
+    if (!map) return
     LAYER_IDS[key]?.forEach(id =>
-      mapInst.current.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none')
+      map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none')
     )
   }
 
@@ -929,8 +1029,127 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         })
       },
 
-      highlightTrechos: (indices: number[]) => {
-        cbRef.current.onSetHighlightedTrechos?.(indices)
+      highlightTrecho: (locfNorm: string, opts?: { color?: string; label?: string }) => {
+        const map = mapInst.current
+        const sel = selectedRef.current
+        if (!map || !sel) return false
+        const target = locfNorm.trim().toLowerCase()
+        const t = sel.top_trechos.find(
+          x => x.locf_norm.trim().toLowerCase() === target,
+        )
+        if (!t || !t.line_geometry) return false
+        const color = opts?.color ?? '#fbb040'
+        const label = opts?.label ?? t.locf_norm
+        const src = map.getSource('agent-highlights') as GeoJSONSource | undefined
+        if (!src) return false
+        const existing = (src as any)._data?.features ?? []
+        src.setData({
+          type: 'FeatureCollection',
+          features: [
+            ...existing,
+            {
+              type: 'Feature',
+              properties: { color, label, total: t.total },
+              geometry: t.line_geometry,
+            },
+          ],
+        })
+        if (typeof t.lat === 'number' && typeof t.lng === 'number') {
+          map.flyTo({ center: [t.lng, t.lat], zoom: Math.max(map.getZoom(), 14), duration: 800 })
+        }
+        return true
+      },
+
+      highlightTopTrechos: (n: number) => {
+        const map = mapInst.current
+        const sel = selectedRef.current
+        if (!map || !sel) return
+        const features = sel.top_trechos
+          .slice(0, Math.max(1, n))
+          .filter(t => t.line_geometry)
+          .map((t, i) => ({
+            type: 'Feature' as const,
+            properties: {
+              color: i === 0 ? '#ef4444' : i < 3 ? '#fbb040' : '#fde68a',
+              label: `${i + 1}. ${t.locf_norm}`,
+              total: t.total,
+            },
+            geometry: t.line_geometry!,
+          }))
+        ;(map.getSource('agent-highlights') as GeoJSONSource | undefined)
+          ?.setData({ type: 'FeatureCollection', features })
+      },
+
+      clearHighlights: () => {
+        const map = mapInst.current
+        if (!map) return
+        ;(map.getSource('agent-highlights') as GeoJSONSource | undefined)
+          ?.setData({ type: 'FeatureCollection', features: [] })
+        ;(map.getSource('agent-routes') as GeoJSONSource | undefined)
+          ?.setData({ type: 'FeatureCollection', features: [] })
+        ;(map.getSource('agent-bairro-focus') as GeoJSONSource | undefined)
+          ?.setData({ type: 'FeatureCollection', features: [] })
+      },
+
+      focusBairro: (nome: string) => {
+        const map = mapInst.current
+        const sel = selectedRef.current
+        if (!map || !sel?.bairros_entorno) return false
+        const target = nome.trim().toLowerCase()
+        const b = sel.bairros_entorno.find(
+          x => x.nome.trim().toLowerCase() === target
+            || x.nome.trim().toLowerCase().includes(target),
+        )
+        if (!b) return false
+        ;(map.getSource('agent-bairro-focus') as GeoJSONSource | undefined)?.setData({
+          type: 'FeatureCollection',
+          features: [{ type: 'Feature', properties: { nome: b.nome }, geometry: b.geometry }],
+        })
+        const bounds = geomBounds(b.geometry as any)
+        if (bounds) {
+          map.fitBounds(bounds, {
+            padding: 80,
+            maxZoom: 15,
+            duration: 900,
+          })
+        }
+        return true
+      },
+
+      setTimeFilter: (horaInicio: number | null, horaFim: number | null) => {
+        const map = mapInst.current
+        if (!map) return
+        const reset = horaInicio === null && horaFim === null
+        const filter: any = reset
+          ? null
+          : [
+              'all',
+              ['!=', ['get', 'h'], null],
+              ['>=', ['to-number', ['get', 'h']], Math.max(0, horaInicio ?? 0)],
+              ['<', ['to-number', ['get', 'h']], Math.min(24, horaFim ?? 24)],
+            ]
+        ;['crime-heat', 'crime-dot'].forEach(id => {
+          try { map.setFilter(id, filter) } catch { /* layer not ready */ }
+        })
+      },
+
+      showRoute: (from: [number, number], to: [number, number], label?: string) => {
+        const map = mapInst.current
+        if (!map) return
+        const src = map.getSource('agent-routes') as GeoJSONSource | undefined
+        if (!src) return
+        const existing = (src as any)._data?.features ?? []
+        src.setData({
+          type: 'FeatureCollection',
+          features: [
+            ...existing,
+            {
+              type: 'Feature',
+              properties: { label: label ?? '' },
+              geometry: { type: 'LineString', coordinates: [[from[0], from[1]], [to[0], to[1]]] },
+            },
+          ],
+        })
       },
     }
   }, [mapReady, mapControlRef, data])

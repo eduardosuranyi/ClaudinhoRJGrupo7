@@ -45,14 +45,15 @@ export default function Home() {
       })
   }, [])
 
-  const { agentState, startAgent, respondToCheckpoint, abortAgent } = useMapAgent({
-    mapControlRef,
-    setWeights,
-    setSelected,
-    getArea: (id) => data?.areas.find(a => a.id === id),
-  })
+  const { messages, status, findings, areaId, isActive, sendMessage, startAgent, abortAgent } =
+    useMapAgent({
+      mapControlRef,
+      setWeights,
+      setSelected,
+      getArea: (id) => data?.areas.find(a => a.id === id),
+    })
 
-  const agentIsActive = agentState.status !== 'idle'
+  const agentIsActive = isActive
 
   if (loading || !data) {
     return (
@@ -104,7 +105,7 @@ export default function Home() {
             setWeights={setWeights}
             onSelectArea={setSelected}
             onInvestigate={agentIsActive ? undefined : startAgent}
-            agentActiveAreaId={agentState.areaId}
+            agentActiveAreaId={areaId}
           />
 
           <MapView
@@ -121,8 +122,11 @@ export default function Home() {
 
           {agentIsActive ? (
             <AgentPanel
-              agentState={agentState}
-              onRespond={respondToCheckpoint}
+              messages={messages}
+              status={status}
+              findings={findings}
+              currentArea={selected}
+              sendMessage={sendMessage}
               onAbort={abortAgent}
             />
           ) : selected ? (

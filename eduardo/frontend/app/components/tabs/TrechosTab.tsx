@@ -1,6 +1,6 @@
 'use client'
 
-import type { Area } from '../../types'
+import type { Area, Trecho } from '../../types'
 import { fmt, cap } from '../../lib/helpers'
 
 interface TrechosTabProps {
@@ -55,7 +55,7 @@ export default function TrechosTab({ area, highlightedTrechos, onToggleTrecho }:
 }
 
 function TrechoRow({ rank, trecho, maxTotal, highlighted, onClick }: {
-  rank: number; trecho: any; maxTotal: number; highlighted?: boolean; onClick?: () => void
+  rank: number; trecho: Trecho; maxTotal: number; highlighted?: boolean; onClick?: () => void
 }) {
   const pct = (trecho.total / maxTotal) * 100
 

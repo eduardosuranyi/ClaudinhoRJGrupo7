@@ -262,24 +262,7 @@ export interface AreasData {
 
 // ─── Agent types ─────────────────────────────────────────────────────────────
 
-export type AgentStatus = 'idle' | 'running' | 'paused' | 'complete' | 'error'
-
-export type AgentLayerKey = 'crime' | 'fatores' | 'cameras' | 'psr' | 'dominio'
-
-export interface AgentCheckpointData {
-  question: string
-  options: string[]
-  reasoning: string
-  tool_use_id: string
-}
-
-export interface TranscriptEntry {
-  id: string
-  type: 'system' | 'narrate' | 'tool_action' | 'checkpoint_ask' | 'checkpoint_answer' | 'complete' | 'error'
-  content: string
-  stepTitle?: string
-  checkpoint?: AgentCheckpointData
-}
+export type AgentLayerKey = 'crime' | 'fatores' | 'cameras' | 'psr' | 'dominio' | 'gaps' | 'chamados' | 'bairros'
 
 export interface AgentFindings {
   summary: string
@@ -296,17 +279,6 @@ export interface AgentFindings {
   }>
 }
 
-export interface AgentState {
-  status: AgentStatus
-  areaId: number | null
-  transcript: TranscriptEntry[]
-  pendingCheckpoint: AgentCheckpointData | null
-  messages: any[]
-  findings: AgentFindings | null
-  error: string | null
-  thinkingDetail: string | null
-}
-
 /** A fatores-urbanos or chamados-1746 point that was clicked on the map. */
 export interface InspectedPoint {
   type: 'fator' | 'chamado'
@@ -315,6 +287,7 @@ export interface InspectedPoint {
   properties: Record<string, any>
 }
 
+
 export interface MapControl {
   toggleLayer: (layer: AgentLayerKey, visible: boolean) => void
   zoomToArea: (areaId: number) => void
@@ -322,5 +295,16 @@ export interface MapControl {
   clearAnnotations: () => void
   snapshotLayers: () => Record<AgentLayerKey, boolean>
   restoreLayers: (snapshot: Record<AgentLayerKey, boolean>) => void
-  highlightTrechos: (indices: number[]) => void
+  /** Paint a specific street segment from the selected area's `top_trechos.line_geometry`. Returns false if no geometry. */
+  highlightTrecho: (locfNorm: string, opts?: { color?: string; label?: string }) => boolean
+  /** Highlight the top-N trechos of the currently selected area at once. */
+  highlightTopTrechos: (n: number) => void
+  /** Clear all agent-driven highlights (lines, routes, focused bairro). */
+  clearHighlights: () => void
+  /** Highlight and zoom to a single bairro from the selected area's `bairros_entorno`. */
+  focusBairro: (nome: string) => boolean
+  /** Filter the crime layer by an hour window. Pass nulls to reset. */
+  setTimeFilter: (horaInicio: number | null, horaFim: number | null) => void
+  /** Draw a temporary route line (e.g. a fuga route described in RELINT/DD). */
+  showRoute: (from: [number, number], to: [number, number], label?: string) => void
 }

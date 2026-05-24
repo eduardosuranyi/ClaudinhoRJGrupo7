@@ -1,6 +1,6 @@
 'use client'
 
-import type { Area } from '../../types'
+import type { Area, Relato } from '../../types'
 import { fmt, cap, MODUS_LABELS } from '../../lib/helpers'
 
 export default function DenunciasTab({ area }: { area: Area }) {
@@ -65,7 +65,7 @@ export default function DenunciasTab({ area }: { area: Area }) {
   )
 }
 
-function RelatoCard({ relato }: { relato: any }) {
+function RelatoCard({ relato }: { relato: Relato }) {
   const dataShort = relato.data ? relato.data.split(' ')[0] : ''
   return (
     <div style={{

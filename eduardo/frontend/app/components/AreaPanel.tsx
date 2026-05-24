@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import type { Area, AreasData, InspectedPoint } from '../types'
-import { fmt, scoreColor, faccaoColor } from '../lib/helpers'
+import type { Area, InspectedPoint } from '../types'
+import { scoreColor, faccaoColor } from '../lib/helpers'
 import OverviewTab from './tabs/OverviewTab'
 import TrechosTab from './tabs/TrechosTab'
 import DenunciasTab from './tabs/DenunciasTab'

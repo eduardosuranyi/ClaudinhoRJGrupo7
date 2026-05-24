@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import type { Area } from '../../types'
-import { fmt, faccaoColor } from '../../lib/helpers'
+import { faccaoColor } from '../../lib/helpers'
 
 export default function InteligenciaTab({ area, allAreas }: { area: Area; allAreas: Area[] }) {
   const [loading, setLoading] = useState(false)

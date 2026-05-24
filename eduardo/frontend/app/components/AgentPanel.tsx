@@ -1,103 +1,139 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import type { AgentState, AgentFindings } from '../types'
-import AgentCheckpoint from './AgentCheckpoint'
+import { useEffect, useRef, useState } from 'react'
+import { isToolUIPart, getToolName } from 'ai'
+import type { UIMessage } from 'ai'
+import type { AgentFindings, Area } from '../types'
 
-interface Props {
-  agentState: AgentState
-  onRespond: (answer: string) => void
-  onAbort: () => void
+const TOOL_LABELS: Record<string, string> = {
+  toggle_layer: 'Camada alterada',
+  zoom_to_area: 'Navegando para área',
+  show_annotation: 'Marcador adicionado',
+  update_weights: 'Pesos ajustados',
+  complete_investigation: 'Investigação concluída',
 }
 
 const URGENCY_COLOR: Record<string, string> = {
   imediata: 'var(--red)',
-  '7_dias':  'var(--accent)',
+  '7_dias': 'var(--accent)',
   '30_dias': 'var(--amber)',
 }
 
 const URGENCY_LABEL: Record<string, string> = {
   imediata: 'Imediata',
-  '7_dias':  '7 dias',
+  '7_dias': '7 dias',
   '30_dias': '30 dias',
 }
 
-export default function AgentPanel({ agentState, onRespond, onAbort }: Props) {
-  const transcriptEndRef = useRef<HTMLDivElement>(null)
+interface Props {
+  messages: UIMessage[]
+  status: 'submitted' | 'streaming' | 'ready' | 'error'
+  findings: AgentFindings | null
+  currentArea: Area | null
+  sendMessage: (msg: { text: string }) => void
+  onAbort: () => void
+}
 
-  // Auto-scroll transcript
+export default function AgentPanel({
+  messages,
+  status,
+  findings,
+  currentArea,
+  sendMessage,
+  onAbort,
+}: Props) {
+  const [input, setInput] = useState('')
+  const bottomRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
-    transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [agentState.transcript.length])
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages.length, status])
 
-  const isActive = agentState.status !== 'idle'
-  const isRunning = agentState.status === 'running'
-  const isPaused = agentState.status === 'paused'
-  const isComplete = agentState.status === 'complete'
-  const isError = agentState.status === 'error'
+  const isRunning = status === 'submitted' || status === 'streaming'
+  const isComplete = findings !== null
+  const isError = status === 'error'
 
-  if (!isActive) return null
+  function handleSubmit(e?: React.FormEvent) {
+    e?.preventDefault()
+    const text = input.trim()
+    if (!text || isRunning) return
+    setInput('')
+    sendMessage({ text })
+  }
+
+  // Visible messages: skip the empty trigger message (first user message with empty text)
+  const visibleMessages = messages.filter((m, i) => {
+    if (m.role === 'user' && i === 0) {
+      const text = (m.parts ?? []).find((p: unknown) => (p as { type: string }).type === 'text')
+      return text && (text as { text: string }).text.trim() !== ''
+    }
+    return true
+  })
 
   return (
-    <aside style={{
-      width: 420, minWidth: 420,
-      borderLeft: '1px solid var(--border)',
-      display: 'flex', flexDirection: 'column',
-      background: 'var(--bg)',
-      overflow: 'hidden',
-    }}>
+    <aside
+      style={{
+        width: 420,
+        minWidth: 420,
+        borderLeft: '1px solid var(--border)',
+        display: 'flex',
+        flexDirection: 'column',
+        background: 'var(--bg)',
+        overflow: 'hidden',
+      }}
+    >
       {/* Header */}
-      <div style={{
-        padding: '12px 16px',
-        borderBottom: '1px solid var(--border)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: 'var(--bg-1)',
-        flexShrink: 0,
-      }}>
+      <div
+        style={{
+          padding: '10px 16px',
+          borderBottom: '1px solid var(--border)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: 'var(--bg-1)',
+          flexShrink: 0,
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {isRunning && (
-            <div style={{
-              width: 7, height: 7, borderRadius: '50%',
-              background: 'var(--green)',
-              animation: 'pulse-accent 1.2s ease-in-out infinite',
+          <div
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
               flexShrink: 0,
-            }} />
-          )}
-          {isPaused && (
-            <div style={{
-              width: 7, height: 7, borderRadius: '50%',
-              background: 'var(--amber)',
-              flexShrink: 0,
-            }} />
-          )}
-          {isComplete && (
-            <div style={{
-              width: 7, height: 7, borderRadius: '50%',
-              background: 'var(--blue)',
-              flexShrink: 0,
-            }} />
-          )}
-          {isError && (
-            <div style={{
-              width: 7, height: 7, borderRadius: '50%',
-              background: 'var(--red)',
-              flexShrink: 0,
-            }} />
-          )}
+              background: isError
+                ? 'var(--red)'
+                : isComplete
+                  ? 'var(--blue)'
+                  : isRunning
+                    ? 'var(--green)'
+                    : 'var(--amber)',
+              animation: isRunning ? 'pulse-accent 1.2s ease-in-out infinite' : undefined,
+            }}
+          />
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', letterSpacing: '0.03em' }}>
-            Investigação Agêntica
+            {currentArea?.nome ?? 'Investigação'}
           </span>
-          <span className="label-overline" style={{ fontSize: 10 }}>
-            {isRunning ? 'em andamento' : isPaused ? 'aguardando resposta' : isComplete ? 'concluída' : 'erro'}
+          <span className="label-overline" style={{ fontSize: 9 }}>
+            {isError
+              ? 'erro'
+              : isComplete
+                ? 'concluída'
+                : isRunning
+                  ? 'em andamento'
+                  : 'aguardando'}
           </span>
         </div>
         <button
           onClick={onAbort}
-          title={isComplete || isError ? 'Fechar' : 'Abortar investigação'}
+          title={isComplete || isError ? 'Fechar' : 'Abortar'}
           style={{
-            background: 'none', border: 'none',
-            color: 'var(--text-muted)', fontSize: 14,
-            cursor: 'pointer', padding: '2px 4px',
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-muted)',
+            fontSize: 14,
+            cursor: 'pointer',
+            padding: '2px 4px',
             lineHeight: 1,
           }}
           onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)' }}
@@ -107,194 +143,262 @@ export default function AgentPanel({ agentState, onRespond, onAbort }: Props) {
         </button>
       </div>
 
-      {/* Transcript */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
-        {agentState.transcript.map(entry => {
-          if (entry.type === 'system') {
-            return (
-              <div key={entry.id} style={{ marginBottom: 12 }}>
-                <div className="label-overline" style={{ marginBottom: 4 }}>Inicializando</div>
-                <p style={{ fontSize: 11, color: 'var(--text-dim)', margin: 0 }}>{entry.content}</p>
-              </div>
-            )
-          }
+      {/* Messages */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {visibleMessages.map(msg => (
+          <MessageBubble key={msg.id} message={msg} />
+        ))}
 
-          if (entry.type === 'tool_action') {
-            return (
-              <div key={entry.id} style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '4px 0', marginBottom: 2,
-              }}>
-                <div style={{
-                  width: 4, height: 4, borderRadius: '50%',
-                  background: 'var(--border-bright)', flexShrink: 0,
-                }} />
-                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{entry.content}</span>
-              </div>
-            )
-          }
-
-          if (entry.type === 'narrate') {
-            return (
-              <div key={entry.id} style={{ marginBottom: 14 }}>
-                {entry.stepTitle && (
-                  <div className="label-overline" style={{ marginBottom: 5, color: 'var(--accent)' }}>
-                    {entry.stepTitle}
-                  </div>
-                )}
-                <p style={{
-                  fontSize: 12, color: 'var(--text)', margin: 0,
-                  lineHeight: 1.65,
-                  borderLeft: '2px solid var(--accent-dim)',
-                  paddingLeft: 10,
-                }}>
-                  {entry.content}
-                </p>
-              </div>
-            )
-          }
-
-          if (entry.type === 'checkpoint_ask' && entry.checkpoint) {
-            return (
-              <AgentCheckpoint
-                key={entry.id}
-                checkpoint={entry.checkpoint}
-                onRespond={agentState.status === 'paused' ? onRespond : () => {}}
-              />
-            )
-          }
-
-          if (entry.type === 'checkpoint_answer') {
-            return (
-              <div key={entry.id} style={{
-                display: 'flex', justifyContent: 'flex-end', marginBottom: 10,
-              }}>
-                <div style={{
-                  background: 'var(--bg-4)',
-                  border: '1px solid var(--border-bright)',
-                  borderRadius: 3,
-                  padding: '5px 10px',
-                  fontSize: 11, color: 'var(--text-dim)',
-                  maxWidth: '75%',
-                }}>
-                  {entry.content}
-                </div>
-              </div>
-            )
-          }
-
-          if (entry.type === 'complete') {
-            return (
-              <div key={entry.id} style={{
-                background: 'var(--blue-soft)',
-                border: '1px solid var(--blue)',
-                borderRadius: 4, padding: '10px 14px', marginBottom: 12,
-              }}>
-                <div className="label-overline" style={{ color: 'var(--blue)', marginBottom: 5 }}>
-                  Investigação Concluída
-                </div>
-                <p style={{ fontSize: 12, color: 'var(--text)', margin: 0, lineHeight: 1.55 }}>
-                  {entry.content}
-                </p>
-              </div>
-            )
-          }
-
-          if (entry.type === 'error') {
-            return (
-              <div key={entry.id} style={{
-                background: 'var(--red-soft)',
-                border: '1px solid var(--red)',
-                borderRadius: 4, padding: '8px 12px', marginBottom: 8,
-              }}>
-                <span style={{ fontSize: 11, color: 'var(--red)' }}>Erro: {entry.content}</span>
-              </div>
-            )
-          }
-
-          return null
-        })}
-
-        {/* Running indicator */}
         {isRunning && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0' }}>
-            <div style={{
-              width: 5, height: 5, borderRadius: '50%',
-              background: 'var(--green)',
-              animation: 'pulse-accent 1s ease-in-out infinite',
-              flexShrink: 0,
-            }} />
-            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-              {agentState.thinkingDetail ?? 'analisando…'}
+            <div
+              style={{
+                width: 5,
+                height: 5,
+                borderRadius: '50%',
+                background: 'var(--green)',
+                animation: 'pulse-accent 1s ease-in-out infinite',
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>analisando…</span>
+          </div>
+        )}
+
+        {isError && (
+          <div
+            style={{
+              background: 'var(--red-soft)',
+              border: '1px solid var(--red)',
+              borderRadius: 4,
+              padding: '8px 12px',
+            }}
+          >
+            <span style={{ fontSize: 11, color: 'var(--red)' }}>
+              Erro na conexão. Tente novamente.
             </span>
           </div>
         )}
 
-        <div ref={transcriptEndRef} />
+        <div ref={bottomRef} />
       </div>
 
-      {/* Findings section */}
-      {isComplete && agentState.findings && (
-        <FindingsSection findings={agentState.findings} />
-      )}
+      {/* Findings panel */}
+      {isComplete && findings && <FindingsSection findings={findings} />}
+
+      {/* Input */}
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          borderTop: '1px solid var(--border)',
+          padding: '8px 12px',
+          display: 'flex',
+          gap: 8,
+          flexShrink: 0,
+          background: 'var(--bg-1)',
+        }}
+      >
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) handleSubmit() }}
+          placeholder={isRunning ? 'Aguarde…' : isComplete ? 'Pergunte algo sobre a análise…' : 'Responda ou direcione a investigação…'}
+          disabled={isRunning}
+          style={{
+            flex: 1,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 3,
+            padding: '6px 10px',
+            fontSize: 11,
+            color: 'var(--text)',
+            outline: 'none',
+            opacity: isRunning ? 0.5 : 1,
+          }}
+        />
+        <button
+          type="submit"
+          disabled={isRunning || !input.trim()}
+          style={{
+            background: isRunning || !input.trim() ? 'var(--bg-2)' : 'var(--accent)',
+            border: '1px solid var(--border)',
+            borderRadius: 3,
+            padding: '6px 12px',
+            fontSize: 10,
+            fontWeight: 600,
+            color: isRunning || !input.trim() ? 'var(--text-muted)' : 'var(--bg)',
+            cursor: isRunning || !input.trim() ? 'default' : 'pointer',
+            letterSpacing: '0.05em',
+          }}
+        >
+          ENVIAR
+        </button>
+      </form>
     </aside>
   )
 }
 
-function FindingsSection({ findings }: { findings: AgentFindings }) {
+function MessageBubble({ message }: { message: UIMessage }) {
+  const isUser = message.role === 'user'
+  const parts = (message.parts ?? []) as unknown[]
+
   return (
-    <div style={{
-      borderTop: '1px solid var(--border)',
-      background: 'var(--bg-1)',
-      flexShrink: 0,
-      maxHeight: 340,
-      overflowY: 'auto',
-    }}>
-      {/* Key findings */}
-      <div style={{ padding: '12px 16px 8px' }}>
-        <div className="label-overline" style={{ marginBottom: 8 }}>Achados Principais</div>
-        {findings.key_findings.map((f, i) => (
-          <div key={i} style={{
-            display: 'flex', gap: 7, alignItems: 'flex-start', marginBottom: 5,
-          }}>
-            <span className="mono" style={{ fontSize: 10, color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}>
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <span style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>{f}</span>
-          </div>
-        ))}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: isUser ? 'flex-end' : 'flex-start' }}>
+      {parts.map((part, i) => {
+        const p = part as { type: string; text?: string }
+
+        if (p.type === 'text' && p.text) {
+          return (
+            <div
+              key={i}
+              style={{
+                background: isUser ? 'var(--bg-4)' : 'var(--bg-1)',
+                border: `1px solid ${isUser ? 'var(--border-bright)' : 'var(--border)'}`,
+                borderRadius: 4,
+                padding: '7px 10px',
+                maxWidth: '90%',
+                fontSize: 12,
+                color: 'var(--text)',
+                lineHeight: 1.6,
+                whiteSpace: 'pre-wrap',
+              }}
+            >
+              {p.text}
+            </div>
+          )
+        }
+
+        if (isToolUIPart(part as never)) {
+          return <ToolCallIndicator key={i} part={part as never} />
+        }
+
+        return null
+      })}
+    </div>
+  )
+}
+
+function ToolCallIndicator({ part }: { part: never }) {
+  const toolName = getToolName(part)
+  const label = TOOL_LABELS[toolName] ?? toolName
+  const typed = part as { state: string }
+  const isPending = typed.state === 'input-streaming' || typed.state === 'input-available'
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 5,
+        padding: '2px 8px',
+        background: 'var(--bg-2)',
+        border: '1px solid var(--border)',
+        borderRadius: 3,
+        fontSize: 10,
+        color: isPending ? 'var(--text-muted)' : 'var(--accent)',
+      }}
+    >
+      <span style={{ opacity: isPending ? 0.5 : 1 }}>↳ {label}</span>
+      {isPending && (
+        <div
+          style={{
+            width: 4,
+            height: 4,
+            borderRadius: '50%',
+            background: 'var(--text-muted)',
+            animation: 'pulse-accent 1s ease-in-out infinite',
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+function FindingsSection({ findings }: { findings: AgentFindings }) {
+  const [collapsed, setCollapsed] = useState(false)
+
+  return (
+    <div
+      style={{
+        borderTop: '1px solid var(--border)',
+        background: 'var(--bg-1)',
+        flexShrink: 0,
+        maxHeight: collapsed ? 40 : 340,
+        overflowY: collapsed ? 'hidden' : 'auto',
+        transition: 'max-height 0.2s ease',
+      }}
+    >
+      <div
+        style={{
+          padding: '8px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          borderBottom: collapsed ? 'none' : '1px solid var(--border-dim)',
+        }}
+        onClick={() => setCollapsed(v => !v)}
+      >
+        <div className="label-overline" style={{ color: 'var(--blue)' }}>
+          Achados e Plano de Ação
+        </div>
+        <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{collapsed ? '▲' : '▼'}</span>
       </div>
 
-      {/* Actions */}
-      <div style={{ padding: '0 16px 12px', borderTop: '1px solid var(--border-dim)', marginTop: 4, paddingTop: 10 }}>
-        <div className="label-overline" style={{ marginBottom: 8 }}>Plano de Ação</div>
-        {findings.actions.map((a, i) => (
-          <div key={i} style={{
-            background: 'var(--bg-2)',
-            border: '1px solid var(--border)',
-            borderRadius: 3,
-            padding: '7px 10px',
-            marginBottom: 5,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-              <span style={{ fontSize: 11, color: 'var(--text)', fontWeight: 500 }}>{a.acao}</span>
-              <span style={{
-                fontSize: 10, color: URGENCY_COLOR[a.urgencia] || 'var(--text-muted)',
-                background: `${URGENCY_COLOR[a.urgencia]}1a`,
-                padding: '1px 5px', borderRadius: 2,
-                flexShrink: 0, marginLeft: 6,
-              }}>
-                {URGENCY_LABEL[a.urgencia] || a.urgencia}
-              </span>
-            </div>
-            <div style={{ display: 'flex', gap: 10, fontSize: 10, color: 'var(--text-muted)' }}>
-              <span>{a.orgao}</span>
-              <span style={{ color: 'var(--border-bright)' }}>·</span>
-              <span>{a.local}</span>
-            </div>
+      {!collapsed && (
+        <>
+          {/* Key findings */}
+          <div style={{ padding: '8px 16px' }}>
+            {findings.key_findings.map((f, i) => (
+              <div key={i} style={{ display: 'flex', gap: 7, alignItems: 'flex-start', marginBottom: 5 }}>
+                <span className="mono" style={{ fontSize: 9, color: 'var(--accent)', marginTop: 2, flexShrink: 0 }}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5 }}>{f}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+
+          {/* Actions */}
+          <div style={{ padding: '0 16px 12px', borderTop: '1px solid var(--border-dim)', paddingTop: 8 }}>
+            <div className="label-overline" style={{ marginBottom: 6 }}>Ações</div>
+            {findings.actions.map((a, i) => (
+              <div
+                key={i}
+                style={{
+                  background: 'var(--bg-2)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 3,
+                  padding: '6px 10px',
+                  marginBottom: 4,
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                  <span style={{ fontSize: 11, color: 'var(--text)', fontWeight: 500 }}>{a.acao}</span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      color: URGENCY_COLOR[a.urgencia] || 'var(--text-muted)',
+                      background: `${URGENCY_COLOR[a.urgencia] ?? ''}1a`,
+                      padding: '1px 5px',
+                      borderRadius: 2,
+                      flexShrink: 0,
+                      marginLeft: 6,
+                    }}
+                  >
+                    {URGENCY_LABEL[a.urgencia] || a.urgencia}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: 10, fontSize: 10, color: 'var(--text-muted)' }}>
+                  <span>{a.orgao}</span>
+                  <span style={{ color: 'var(--border-bright)' }}>·</span>
+                  <span>{a.local}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -1,21 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import type { Trecho, Relato, FatorOrgao, AreaStats, Chamados1746, ValidacaoCruzada } from '../../types'
 
 const client = new Anthropic()
 
+interface SynthesizeBody {
+  nome: string
+  relint: string | null
+  stats: AreaStats
+  top_trechos: Trecho[]
+  fatores: FatorOrgao[]
+  relatos: Relato[]
+  chamados_1746?: Chamados1746
+  validacao_cruzada?: ValidacaoCruzada[]
+}
+
 export async function POST(req: NextRequest) {
-  const { nome, relint, stats, top_trechos, fatores, relatos, chamados_1746, validacao_cruzada } = await req.json()
+  const { nome, relint, stats, top_trechos, fatores, relatos, chamados_1746, validacao_cruzada } = await req.json() as SynthesizeBody
 
   const trechos_txt = top_trechos
-    .map((t: any, i: number) => `  ${i+1}. ${t.locf_norm} — ${t.total} ocorrências (pico ${t.pico_hora}h)`)
+    .map((t, i) => `  ${i+1}. ${t.locf_norm} — ${t.total} ocorrências (pico ${t.pico_hora}h)`)
     .join('\n')
 
   const fatores_txt = fatores
-    .map((f: any) => `  ${f.orgao}: ${f.total} fatores — ${f.tipos.slice(0,2).map((t: any) => `${t.tipo} [${t.count}]`).join(', ')}`)
+    .map((f) => `  ${f.orgao}: ${f.total} fatores — ${f.tipos.slice(0,2).map((t) => `${t.tipo} [${t.count}]`).join(', ')}`)
     .join('\n')
 
   const relatos_txt = (relatos || []).slice(0,4)
-    .map((r: any, i: number) => `  [${i+1}] ${r.tipo} — "${r.relato.slice(0,180)}"`)
+    .map((r, i) => `  [${i+1}] ${r.tipo} — "${r.relato.slice(0,180)}"`)
     .join('\n')
 
   const modus_txt = Object.entries(stats.modus_operandi || {}).slice(0,5)
@@ -23,11 +35,11 @@ export async function POST(req: NextRequest) {
 
   const chamados_txt = chamados_1746
     ? `Total: ${chamados_1746.total} chamados | ${chamados_1746.pct_atendido}% atendidos | ${chamados_1746.pct_vencido}% vencidos\n` +
-      (chamados_1746.por_tipo || []).slice(0,8).map((c: any) => `  ${c.tipo}: ${c.total} (${c.atendidos} atendidos)`).join('\n')
+      (chamados_1746.por_tipo || []).slice(0,8).map((c) => `  ${c.tipo}: ${c.total} (${c.atendidos} atendidos)`).join('\n')
     : 'Não disponível.'
 
   const validacao_txt = (validacao_cruzada || [])
-    .map((v: any) => `  ${v.orgao}: ${v.fatores_campo} fatores campo + ${v.chamados_1746} chamados 1746 (${v.chamados_1746 > 0 ? Math.round(v.chamados_atendidos/v.chamados_1746*100) : 0}% atendidos, ${v.chamados_vencidos} vencidos)`)
+    .map((v) => `  ${v.orgao}: ${v.fatores_campo} fatores campo + ${v.chamados_1746} chamados 1746 (${v.chamados_1746 > 0 ? Math.round(v.chamados_atendidos/v.chamados_1746*100) : 0}% atendidos, ${v.chamados_vencidos} vencidos)`)
     .join('\n')
 
   const prompt = `Você monta um plano de ação prático para melhorar a segurança na área "${nome}".
@@ -115,12 +127,15 @@ Regras:
       max_tokens: 1500,
       messages: [{ role: 'user', content: prompt }],
     })
-    const raw = (response.content[0] as any).text.trim()
+    const block = response.content[0]
+    if (block.type !== 'text') throw new Error('Unexpected response type from Claude')
+    const raw = block.text.trim()
     // Strip any accidental markdown fences
     const clean = raw.replace(/^```json\s*/,'').replace(/```\s*$/,'').trim()
     const parsed = JSON.parse(clean)
     return NextResponse.json(parsed)
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
