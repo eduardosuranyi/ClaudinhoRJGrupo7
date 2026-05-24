@@ -6,7 +6,8 @@ Comandos:
     extract <source>   — roda extração de uma fonte (ocorrencias|disque|relints|tweets|news|all)
     stats              — sumariza o JSONL de eventos (totais por fonte/crime_type)
     schema             — imprime o JSON Schema da ontologia
-    score              — placeholder; calcula score a partir dos eventos (TODO)
+    score              — calcula score ontológico por área/logradouro, gera JSON
+    fleet              — distribui efetivo (600 agentes default) a partir do score
     init-fm-actions    — cria um exemplo de actions.jsonl
 """
 
@@ -79,10 +80,60 @@ def schema():
 
 
 @app.command()
-def score():
-    """Placeholder — score ainda não implementado."""
+def score(
+    window_days: int = typer.Option(
+        30, "--window-days", "-w",
+        help="Janela temporal em dias (padrão: 30 dias rolantes).",
+    ),
+):
+    """Calcula score ontológico por área FM + top logradouros.
+
+    Lê `data/ontology/crime_events.jsonl`, computa as 5 camadas
+    (severidade do evento, agregação, ambiente, fonte, feedback FM) e
+    grava `data/scores/score_report.json` — consumível pelo frontend.
+    """
     from valente_ontology import score as score_mod
-    score_mod.run_score(settings)   # vai levantar NotImplementedError com mensagem útil
+    settings.ensure_dirs()
+    out = score_mod.run_score(settings, window_days=window_days)
+    typer.echo(f"Score report gerado em: {out}")
+
+
+@app.command()
+def fleet(
+    size: int = typer.Option(600, "--size", "-n", help="Efetivo total a distribuir."),
+    min_per_area: int = typer.Option(25, "--min", help="Piso de agentes por área."),
+    max_share: float = typer.Option(0.35, "--max-share", help="Teto de share por área (0..1)."),
+    window_days: int = typer.Option(30, "--window-days", "-w"),
+):
+    """Distribui efetivo entre as áreas FM com base no score ontológico.
+
+    Gera `data/scores/fleet_plan.json` com efetivo total, divisão por
+    turno (daypart) e justificativa por área.
+    """
+    from valente_ontology import score as score_mod
+    from valente_ontology import fleet_allocation as fleet_mod
+
+    settings.ensure_dirs()
+    report = score_mod.build_score_report(settings, window_days=window_days)
+    plan = fleet_mod.allocate_fleet(
+        report,
+        fleet_size=size,
+        min_agents_per_area=min_per_area,
+        max_share=max_share,
+    )
+    out_path = settings.valente_data_dir / "scores" / "fleet_plan.json"
+    fleet_mod.write_fleet_plan(plan, out_path)
+    typer.echo(f"Fleet plan gerado em: {out_path}")
+    typer.echo(json.dumps(
+        {
+            "fleet_size": plan.fleet_size,
+            "areas": [
+                {"area": a.area_fm, "agents": a.agents_total, "score": a.score, "priority": a.priority}
+                for a in plan.allocations
+            ],
+        },
+        indent=2, ensure_ascii=False,
+    ))
 
 
 @app.command("init-fm-actions")

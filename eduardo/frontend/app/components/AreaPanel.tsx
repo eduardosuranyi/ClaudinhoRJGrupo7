@@ -9,8 +9,9 @@ import DenunciasTab from './tabs/DenunciasTab'
 import InteligenciaTab from './tabs/InteligenciaTab'
 import RelatorioTab from './tabs/RelatorioTab'
 import EscalaTab from './tabs/EscalaTab'
+import OntologyScorePanel from './OntologyScorePanel'
 
-type TabId = 'escala' | 'overview' | 'trechos' | 'denuncias' | 'inteligencia' | 'relatorio'
+type TabId = 'escala' | 'overview' | 'trechos' | 'denuncias' | 'inteligencia' | 'relatorio' | 'ontologia'
 
 interface Props {
   area: Area
@@ -24,6 +25,7 @@ export default function AreaPanel({ area, allAreas, weights, onClose }: Props) {
 
   const tabs: { id: TabId; label: string; badge?: string; highlight?: boolean }[] = [
     { id: 'escala',       label: 'Escala',       badge: '600', highlight: true },
+    { id: 'ontologia',    label: 'Ontologia',    badge: 'NEW', highlight: true },
     { id: 'overview',     label: 'Dados' },
     { id: 'trechos',      label: 'Trechos',      badge: String(area.top_trechos.length) },
     { id: 'denuncias',    label: 'Denúncias',    badge: String(area.relatos_sample.length) },
@@ -140,6 +142,7 @@ export default function AreaPanel({ area, allAreas, weights, onClose }: Props) {
       {/* Tab content */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {tab === 'escala'       && <EscalaTab area={area} allAreas={allAreas} weights={weights} />}
+        {tab === 'ontologia'    && <OntologyScorePanel areaName={area.nome} />}
         {tab === 'overview'     && <OverviewTab area={area} allAreas={allAreas} />}
         {tab === 'trechos'      && <TrechosTab area={area} />}
         {tab === 'denuncias'    && <DenunciasTab area={area} />}
