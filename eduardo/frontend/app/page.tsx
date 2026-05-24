@@ -46,7 +46,7 @@ export default function Home() {
       })
   }, [])
 
-  const { messages, status, findings, areaId, isActive, sendMessage, startAgent, abortAgent } =
+  const { messages, status, findings, areaId, isActive, isPaused, nextSuggestions, sendMessage, startAgent, abortAgent } =
     useMapAgent({
       mapControlRef,
       setWeights,
@@ -178,6 +178,8 @@ export default function Home() {
                 currentArea={selected}
                 sendMessage={sendMessage}
                 onAbort={abortAgent}
+                isPaused={isPaused}
+                nextSuggestions={nextSuggestions}
               />
             ) : selected ? (
               <AreaPanel
