@@ -25,6 +25,7 @@ export interface EscalaArea {
   area_id: number
   score: number
   agentes_total: number
+  agentes_por_turno: number   // efetivo simultâneo (escala 12x36)
   pct_do_contingente: number
   modalidades: Modalidade[]
   posicionamentos: Posicionamento[]
@@ -37,6 +38,9 @@ export interface EscalaArea {
 
 const TOTAL_AGENTES = 600
 const FLOOR_POR_AREA = 12   // mínimo garantido por área
+const TURNOS_NO_CICLO = 4   // escala 12x36 → 4 turnos no ciclo de 48h
+                            // (cada agente trabalha 12h em 48h = 1/4 do tempo)
+                            // efetivo simultâneo por turno = TOTAL / 4 = 150
 
 // Areas que têm parques/orla → bicicleta é viável
 const AREAS_BICICLETA = ['jardim de alah', 'botafogo', 'rio sul', 'copacabana']
@@ -63,11 +67,12 @@ export function calcularEscala(areas: Area[], weights: { mancha: number; pico: n
   return scored.map(({ area, score }) => {
     const agentesAcimaPiso = Math.round(budgetAcimaDoPiso * (score / totalScore))
     const agentes_total = FLOOR_POR_AREA + agentesAcimaPiso
+    const agentes_por_turno = Math.round(agentes_total / TURNOS_NO_CICLO)
 
-    // Determinar modalidades
-    const modalidades = calcularModalidades(area, agentes_total)
+    // Determinar modalidades — calculadas sobre o efetivo POR TURNO (12x36)
+    const modalidades = calcularModalidades(area, agentes_por_turno)
 
-    // Determinar posicionamentos
+    // Determinar posicionamentos com base no efetivo simultâneo
     const posicionamentos = calcularPosicionamentos(area, modalidades)
 
     // Turno prioritário
@@ -96,6 +101,7 @@ export function calcularEscala(areas: Area[], weights: { mancha: number; pico: n
       area_id: area.id,
       score,
       agentes_total,
+      agentes_por_turno: Math.round(agentes_total / TURNOS_NO_CICLO),
       pct_do_contingente: pct,
       modalidades,
       posicionamentos,

@@ -34,14 +34,18 @@ export default function EscalaTab({ area, weights, allAreas }: Props) {
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
               <span className="mono tnum" style={{ fontSize: 36, color: 'var(--text)', fontWeight: 600, lineHeight: 1 }}>
-                {escala.agentes_total}
+                {escala.agentes_por_turno}
               </span>
               <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>
-                agentes · {escala.pct_do_contingente}% do contingente
+                agentes por turno
               </span>
             </div>
             <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>
-              de 600 agentes GM-Rio totais
+              Efetivo total designado: <span className="mono tnum" style={{ color: 'var(--text-dim)' }}>{escala.agentes_total}</span>
+              {' · '}
+              <span style={{ color: 'var(--amber)' }}>escala 12×36</span>
+              {' · '}
+              {escala.pct_do_contingente}% dos 600 da GM-Rio
             </div>
           </div>
 
@@ -182,7 +186,7 @@ export default function EscalaTab({ area, weights, allAreas }: Props) {
 
       {/* Contexto entre áreas */}
       <div>
-        <div className="label-overline" style={{ marginBottom: 8 }}>Distribuição do Contingente (todas as áreas)</div>
+        <div className="label-overline" style={{ marginBottom: 8 }}>Distribuição por Turno (todas as áreas)</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {todas.map(e => {
             const isThis = e.area_id === area.id
@@ -219,18 +223,18 @@ export default function EscalaTab({ area, weights, allAreas }: Props) {
                   </span>
                 </div>
                 <span className="mono tnum" style={{ fontSize: 12, color: isThis ? nrc2.color : 'var(--text-dim)', fontWeight: 600, minWidth: 28, textAlign: 'right' }}>
-                  {e.agentes_total}
+                  {e.agentes_por_turno}
                 </span>
-                <span style={{ fontSize: 9, color: 'var(--text-muted)', minWidth: 30, textAlign: 'right' }}>
-                  {e.pct_do_contingente}%
+                <span style={{ fontSize: 9, color: 'var(--text-muted)', minWidth: 36, textAlign: 'right' }}>
+                  /turno
                 </span>
               </div>
             )
           })}
           <div style={{ padding: '5px 8px', borderTop: '1px solid var(--border-dim)', display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Total alocado</span>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Efetivo simultâneo (escala 12×36)</span>
             <span className="mono tnum" style={{ fontSize: 12, color: 'var(--text)', fontWeight: 600 }}>
-              {todas.reduce((s, e) => s + e.agentes_total, 0)} / 600
+              {todas.reduce((s, e) => s + e.agentes_por_turno, 0)} / 150
             </span>
           </div>
         </div>
