@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { isToolUIPart, getToolName } from 'ai'
 import type { UIMessage } from 'ai'
 import type { AgentFindings, Area } from '../types'
@@ -80,6 +82,7 @@ export default function AgentPanel({
         flexDirection: 'column',
         background: 'var(--bg)',
         overflow: 'hidden',
+        height: '100%',
       }}
     >
       {/* Header */}
@@ -251,6 +254,7 @@ function MessageBubble({ message }: { message: UIMessage }) {
           return (
             <div
               key={i}
+              className={isUser ? undefined : 'agent-markdown'}
               style={{
                 background: isUser ? 'var(--bg-4)' : 'var(--bg-1)',
                 border: `1px solid ${isUser ? 'var(--border-bright)' : 'var(--border)'}`,
@@ -260,10 +264,14 @@ function MessageBubble({ message }: { message: UIMessage }) {
                 fontSize: 12,
                 color: 'var(--text)',
                 lineHeight: 1.6,
-                whiteSpace: 'pre-wrap',
+                whiteSpace: isUser ? 'pre-wrap' : undefined,
               }}
             >
-              {p.text}
+              {isUser ? p.text : (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {p.text}
+                </ReactMarkdown>
+              )}
             </div>
           )
         }

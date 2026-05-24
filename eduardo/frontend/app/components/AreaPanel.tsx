@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Area, InspectedPoint } from '../types'
 import { scoreColor, faccaoColor } from '../lib/helpers'
 import OverviewTab from './tabs/OverviewTab'
@@ -10,7 +10,7 @@ import InteligenciaTab from './tabs/InteligenciaTab'
 import RelatorioTab from './tabs/RelatorioTab'
 import EscalaTab from './tabs/EscalaTab'
 
-type TabId = 'escala' | 'overview' | 'trechos' | 'denuncias' | 'inteligencia' | 'relatorio'
+type TabId = 'escala' | 'analise' | 'inteligencia' | 'acao'
 
 interface Props {
   area: Area
@@ -24,15 +24,15 @@ interface Props {
 }
 
 export default function AreaPanel({ area, allAreas, weights, onClose, highlightedTrechos, onToggleTrecho, inspectedPoint, onCloseInspect }: Props) {
-  const [tab, setTab] = useState<TabId>('escala')
+  const [tab, setTab] = useState<TabId>('analise')
+  const [showAllIds, setShowAllIds] = useState(false)
+  const [showBairros, setShowBairros] = useState(false)
 
-  const tabs: { id: TabId; label: string; badge?: string; highlight?: boolean }[] = [
-    { id: 'escala',       label: 'Escala',       badge: '600', highlight: true },
-    { id: 'overview',     label: 'Dados' },
-    { id: 'trechos',      label: 'Trechos',      badge: String(area.top_trechos.length) },
-    { id: 'denuncias',    label: 'Denúncias',    badge: String(area.relatos_sample.length) },
-    { id: 'inteligencia', label: 'Inteligência', badge: area.relint_disponivel ? 'RELINT' : undefined },
-    { id: 'relatorio',    label: 'Plano de Ação' },
+  const tabs: { id: TabId; label: string; highlight?: boolean }[] = [
+    { id: 'escala',       label: 'Escala',       highlight: true },
+    { id: 'analise',      label: 'Análise' },
+    { id: 'inteligencia', label: 'Inteligência' },
+    { id: 'acao',         label: 'Ação' },
   ]
 
   return (
@@ -42,6 +42,7 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
       display: 'flex', flexDirection: 'column',
       background: 'var(--bg)',
       overflow: 'hidden',
+      height: '100%',
     }}>
       {/* Header */}
       <div style={{
@@ -56,32 +57,71 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
             <h2 style={{ fontSize: 13, fontWeight: 600, margin: '2px 0 6px', color: 'var(--text)', lineHeight: 1.35 }}>
               {area.nome}
             </h2>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              {area.identificacao.aisp && <IdChip label="AISP" value={String(area.identificacao.aisp)} />}
-              {area.identificacao.risp && <IdChip label="RISP" value={String(area.identificacao.risp)} />}
-              <IdChip label="Base FM" value={area.identificacao.base_fm} />
-              {area.identificacao.subprefeitura && area.identificacao.subprefeitura !== '—' && (
-                <IdChip label="Subpref." value={area.identificacao.subprefeitura} />
-              )}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
               {area.identificacao.dominio_principal && area.identificacao.dominio_principal !== '—' && (
                 <IdChip label="Domínio" value={area.identificacao.dominio_principal}
                   color={faccaoColor(area.identificacao.dominio_principal)} />
               )}
+              {area.identificacao.aisp && <IdChip label="AISP" value={String(area.identificacao.aisp)} />}
+              {showAllIds && (
+                <>
+                  {area.identificacao.risp && <IdChip label="RISP" value={String(area.identificacao.risp)} />}
+                  <IdChip label="Base FM" value={area.identificacao.base_fm} />
+                  {area.identificacao.subprefeitura && area.identificacao.subprefeitura !== '—' && (
+                    <IdChip label="Subpref." value={area.identificacao.subprefeitura} />
+                  )}
+                </>
+              )}
+              <button
+                onClick={() => setShowAllIds(v => !v)}
+                style={{
+                  background: 'var(--bg-3)', border: '1px solid var(--border)',
+                  borderRadius: 2, padding: '2px 5px', cursor: 'pointer',
+                  fontSize: 10, color: 'var(--text-muted)', lineHeight: 1,
+                }}
+              >
+                {showAllIds ? '−' : '+'}
+              </button>
             </div>
             {area.identificacao.bairros && area.identificacao.bairros.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 4 }}>
-                {area.identificacao.bairros.map(b => (
-                  <span key={b} style={{
-                    fontSize: 10,
-                    padding: '1px 5px',
-                    background: 'rgba(74,144,226,0.1)',
-                    border: '1px solid rgba(74,144,226,0.25)',
-                    color: '#4a90e2',
-                    borderRadius: 2,
-                  }}>
-                    {b}
-                  </span>
-                ))}
+              <div style={{ marginTop: 4 }}>
+                {showBairros ? (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center' }}>
+                    {area.identificacao.bairros.map(b => (
+                      <span key={b} style={{
+                        fontSize: 10,
+                        padding: '1px 5px',
+                        background: 'rgba(74,144,226,0.1)',
+                        border: '1px solid rgba(74,144,226,0.25)',
+                        color: '#4a90e2',
+                        borderRadius: 2,
+                      }}>
+                        {b}
+                      </span>
+                    ))}
+                    <button
+                      onClick={() => setShowBairros(false)}
+                      style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        fontSize: 10, color: 'var(--text-muted)', padding: '1px 4px',
+                      }}
+                    >×</button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowBairros(true)}
+                    style={{
+                      background: 'rgba(74,144,226,0.1)',
+                      border: '1px solid rgba(74,144,226,0.25)',
+                      color: '#4a90e2',
+                      borderRadius: 2,
+                      fontSize: 10, padding: '1px 6px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {area.identificacao.bairros.length} bairros
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -112,46 +152,53 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', flexShrink: 0, background: 'var(--bg-1)' }}>
         {tabs.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: 1, padding: '9px 2px',
-            background: 'none', cursor: 'pointer',
+            flex: 1, padding: '10px 4px',
+            background: tab === t.id
+              ? (t.highlight ? 'var(--amber-soft)' : 'var(--accent-soft)')
+              : 'none',
+            cursor: 'pointer',
             border: 'none',
             borderBottom: tab === t.id
-              ? `2px solid ${t.highlight ? 'var(--amber)' : 'var(--accent)'}`
-              : '2px solid transparent',
+              ? `3px solid ${t.highlight ? 'var(--amber)' : 'var(--accent)'}`
+              : '3px solid transparent',
             color: tab === t.id ? 'var(--text)' : 'var(--text-muted)',
-            fontSize: 10.5, fontWeight: tab === t.id ? 600 : 400,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3,
+            fontSize: 12, fontWeight: tab === t.id ? 600 : 400,
+            transition: 'background 0.15s, color 0.15s',
           }}>
-            <span>{t.label}</span>
-            {t.badge && (
-              <span className="mono" style={{
-                fontSize: 10,
-                background: tab === t.id
-                  ? t.highlight ? 'var(--amber-soft)' : 'var(--accent-soft)'
-                  : 'var(--bg-3)',
-                color: tab === t.id
-                  ? t.highlight ? 'var(--amber)' : 'var(--accent)'
-                  : 'var(--text-muted)',
-                padding: '1px 4px', borderRadius: 2,
-              }}>
-                {t.badge}
-              </span>
-            )}
+            {t.label}
           </button>
         ))}
       </div>
 
       {/* Tab content */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div key={tab} className="tab-content-enter" style={{ flex: 1, overflowY: 'auto' }}>
         {inspectedPoint && (
           <InspectedPointCard point={inspectedPoint} onClose={() => onCloseInspect?.()} />
         )}
-        {tab === 'escala'       && <EscalaTab area={area} allAreas={allAreas} weights={weights} />}
-        {tab === 'overview'     && <OverviewTab area={area} allAreas={allAreas} />}
-        {tab === 'trechos'      && <TrechosTab area={area} highlightedTrechos={highlightedTrechos} onToggleTrecho={onToggleTrecho} />}
-        {tab === 'denuncias'    && <DenunciasTab area={area} />}
-        {tab === 'inteligencia' && <InteligenciaTab area={area} allAreas={allAreas} />}
-        {tab === 'relatorio'    && <RelatorioTab area={area} allAreas={allAreas} />}
+        {tab === 'escala' && <EscalaTab area={area} allAreas={allAreas} weights={weights} />}
+        {tab === 'analise' && (
+          <>
+            <OverviewTab area={area} allAreas={allAreas} />
+            <div style={{ margin: '0 16px', padding: '12px 0', borderTop: '1px solid var(--border)' }}>
+              <span className="label-overline" style={{ fontSize: 10 }}>
+                Trechos Críticos · {area.top_trechos.length}
+              </span>
+            </div>
+            <TrechosTab area={area} highlightedTrechos={highlightedTrechos} onToggleTrecho={onToggleTrecho} />
+          </>
+        )}
+        {tab === 'inteligencia' && (
+          <>
+            <DenunciasTab area={area} />
+            <div style={{ margin: '0 16px', padding: '12px 0', borderTop: '1px solid var(--border)' }}>
+              <span className="label-overline" style={{ fontSize: 10 }}>
+                Inteligência Territorial
+              </span>
+            </div>
+            <InteligenciaTab area={area} allAreas={allAreas} />
+          </>
+        )}
+        {tab === 'acao' && <RelatorioTab area={area} allAreas={allAreas} />}
       </div>
     </aside>
   )
@@ -167,6 +214,9 @@ function IdChip({ label, value, color }: { label: string; value: string; color?:
 }
 
 function BreakdownPill({ label, value, max }: { label: string; value: number; max: number }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   return (
     <div style={{ flex: 1, background: 'var(--bg-3)', padding: '5px 7px', borderRadius: 2, border: '1px solid var(--border-dim)' }}>
       <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
@@ -175,7 +225,13 @@ function BreakdownPill({ label, value, max }: { label: string; value: number; ma
         <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-muted)' }}>/{max}</span>
       </div>
       <div style={{ height: 2, background: 'var(--border-dim)', marginTop: 3, borderRadius: 1 }}>
-        <div style={{ height: '100%', width: `${(value/max)*100}%`, background: 'var(--accent)', borderRadius: 1 }} />
+        <div style={{
+          height: '100%',
+          width: mounted ? `${(value/max)*100}%` : '0%',
+          background: 'var(--accent)',
+          borderRadius: 1,
+          transition: 'width 400ms ease-out',
+        }} />
       </div>
     </div>
   )

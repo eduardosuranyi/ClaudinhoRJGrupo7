@@ -120,27 +120,39 @@ export default function Home() {
             onInspectPoint={setInspectedPoint}
           />
 
-          {agentIsActive ? (
-            <AgentPanel
-              messages={messages}
-              status={status}
-              findings={findings}
-              currentArea={selected}
-              sendMessage={sendMessage}
-              onAbort={abortAgent}
-            />
-          ) : selected ? (
-            <AreaPanel
-              area={selected}
-              allAreas={data.areas}
-              weights={weights}
-              onClose={() => setSelected(null)}
-              highlightedTrechos={highlightedTrechos}
-              onToggleTrecho={toggleTrecho}
-              inspectedPoint={inspectedPoint}
-              onCloseInspect={() => setInspectedPoint(null)}
-            />
-          ) : null}
+          <div style={{
+            width: (agentIsActive || selected) ? 420 : 0,
+            minWidth: (agentIsActive || selected) ? 420 : 0,
+            opacity: (agentIsActive || selected) ? 1 : 0,
+            transform: (agentIsActive || selected) ? 'translateX(0)' : 'translateX(30px)',
+            transition: 'width 250ms ease-out, min-width 250ms ease-out, opacity 250ms ease-out, transform 250ms ease-out',
+            overflow: 'hidden',
+            flexShrink: 0,
+            alignSelf: 'stretch',
+            display: 'flex',
+          }}>
+            {agentIsActive ? (
+              <AgentPanel
+                messages={messages}
+                status={status}
+                findings={findings}
+                currentArea={selected}
+                sendMessage={sendMessage}
+                onAbort={abortAgent}
+              />
+            ) : selected ? (
+              <AreaPanel
+                area={selected}
+                allAreas={data.areas}
+                weights={weights}
+                onClose={() => setSelected(null)}
+                highlightedTrechos={highlightedTrechos}
+                onToggleTrecho={toggleTrecho}
+                inspectedPoint={inspectedPoint}
+                onCloseInspect={() => setInspectedPoint(null)}
+              />
+            ) : null}
+          </div>
         </div>
       )}
     </div>

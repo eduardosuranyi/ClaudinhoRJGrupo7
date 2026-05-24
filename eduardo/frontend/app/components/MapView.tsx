@@ -1054,8 +1054,16 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
             },
           ],
         })
-        if (typeof t.lat === 'number' && typeof t.lng === 'number') {
-          map.flyTo({ center: [t.lng, t.lat], zoom: Math.max(map.getZoom(), 14), duration: 800 })
+        const bounds = geomBounds(t.line_geometry)
+        if (bounds) {
+          map.fitBounds(bounds, {
+            padding: { top: 100, bottom: 100, left: 100, right: 100 },
+            maxZoom: 15.5,
+            duration: 800,
+            easing: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+          })
+        } else if (typeof t.lat === 'number' && typeof t.lng === 'number') {
+          map.flyTo({ center: [t.lng, t.lat], zoom: Math.min(map.getZoom() + 1, 15), duration: 800 })
         }
         return true
       },
@@ -1064,10 +1072,8 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         const map = mapInst.current
         const sel = selectedRef.current
         if (!map || !sel) return
-        const features = sel.top_trechos
-          .slice(0, Math.max(1, n))
-          .filter(t => t.line_geometry)
-          .map((t, i) => ({
+        const trechos = sel.top_trechos.slice(0, Math.max(1, n)).filter(t => t.line_geometry)
+        const features = trechos.map((t, i) => ({
             type: 'Feature' as const,
             properties: {
               color: i === 0 ? '#ef4444' : i < 3 ? '#fbb040' : '#fde68a',
@@ -1078,6 +1084,22 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
           }))
         ;(map.getSource('agent-highlights') as GeoJSONSource | undefined)
           ?.setData({ type: 'FeatureCollection', features })
+        if (trechos.length > 0) {
+          const allGeoms = trechos.map(t => t.line_geometry!)
+          const allBounds = allGeoms.map(g => geomBounds(g)).filter(Boolean) as [[number,number],[number,number]][]
+          if (allBounds.length > 0) {
+            const combined: [[number,number],[number,number]] = [
+              [Math.min(...allBounds.map(b => b[0][0])), Math.min(...allBounds.map(b => b[0][1]))],
+              [Math.max(...allBounds.map(b => b[1][0])), Math.max(...allBounds.map(b => b[1][1]))],
+            ]
+            map.fitBounds(combined, {
+              padding: { top: 100, bottom: 100, left: 100, right: 100 },
+              maxZoom: 15.5,
+              duration: 900,
+              easing: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+            })
+          }
+        }
       },
 
       clearHighlights: () => {
