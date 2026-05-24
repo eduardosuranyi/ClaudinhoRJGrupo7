@@ -9,6 +9,7 @@ Output: areas_data.json (consumido por frontend e gerador de relatório)
 import argparse
 import json
 import re
+import unicodedata
 import warnings
 from collections import Counter
 from pathlib import Path
@@ -73,9 +74,16 @@ def load_ocorrencias(data_dir: Path) -> pd.DataFrame:
     return df
 
 
+def _rename_dd_dot_cols(df: pd.DataFrame) -> pd.DataFrame:
+    """Rename envolvidos.X columns to envolvidos_X for itertuples() compatibility."""
+    renames = {c: c.replace(".", "_") for c in df.columns if "." in c}
+    return df.rename(columns=renames) if renames else df
+
+
 def load_disk_denuncia(data_dir: Path) -> tuple:
     if _repo_clean_bundle(data_dir):
         df = pd.read_parquet(data_dir / "clean" / "disque_denuncia.parquet")
+        df = _rename_dd_dot_cols(df)
         mask = df["tipo"].str.contains("ROUBO|FURTO", case=False, na=False)
         df = df[mask].copy()
         df["bairro_norm"] = df["bairro_logradouro"].fillna("").str.upper().str.strip()
@@ -283,6 +291,175 @@ def load_relints(data_dir: Path) -> dict:
 
 
 # ───────────────────────────────────────────────────────────────────────────
+# 1b. EXTERNAL DATA LOADERS (bairros, censo, 1746, DD drogas)
+# ───────────────────────────────────────────────────────────────────────────
+
+
+def load_bairros(data_dir: Path) -> gpd.GeoDataFrame:
+    path = data_dir / "external" / "bairros_rio.geojson"
+    if not path.is_file():
+        return gpd.GeoDataFrame()
+    return gpd.read_file(path).to_crs(4326)
+
+
+def load_censo(data_dir: Path) -> gpd.GeoDataFrame:
+    path = data_dir / "external" / "censo_2022_bairros.geojson"
+    if not path.is_file():
+        return gpd.GeoDataFrame()
+    return gpd.read_file(path).to_crs(4326)
+
+
+def load_chamados_1746(data_dir: Path) -> pd.DataFrame:
+    path = data_dir / "external" / "chamados_1746_fm.csv"
+    if not path.is_file():
+        return pd.DataFrame()
+    usecols = [
+        "id_chamado", "data_inicio", "data_fim", "id_bairro",
+        "nome_unidade_organizacional", "tipo", "subtipo",
+        "tipo_situacao", "dentro_prazo",
+        "latitude", "longitude", "data_particao",
+    ]
+    df = pd.read_csv(path, usecols=usecols, low_memory=False)
+    df["data_particao"] = pd.to_datetime(df["data_particao"], errors="coerce")
+    df["data_inicio"] = pd.to_datetime(df["data_inicio"], errors="coerce")
+    df["data_fim"] = pd.to_datetime(df["data_fim"], errors="coerce")
+    return df
+
+
+def load_dd_drogas(data_dir: Path) -> pd.DataFrame:
+    """Load DD records for CONSUMO DE DROGAS (SMAS factor signal)."""
+    if _repo_clean_bundle(data_dir):
+        df = pd.read_parquet(data_dir / "clean" / "disque_denuncia.parquet")
+    else:
+        path = data_dir / "dados" / "disk_denuncia.csv"
+        if not path.is_file():
+            return pd.DataFrame()
+        df = pd.read_csv(path, encoding="latin-1", sep=";", low_memory=False, decimal=",")
+    mask = df["tipo"].str.contains("CONSUMO DE DROGAS", case=False, na=False)
+    df = df[mask].copy()
+    valid_geo = df["latitude"].between(-23.2, -22.7) & df["longitude"].between(-43.9, -43.0)
+    return df[valid_geo].copy()
+
+
+def load_dd_all_geo(data_dir: Path) -> pd.DataFrame:
+    """Load ALL geocoded DD records (for bairro-level aggregation)."""
+    if _repo_clean_bundle(data_dir):
+        df = pd.read_parquet(data_dir / "clean" / "disque_denuncia.parquet")
+    else:
+        path = data_dir / "dados" / "disk_denuncia.csv"
+        if not path.is_file():
+            return pd.DataFrame()
+        df = pd.read_csv(path, encoding="latin-1", sep=";", low_memory=False, decimal=",")
+    valid_geo = df["latitude"].between(-23.2, -22.7) & df["longitude"].between(-43.9, -43.0)
+    return df[valid_geo].copy()
+
+
+def load_logradouros(data_dir: Path) -> gpd.GeoDataFrame:
+    path = data_dir / "external" / "logradouros_rio.geojson"
+    if not path.is_file():
+        return gpd.GeoDataFrame()
+    gdf = gpd.read_file(path).to_crs(4326)
+    if "completo" in gdf.columns:
+        gdf["_name_norm"] = gdf["completo"].apply(_normalize_street)
+    return gdf
+
+
+def _normalize_street(s):
+    """Strip accents and lowercase for fuzzy matching."""
+    if not isinstance(s, str):
+        return ""
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(c for c in s if not unicodedata.combining(c))
+    return s.lower().strip()
+
+
+def match_trechos_to_lines(top_trechos, logradouros, bairro_names):
+    """For each top_trecho, find matching LineString geometries from the gazetteer."""
+    if logradouros.empty or "_name_norm" not in logradouros.columns:
+        return top_trechos
+
+    bairro_set = set(b.lower() for b in bairro_names) if bairro_names else set()
+    log_in_bairros = logradouros
+    if bairro_set and "bairro" in logradouros.columns:
+        log_in_bairros = logradouros[logradouros["bairro"].str.lower().isin(bairro_set)]
+
+    name_index = {}
+    for idx, row in log_in_bairros.iterrows():
+        nn = row["_name_norm"]
+        if nn not in name_index:
+            name_index[nn] = []
+        name_index[nn].append(row.geometry)
+
+    from shapely.ops import linemerge
+    from shapely.geometry import MultiLineString as ShapelyMLS
+
+    enriched = []
+    for t in top_trechos:
+        raw_name = t["locf_norm"]
+        norm = _normalize_street(raw_name)
+        norm_clean = re.sub(r"^(praia|praca)\s+\1\s+", r"\1 ", norm)
+        geoms = name_index.get(norm) or name_index.get(norm_clean)
+        tc = dict(t)
+        if geoms:
+            merged = linemerge(ShapelyMLS(geoms)) if len(geoms) > 1 else geoms[0]
+            simplified = merged.simplify(0.0002, preserve_topology=True)
+            tc["line_geometry"] = simplified.__geo_interface__
+        enriched.append(tc)
+    return enriched
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# 1c. BAIRRO CONTEXT BUILDER
+# ───────────────────────────────────────────────────────────────────────────
+
+
+def build_bairro_context(polys, bairros, censo):
+    """Precompute bairro→FM area mapping with population data + geometries."""
+    if bairros.empty:
+        return {}
+
+    fm_bairros = gpd.sjoin(bairros, polys[["nome_area", "geometry"]], how="inner", predicate="intersects")
+
+    context = {}
+    for nome_area in polys["nome_area"].unique():
+        subset = fm_bairros[fm_bairros["nome_area"] == nome_area]
+        bairro_names = sorted(subset["nome"].unique().tolist()) if "nome" in subset.columns else []
+
+        pop = 0
+        subpref = "—"
+        bairro_features = []
+        if not censo.empty and bairro_names:
+            censo_match = censo[censo["nome"].isin(bairro_names)]
+            pop_col = "Total_de_pessoas_2022"
+            if pop_col in censo_match.columns:
+                pop = int(censo_match[pop_col].sum())
+            if "regiao_adm" in censo_match.columns and not censo_match["regiao_adm"].dropna().empty:
+                subpref = censo_match["regiao_adm"].mode().iloc[0]
+
+        bairro_rows = bairros[bairros["nome"].isin(bairro_names)] if "nome" in bairros.columns else bairros.iloc[0:0]
+        for _, row in bairro_rows.iterrows():
+            bpop = 0
+            if not censo.empty and "nome" in censo.columns:
+                cm = censo[censo["nome"] == row["nome"]]
+                if not cm.empty and "Total_de_pessoas_2022" in cm.columns:
+                    bpop = int(cm["Total_de_pessoas_2022"].iloc[0])
+            geom = row.geometry.simplify(0.0005, preserve_topology=True)
+            bairro_features.append({
+                "nome": row["nome"],
+                "populacao": bpop,
+                "geometry": geom.__geo_interface__,
+            })
+
+        context[nome_area] = {
+            "bairros": bairro_names,
+            "populacao_bairros_2022": pop,
+            "subprefeitura": subpref,
+            "bairro_features": bairro_features,
+        }
+    return context
+
+
+# ───────────────────────────────────────────────────────────────────────────
 # 2. MODUS OPERANDI EXTRACTION (das denúncias)
 # ───────────────────────────────────────────────────────────────────────────
 
@@ -424,15 +601,75 @@ def get_relatos_sample(dd_df, n=8):
     out = []
     for r in sample.itertuples():
         relato = str(r.relato_redacted)[:400]
-        out.append({
+        perfil = _build_perfil_suspeito(r)
+        entry = {
             "tipo": str(getattr(r, "tipo", "")),
             "data": str(getattr(r, "data_denuncia", "")),
             "bairro": str(getattr(r, "bairro_logradouro", "")),
             "logradouro": str(getattr(r, "logradouro", "")),
             "relato": relato,
             "modus": extract_modus(relato),
-        })
+        }
+        if perfil:
+            entry["perfil_suspeito"] = perfil
+        out.append(entry)
     return out
+
+
+def _parse_json_array(val) -> list:
+    """Parse a JSON-serialized array string like '["M", "F"]' into a list."""
+    s = str(val or "").strip()
+    if not s or s in ("nan", "[]", ""):
+        return []
+    try:
+        parsed = json.loads(s)
+        if isinstance(parsed, list):
+            return [str(x).strip() for x in parsed if str(x).strip()]
+        return [str(parsed).strip()] if str(parsed).strip() else []
+    except (json.JSONDecodeError, ValueError):
+        return [s] if s else []
+
+
+def _build_perfil_suspeito(row) -> str:
+    parts = []
+    sexo_vals = _parse_json_array(getattr(row, "envolvidos_sexo", ""))
+    if sexo_vals:
+        sexo_map = {"M": "Homem", "F": "Mulher"}
+        parts.append(sexo_map.get(sexo_vals[0], sexo_vals[0]))
+    idade_vals = _parse_json_array(getattr(row, "envolvidos_idade", ""))
+    if idade_vals:
+        try:
+            parts.append(f"{int(float(idade_vals[0]))} anos")
+        except (ValueError, TypeError):
+            pass
+    pele_vals = _parse_json_array(getattr(row, "envolvidos_pele", ""))
+    if pele_vals:
+        parts.append(f"pele {pele_vals[0].lower()}")
+    return ", ".join(parts) if parts else ""
+
+
+def get_denuncias_por_bairro(dd_all_geo, bairros_gdf, area_geom):
+    """Aggregate DD by bairro for the bairros intersecting an FM area."""
+    if dd_all_geo.empty or bairros_gdf.empty:
+        return []
+    area_bairros = bairros_gdf[bairros_gdf.intersects(area_geom)]
+    if area_bairros.empty:
+        return []
+
+    dd_gdf = gpd.GeoDataFrame(
+        dd_all_geo,
+        geometry=gpd.points_from_xy(dd_all_geo["longitude"], dd_all_geo["latitude"]),
+        crs=4326,
+    )
+    dd_in_bairros = gpd.sjoin(dd_gdf, area_bairros[["nome", "geometry"]], how="inner", predicate="within")
+    if dd_in_bairros.empty:
+        return []
+
+    result = []
+    for bairro_name, grp in dd_in_bairros.groupby("nome"):
+        tipos = {str(k): int(v) for k, v in grp["tipo"].value_counts().head(5).items()}
+        result.append({"bairro": bairro_name, "total": int(len(grp)), "tipos": tipos})
+    return sorted(result, key=lambda x: x["total"], reverse=True)
 
 
 def get_fatores_por_orgao(fu_df):
@@ -476,6 +713,113 @@ def get_psr_points(psr_df, max_points=400):
         return []
     df = psr_df.head(max_points)
     return [{"lat": float(r.lat), "lng": float(r.lng)} for r in df.itertuples()]
+
+
+def get_chamados_points(ch_df, max_points=500):
+    if ch_df.empty:
+        return []
+    valid = ch_df.dropna(subset=["latitude", "longitude"]).head(max_points)
+    return [
+        {
+            "lat": float(r.latitude),
+            "lng": float(r.longitude),
+            "tipo": str(r.tipo),
+            "orgao": str(r.nome_unidade_organizacional),
+        }
+        for r in valid.itertuples()
+    ]
+
+
+def chamados_evolucao_mensal(ch_df):
+    if ch_df.empty or "data_particao" not in ch_df.columns:
+        return []
+    df = ch_df.copy()
+    df["ym"] = df["data_particao"].dt.to_period("M").astype(str)
+    grouped = df.groupby("ym").size()
+    grouped = grouped[grouped.index != "NaT"].tail(60)
+    return [{"mes": str(k), "total": int(v)} for k, v in grouped.items()]
+
+
+ORGAO_NORMALIZE = {
+    "Rio Luz": "RioLuz",
+    "RIOLUZ": "RioLuz",
+    "RIOLUZ - Companhia Municipal de Energia e Iluminação": "RioLuz",
+    "Ouvidoria RIOLUZ": "RioLuz",
+    "COMLURB": "COMLURB",
+    "COMLURB - Companhia Municipal de Limpeza Urbana": "COMLURB",
+    "Ouvidoria COMLURB": "COMLURB",
+    "SECONSERVA": "SECONSERVA",
+    "CGC - Coordenadoria Geral de Conservação": "SECONSERVA",
+    "Ouvidoria SECONSERVA": "SECONSERVA",
+    "SEOP": "SEOP",
+    "GM-Rio": "GM-Rio",
+    "GM-RIO - Guarda Municipal do Rio de Janeiro": "GM-Rio",
+    "Ouvidoria GM-RIO": "GM-Rio",
+    "CET-Rio": "CET-Rio",
+    "CET-RIO": "CET-Rio",
+    "SMAS": "SMAS",
+    "SMTR": "SMTR",
+}
+
+
+def _norm_orgao(name: str) -> str:
+    if name in ORGAO_NORMALIZE:
+        return ORGAO_NORMALIZE[name]
+    low = name.upper()
+    if "RIOLUZ" in low:
+        return "RioLuz"
+    if "COMLURB" in low:
+        return "COMLURB"
+    if "GM-RIO" in low or "GUARDA" in low:
+        return "GM-Rio"
+    if "CET" in low:
+        return "CET-Rio"
+    if "SMAS" in low or "CAS" in low:
+        return "SMAS"
+    if "SMTR" in low or low.startswith("TR/"):
+        return "SMTR"
+    for gc in ("01A", "02A", "03A", "04A", "05A", "21A", "CGC", "SECONSERVA"):
+        if gc in low:
+            return "SECONSERVA"
+    if "SEOP" in low:
+        return "SEOP"
+    return name
+
+
+def build_validacao_cruzada(fu_area, ch_area):
+    """Cross-references fatores (field observations) with chamados (citizen complaints)."""
+    if fu_area.empty:
+        return []
+    orgao_col = "orgao_responsavel"
+    fu_by_orgao = fu_area.groupby(orgao_col).size().to_dict()
+
+    ch_by_orgao = {}
+    ch_atd_by_orgao = {}
+    ch_venc_by_orgao = {}
+    if not ch_area.empty:
+        for _, row in ch_area.iterrows():
+            org = _norm_orgao(str(row.get("nome_unidade_organizacional", "")))
+            ch_by_orgao[org] = ch_by_orgao.get(org, 0) + 1
+            if str(row.get("tipo_situacao", "")).startswith("Atendido"):
+                ch_atd_by_orgao[org] = ch_atd_by_orgao.get(org, 0) + 1
+            if row.get("dentro_prazo") == "Vencido":
+                ch_venc_by_orgao[org] = ch_venc_by_orgao.get(org, 0) + 1
+
+    result = []
+    for orgao_raw, fu_count in fu_by_orgao.items():
+        orgao_norm = _norm_orgao(orgao_raw)
+        ch_count = ch_by_orgao.get(orgao_norm, 0)
+        ch_atd = ch_atd_by_orgao.get(orgao_norm, 0)
+        ch_venc = ch_venc_by_orgao.get(orgao_norm, 0)
+        result.append({
+            "orgao": orgao_norm,
+            "fatores_campo": int(fu_count),
+            "chamados_1746": int(ch_count),
+            "chamados_atendidos": int(ch_atd),
+            "chamados_vencidos": int(ch_venc),
+            "validado": ch_count > 0,
+        })
+    return sorted(result, key=lambda x: x["chamados_1746"], reverse=True)
 
 
 def get_dominio_features(dominio_gdf, area_geom):
@@ -667,14 +1011,25 @@ def build_areas_data(data_dir: Path) -> dict:
     dominio = load_dominio(data_dir)
     psr = load_psr(data_dir)
 
+    # External enrichment sources (all optional — return empty if missing)
+    bairros = load_bairros(data_dir)
+    censo = load_censo(data_dir)
+    chamados_1746 = load_chamados_1746(data_dir)
+    logradouros = load_logradouros(data_dir)
+    dd_drogas = load_dd_drogas(data_dir)
+    dd_all_geo = load_dd_all_geo(data_dir)
+
     print(f"  Ocorrências: {len(oc):,}")
     print(f"  Disque Denúncia geo: {len(dd_geo):,} | sem geo: {len(dd_no_geo):,}")
+    print(f"  DD drogas (SMAS signal): {len(dd_drogas):,}")
     print(f"  Fatores: {len(fu):,}")
     print(f"  Câmeras: {len(cam):,}")
     print(f"  Polígonos FM: {len(polys)}")
     print(f"  RELINTs: {len(relints)}")
     print(f"  Domínio territorial: {len(dominio):,}")
     print(f"  Censo PSR: {len(psr):,}")
+    print(f"  Bairros: {len(bairros)} | Censo 2022: {len(censo)} | 1746: {len(chamados_1746):,}")
+    print(f"  Logradouros: {len(logradouros):,}")
 
     print("\nFazendo joins espaciais...")
     oc_joined = join_points_to_areas(oc, polys)
@@ -682,11 +1037,23 @@ def build_areas_data(data_dir: Path) -> dict:
     fu_joined = join_points_to_areas(fu, polys)
     psr_joined = join_points_to_areas(psr, polys, lat_col="lat", lng_col="lng")
 
-    # Mapeamento bairro → áreas FM (pra usar com DD sem geo)
-    bairros_by_area = {}
-    for nome in polys["nome_area"].unique():
-        # Aproximação: filtrar DD por bairro_logradouro contém palavras chave do nome da área
-        bairros_by_area[nome] = []
+    dd_drogas_joined = pd.DataFrame()
+    if not dd_drogas.empty:
+        dd_drogas_joined = join_points_to_areas(dd_drogas, polys)
+
+    chamados_joined = pd.DataFrame()
+    has_1746 = not chamados_1746.empty
+    if has_1746 and "latitude" in chamados_1746.columns:
+        valid = chamados_1746.dropna(subset=["latitude", "longitude"])
+        valid = valid[valid["latitude"].between(-23.2, -22.7) & valid["longitude"].between(-43.9, -43.0)]
+        if not valid.empty:
+            chamados_joined = join_points_to_areas(valid, polys)
+
+    bairro_context = build_bairro_context(polys, bairros, censo)
+    has_censo = bool(bairro_context and any(v["populacao_bairros_2022"] > 0 for v in bairro_context.values()))
+
+    # Pre-build bairros GeoDataFrame for DD bairro aggregation
+    bairros_gdf = bairros if not bairros.empty else gpd.GeoDataFrame()
 
     areas_raw = []
     for _, poly_row in polys.iterrows():
@@ -734,6 +1101,8 @@ def build_areas_data(data_dir: Path) -> dict:
         top_trechos = get_top_trechos(oc_area)
         top_trechos, n_bingo, n_triple_bingo = compute_bingo(
             top_trechos, fu_area, dd_area, oc_area)
+        _bairro_names = bairro_context.get(nome, {}).get("bairros", [])
+        top_trechos = match_trechos_to_lines(top_trechos, logradouros, _bairro_names)
 
         # Camera gap analysis
         camera_gaps = compute_camera_gaps(oc_area, cam_area)
@@ -747,30 +1116,83 @@ def build_areas_data(data_dir: Path) -> dict:
         # Evolução mensal
         evolucao = evolution_mensal(oc_area)
 
-        areas_raw.append({
+        # --- Enrichment: bairro context, population, per-capita ---
+        ctx = bairro_context.get(nome, {})
+        pop = ctx.get("populacao_bairros_2022", 0)
+        crimes_total = int(len(oc_area))
+        crimes_per_1000 = round((crimes_total / pop) * 1000, 1) if pop > 0 else None
+
+        # --- Enrichment: DD drogas (SMAS factor signal) ---
+        drogas_area = dd_drogas_joined[dd_drogas_joined["nome_area"] == nome] if not dd_drogas_joined.empty else pd.DataFrame()
+        denuncias_drogas = int(len(drogas_area))
+
+        # --- Enrichment: bairro-level DD aggregation ---
+        dd_bairro_agg = get_denuncias_por_bairro(dd_all_geo, bairros_gdf, geom)
+
+        # --- Enrichment: 1746 chamados ---
+        chamados_area_data = None
+        ch_area_points = []
+        if not chamados_joined.empty:
+            ch_area = chamados_joined[chamados_joined["nome_area"] == nome]
+            if not ch_area.empty:
+                ch_by_tipo = []
+                for (tipo, orgao), grp in ch_area.groupby(["tipo", "nome_unidade_organizacional"]):
+                    atendidos = int(grp["tipo_situacao"].str.contains("Atendido", case=False, na=False).sum()) if "tipo_situacao" in grp.columns else 0
+                    vencidos = int((grp.get("dentro_prazo", pd.Series()) == "Vencido").sum())
+                    ch_by_tipo.append({"tipo": str(tipo), "orgao": str(orgao), "total": int(len(grp)), "atendidos": atendidos, "vencidos": vencidos})
+                ch_by_tipo.sort(key=lambda x: x["total"], reverse=True)
+                ch_evol = chamados_evolucao_mensal(ch_area)
+                ch_area_points = get_chamados_points(ch_area)
+                chamados_area_data = {
+                    "total": int(len(ch_area)),
+                    "com_coordenadas": int(ch_area["latitude"].notna().sum()),
+                    "pct_atendido": round(100 * (ch_area["tipo_situacao"] == "Atendido").mean(), 1) if "tipo_situacao" in ch_area.columns else None,
+                    "pct_vencido": round(100 * (ch_area.get("dentro_prazo", pd.Series()) == "Vencido").mean(), 1),
+                    "por_tipo": ch_by_tipo[:20],
+                    "evolucao_mensal": ch_evol,
+                }
+
+        # --- Enrichment: cross-reference fatores × chamados ---
+        ch_area_for_val = chamados_joined[chamados_joined["nome_area"] == nome] if not chamados_joined.empty else pd.DataFrame()
+        validacao = build_validacao_cruzada(fu_area, ch_area_for_val)
+
+        identificacao = {
+            "aisp": aisp,
+            "risp": risp,
+            "base_fm": "Litorânea" if "Botafogo" in nome or "Copacabana" in nome else "Central",
+            "subprefeitura": ctx.get("subprefeitura", "—"),
+            "dominio_principal": faccoes_count.most_common(1)[0][0] if faccoes_count else "—",
+        }
+        if ctx.get("bairros"):
+            identificacao["bairros"] = ctx["bairros"]
+        if pop > 0:
+            identificacao["populacao_bairros_2022"] = pop
+
+        stats = {
+            "crimes_total": crimes_total,
+            "crimes_por_tipo": crime_por_tipo,
+            "pico_horario": get_pico_hora(hora_dist),
+            "pct_noturno": get_pct_noturno(oc_area),
+            "hora_distribution": hora_dist,
+            "dia_distribution": dia_dist,
+            "denuncias_total": int(len(dd_area)),
+            "fatores_urbanos_total": int(len(fu_area)),
+            "cameras_total": int(len(cam_area)),
+            "psr_total": int(len(psr_area)),
+            "modus_operandi": modus_dist,
+        }
+        if pop > 0:
+            stats["populacao_estimada"] = pop
+            stats["crimes_per_1000_hab"] = crimes_per_1000
+        if denuncias_drogas > 0:
+            stats["denuncias_drogas"] = denuncias_drogas
+
+        area_obj = {
             "id": fid,
             "nome": nome,
             "geometry": geom.__geo_interface__,
-            "identificacao": {
-                "aisp": aisp,
-                "risp": risp,
-                "base_fm": "Litorânea" if "Botafogo" in nome or "Copacabana" in nome else "Central",
-                "subprefeitura": "—",
-                "dominio_principal": faccoes_count.most_common(1)[0][0] if faccoes_count else "—",
-            },
-            "stats": {
-                "crimes_total": int(len(oc_area)),
-                "crimes_por_tipo": crime_por_tipo,
-                "pico_horario": get_pico_hora(hora_dist),
-                "pct_noturno": get_pct_noturno(oc_area),
-                "hora_distribution": hora_dist,
-                "dia_distribution": dia_dist,
-                "denuncias_total": int(len(dd_area)),
-                "fatores_urbanos_total": int(len(fu_area)),
-                "cameras_total": int(len(cam_area)),
-                "psr_total": int(len(psr_area)),
-                "modus_operandi": modus_dist,
-            },
+            "identificacao": identificacao,
+            "stats": stats,
             "top_trechos": top_trechos,
             "n_bingo_trechos": n_bingo,
             "n_triple_bingo": n_triple_bingo,
@@ -786,6 +1208,7 @@ def build_areas_data(data_dir: Path) -> dict:
                 "fatores_points": fatores_points,
                 "cameras_points": cameras_points,
                 "psr_points": psr_points,
+                "chamados_points": ch_area_points,
             },
             "_raw": {
                 "crime": len(oc_area),
@@ -794,7 +1217,31 @@ def build_areas_data(data_dir: Path) -> dict:
                 "denuncias": len(dd_area),
                 "has_relint": nome in relints,
             },
-        })
+        }
+        if dd_bairro_agg:
+            area_obj["denuncias_por_bairro"] = dd_bairro_agg
+        if chamados_area_data:
+            area_obj["chamados_1746"] = chamados_area_data
+        if validacao:
+            area_obj["validacao_cruzada"] = validacao
+
+        bairro_feats = ctx.get("bairro_features", [])
+        if bairro_feats:
+            dd_bairro_map = {b["bairro"]: b for b in dd_bairro_agg} if dd_bairro_agg else {}
+            bairro_to_id = {}
+            if not bairros.empty and "codbnum" in bairros.columns:
+                bairro_to_id = dict(zip(bairros["nome"], bairros["codbnum"].astype(int)))
+            ch_by_bairro_id = {}
+            if not chamados_1746.empty and "id_bairro" in chamados_1746.columns:
+                ch_by_bairro_id = chamados_1746.groupby(chamados_1746["id_bairro"].astype(int)).size().to_dict()
+            for bf in bairro_feats:
+                dd_info = dd_bairro_map.get(bf["nome"], {})
+                bf["denuncias"] = dd_info.get("total", 0)
+                bid = bairro_to_id.get(bf["nome"], -1)
+                bf["chamados_1746"] = int(ch_by_bairro_id.get(bid, 0))
+            area_obj["bairros_entorno"] = bairro_feats
+
+        areas_raw.append(area_obj)
 
     areas_raw = normalize_scores(areas_raw)
     areas_raw.sort(key=lambda x: x["score"]["total"], reverse=True)
@@ -803,21 +1250,28 @@ def build_areas_data(data_dir: Path) -> dict:
     for a in areas_raw:
         print(f"  [{a['score']['total']:5.1f}] {a['nome'][:60]}")
 
-    return {
-        "areas": areas_raw,
-        "meta": {
-            "total_ocorrencias": int(len(oc)),
-            "total_ocorrencias_em_areas": int(len(oc_joined[oc_joined["nome_area"].notna()])),
-            "total_denuncias": int(len(dd_geo) + len(dd_no_geo)),
-            "total_fatores_urbanos": int(len(fu)),
-            "total_cameras": int(len(cam)),
-            "total_areas": len(areas_raw),
-            "total_psr": int(len(psr)),
-            "periodo_criminal": "2020-2024",
-            "periodo_fatores": "2026",
-            "periodo_denuncias": "2025",
-        },
+    pop_total = sum(v["populacao_bairros_2022"] for v in bairro_context.values()) if bairro_context else 0
+
+    meta = {
+        "total_ocorrencias": int(len(oc)),
+        "total_ocorrencias_em_areas": int(len(oc_joined[oc_joined["nome_area"].notna()])),
+        "total_denuncias": int(len(dd_geo) + len(dd_no_geo)),
+        "total_fatores_urbanos": int(len(fu)),
+        "total_cameras": int(len(cam)),
+        "total_areas": len(areas_raw),
+        "total_psr": int(len(psr)),
+        "periodo_criminal": "2020-2024",
+        "periodo_fatores": "2026",
+        "periodo_denuncias": "2025",
+        "has_censo": has_censo,
+        "has_1746": has_1746,
+        "total_chamados_1746": int(len(chamados_1746)) if has_1746 else 0,
+        "periodo_1746": "2020-2024" if has_1746 else None,
     }
+    if pop_total > 0:
+        meta["populacao_total_bairros_fm"] = pop_total
+
+    return {"areas": areas_raw, "meta": meta}
 
 
 def main():

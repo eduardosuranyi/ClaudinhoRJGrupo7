@@ -74,6 +74,8 @@ export default function RelatorioTab({ area }: { area: Area }) {
           top_trechos: area.top_trechos.slice(0, 5),
           fatores: area.fatores_por_orgao,
           relatos: area.relatos_sample.slice(0, 5),
+          chamados_1746: area.chamados_1746,
+          validacao_cruzada: area.validacao_cruzada,
         }),
       })
       const d = await res.json()
@@ -343,11 +345,14 @@ function AnalyticalReport({ area, dinamica }: { area: Area; dinamica?: string })
     lines.push(`| Domínio principal | ${area.identificacao.dominio_principal} |\n`)
 
     lines.push('## 2. Indicadores do Período\n')
-    lines.push(`- **Ocorrências:** ${fmt(area.stats.crimes_total)}`)
+    lines.push(`- **Ocorrências (ISP-RJ 2020-2024):** ${fmt(area.stats.crimes_total)}`)
     lines.push(`- **Pico horário:** ${area.stats.pico_horario}`)
     lines.push(`- **% Noturno:** ${area.stats.pct_noturno}%`)
-    lines.push(`- **Denúncias:** ${fmt(area.stats.denuncias_total)}`)
-    lines.push(`- **Fatores urbanos:** ${fmt(area.stats.fatores_urbanos_total)}`)
+    lines.push(`- **Denúncias Disque Denúncia (crime anônimo):** ${fmt(area.stats.denuncias_total)}`)
+    lines.push(`- **Fatores urbanos (observação de campo):** ${fmt(area.stats.fatores_urbanos_total)}`)
+    if (area.chamados_1746) {
+      lines.push(`- **Chamados 1746 (demanda cidadã 2020-2024):** ${fmt(area.chamados_1746.total)} (${area.chamados_1746.pct_atendido}% atendidos, ${area.chamados_1746.pct_vencido}% vencidos)`)
+    }
     lines.push(`- **Câmeras:** ${fmt(area.stats.cameras_total)}`)
     lines.push(`- **Pop. situação de rua:** ${fmt(area.stats.psr_total)}`)
     lines.push(`- **Score de risco:** ${area.score.total.toFixed(1)}/100\n`)
@@ -374,11 +379,23 @@ function AnalyticalReport({ area, dinamica }: { area: Area; dinamica?: string })
     lines.push(`- Trechos com 2+ camadas: ${area.n_bingo_trechos}`)
     lines.push(`- Trechos com 3/3 camadas: ${area.n_triple_bingo}\n`)
 
-    lines.push('## 7. Fatores por Órgão\n')
-    for (const org of area.fatores_por_orgao) {
-      lines.push(`**${org.orgao}** — ${fmt(org.total)} registros`)
-      for (const t of org.tipos.slice(0, 3)) {
-        lines.push(`  - ${t.tipo}: ${t.count}`)
+    lines.push('## 7. Demandas por Órgão (validação cruzada)\n')
+    lines.push('> Fatores Urbanos = observação de campo pela equipe FM (diagnóstico qualitativo)')
+    lines.push('> Chamados 1746 = reclamações da população na Central de Atendimento (demanda quantitativa)')
+    lines.push('> Disque Denúncia = denúncias anônimas sobre CRIME (fonte separada, NÃO é infraestrutura)\n')
+    if (area.validacao_cruzada && area.validacao_cruzada.length > 0) {
+      lines.push('| Órgão | Campo (fatores) | Cidadão (1746) | % Atendidos | Vencidos | Validado |')
+      lines.push('|-------|-----------------|----------------|-------------|----------|----------|')
+      for (const v of area.validacao_cruzada) {
+        const pctAt = v.chamados_1746 > 0 ? Math.round(v.chamados_atendidos / v.chamados_1746 * 100) : 0
+        lines.push(`| ${v.orgao} | ${fmt(v.fatores_campo)} | ${fmt(v.chamados_1746)} | ${pctAt}% | ${fmt(v.chamados_vencidos)} | ${v.validado ? 'Sim' : '—'} |`)
+      }
+    } else {
+      for (const org of area.fatores_por_orgao) {
+        lines.push(`**${org.orgao}** — ${fmt(org.total)} registros de campo`)
+        for (const t of org.tipos.slice(0, 3)) {
+          lines.push(`  - ${t.tipo}: ${t.count}`)
+        }
       }
     }
     lines.push('')

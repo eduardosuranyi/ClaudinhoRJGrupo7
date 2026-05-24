@@ -88,6 +88,13 @@ function TrechoRow({ rank, trecho, maxTotal }: { rank: number; trecho: any; maxT
                 BINGO {trecho.bingo_count}/3
               </span>
             )}
+            {trecho.bingo_layers && trecho.bingo_count !== undefined && trecho.bingo_count >= 2 && (
+              <span style={{ display: 'inline-flex', gap: 2 }}>
+                {trecho.bingo_layers.crime && <LayerPill label="Crime" bg="rgba(239,68,68,0.15)" color="#ef4444" />}
+                {trecho.bingo_layers.fatores && <LayerPill label="Fator" bg="rgba(251,176,64,0.15)" color="#fbb040" />}
+                {trecho.bingo_layers.sinais && <LayerPill label="Sinal" bg="rgba(255,107,53,0.15)" color="#ff6b35" />}
+              </span>
+            )}
           </div>
         </div>
         <span className="mono tnum" style={{
@@ -97,6 +104,22 @@ function TrechoRow({ rank, trecho, maxTotal }: { rank: number; trecho: any; maxT
         </span>
       </div>
     </div>
+  )
+}
+
+function LayerPill({ label, bg, color }: { label: string; bg: string; color: string }) {
+  return (
+    <span style={{
+      fontSize: 7,
+      padding: '0px 3px',
+      background: bg,
+      color,
+      borderRadius: 1,
+      fontWeight: 600,
+      letterSpacing: '0.03em',
+    }}>
+      {label}
+    </span>
   )
 }
 

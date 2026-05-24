@@ -42,6 +42,21 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
         <KPI label="Pontos Cegos" value={fmt(area.camera_gaps.gaps.length)} hint={`${fmt(area.camera_gaps.n_cameras)} câmeras`} />
       </div>
 
+      {/* Per-capita / population enrichment row */}
+      {(area.stats.populacao_estimada != null || area.stats.denuncias_drogas != null) && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+          {area.stats.populacao_estimada != null && (
+            <KPI label="Pop. Residente" value={fmt(area.stats.populacao_estimada)} hint="Censo 2022" />
+          )}
+          {area.stats.crimes_per_1000_hab != null && (
+            <KPI label="Crimes/1k hab" value={area.stats.crimes_per_1000_hab.toFixed(1)} hint="per capita" />
+          )}
+          {area.stats.denuncias_drogas != null && (
+            <KPI label="Cenas de Drogas" value={fmt(area.stats.denuncias_drogas)} hint="DD - SMAS" />
+          )}
+        </div>
+      )}
+
       {/* Crime types */}
       <div>
         <SectionLabel>Tipos de Ocorrência</SectionLabel>
@@ -144,6 +159,95 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
               )
             })}
           </div>
+        </div>
+      )}
+
+      {/* Validação Cruzada: Campo × 1746 */}
+      {area.validacao_cruzada && area.validacao_cruzada.length > 0 ? (
+        <div>
+          <SectionLabel>Demandas por Órgão <span style={{ color: 'var(--text-muted)', fontSize: 9, marginLeft: 4 }}>(campo 2026 × 1746 2020-2024)</span></SectionLabel>
+          <div style={{ fontSize: 10, color: 'var(--text-dim)', marginBottom: 8 }}>
+            Fatores = observação de campo. Chamados = reclamações da população.
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {area.validacao_cruzada.map((vc) => {
+              const maxBar = Math.max(...area.validacao_cruzada!.map(v => v.chamados_1746), 1)
+              const barPct = Math.round((vc.chamados_1746 / maxBar) * 100)
+              const atdPct = vc.chamados_1746 > 0 ? Math.round((vc.chamados_atendidos / vc.chamados_1746) * 100) : 0
+              return (
+                <div key={vc.orgao}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                    <span style={{ fontSize: 11, color: 'var(--text)' }}>{vc.orgao}</span>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <span style={{ fontSize: 10, color: '#36c476' }} title="Fatores observados em campo">{vc.fatores_campo} campo</span>
+                      <span className="mono tnum" style={{ fontSize: 10, color: '#f59e0b' }} title="Chamados 1746">{fmt(vc.chamados_1746)} 1746</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 2, height: 4 }}>
+                    <div style={{ flex: 1, background: 'var(--bg-3)', position: 'relative' }}>
+                      <div style={{ position: 'absolute', height: '100%', width: `${barPct}%`, background: vc.validado ? '#f59e0b' : 'var(--bg-3)' }} />
+                    </div>
+                  </div>
+                  {vc.chamados_1746 > 0 && (
+                    <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 1 }}>
+                      {atdPct}% atendidos · {fmt(vc.chamados_vencidos)} vencidos
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ) : area.fatores_por_orgao.length > 0 ? (
+        <div>
+          <SectionLabel>Fatores Urbanos por Órgão</SectionLabel>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {area.fatores_por_orgao.slice(0, 7).map((fo) => {
+              const pct = Math.round((fo.total / (area.stats.fatores_urbanos_total || 1)) * 100)
+              return (
+                <div key={fo.orgao}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                    <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>{fo.orgao}</span>
+                    <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-muted)' }}>{fmt(fo.total)} ({pct}%)</span>
+                  </div>
+                  <div style={{ height: 3, background: 'var(--bg-3)' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, background: '#36c476' }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Chamados 1746 — evolução mensal */}
+      {area.chamados_1746 && (
+        <div>
+          <SectionLabel>Chamados 1746 <span style={{ color: 'var(--text-muted)', fontSize: 9, marginLeft: 4 }}>(Central de Atendimento · 2020-2024)</span></SectionLabel>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginBottom: 10 }}>
+            <KPI label="Chamados" value={fmt(area.chamados_1746.total)} hint="na área FM" />
+            {area.chamados_1746.pct_atendido != null && (
+              <KPI label="Atendidos" value={`${area.chamados_1746.pct_atendido}%`} hint="taxa atendimento" />
+            )}
+            {area.chamados_1746.pct_vencido != null && (
+              <KPI label="Vencidos" value={`${area.chamados_1746.pct_vencido}%`} hint="fora do prazo" />
+            )}
+          </div>
+          {area.chamados_1746.evolucao_mensal && area.chamados_1746.evolucao_mensal.length > 1 && (
+            <div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4 }}>Evolução mensal dos chamados</div>
+              <div style={{ height: 60 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={area.chamados_1746.evolucao_mensal.slice(-24)} margin={{ top: 4, right: 0, left: -25, bottom: 0 }}>
+                    <XAxis dataKey="mes" tick={{ fontSize: 7, fill: '#4a4a55' }} interval={Math.max(0, Math.floor(area.chamados_1746.evolucao_mensal.slice(-24).length / 4))} tickLine={false} axisLine={{ stroke: '#2a2a35' }} />
+                    <YAxis tick={{ fontSize: 9, fill: '#4a4a55' }} tickLine={false} axisLine={false} />
+                    <Tooltip contentStyle={{ background: '#14141a', border: '1px solid #2a2a35', fontSize: 10 }} labelStyle={{ color: '#8a8a95' }} itemStyle={{ color: '#f0f0f3' }} />
+                    <Line type="monotone" dataKey="total" stroke="#f59e0b" strokeWidth={1.5} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

@@ -61,6 +61,9 @@ export default function TopHeader({ data }: Props) {
         <KPI label="Denúncias" value={fmt(totalDenuncias)} sub={data.meta.periodo_denuncias} />
         <KPI label="Fatores" value={fmt(totalFatores)} sub="pendentes" />
         <KPI label="Câmeras" value={fmt(totalCameras)} sub="CIVITAS" />
+        {data.meta.populacao_total_bairros_fm != null && (
+          <KPI label="Pop. FM" value={fmt(data.meta.populacao_total_bairros_fm)} sub="Censo 2022" />
+        )}
       </div>
 
       {/* Status & time */}

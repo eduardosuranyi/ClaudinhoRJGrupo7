@@ -1,7 +1,7 @@
 # ClaudinhoRJ Grupo 7 — Plataforma CompStat Municipal RJ
 
 Plataforma de inteligência criminal para o CompStat Municipal do Rio de Janeiro.
-Integra **9 fontes de dados** em uma única tela operacional, gera o **Relatório Analítico de Área** automaticamente em `.docx`, e permite **despachar fatores urbanos** com um clique para o órgão responsável.
+Integra **12 fontes de dados** (9 oficiais + 3 externas) em uma única tela operacional, gera o **Relatório Analítico de Área** automaticamente em `.docx`, e permite **despachar fatores urbanos** com um clique para o órgão responsável.
 
 ## Stack
 
@@ -14,7 +14,7 @@ Integra **9 fontes de dados** em uma única tela operacional, gera o **Relatóri
 ```
 eduardo/
 ├── backend/
-│   ├── data_pipeline.py    # 9 fontes → spatial joins → scoring
+│   ├── data_pipeline.py    # 12 fontes → spatial joins → scoring + enrichment
 │   ├── generate_report.py  # gera .docx CompStat
 │   ├── requirements.txt
 │   └── areas_data.json     # output do pipeline
@@ -78,15 +78,17 @@ npm run dev
 
 ### Mapa interativo
 - Polígonos das 8 áreas FM coloridos por score
-- 5 camadas toggleáveis: mancha criminal (heatmap), fatores urbanos (por órgão), câmeras CIVITAS, censo PSR, domínio territorial (por facção)
+- 6 camadas toggleáveis: mancha criminal (heatmap), fatores urbanos (por órgão), câmeras CIVITAS, censo PSR, domínio territorial (por facção), pontos cegos
+- Marcadores numerados de trechos críticos ao selecionar área
 - Click abre painel de análise da área
 
-### Painel de análise (5 tabs)
-1. **Visão Geral** — 6 KPIs + tipos de crime + distribuição horária + dia da semana + modus operandi + evolução mensal
-2. **Trechos** — top 10 com breakdown por tipo e pico horário
-3. **Denúncias** — relatos reais do Disque Denúncia com modus operandi tagueado via NLP
-4. **Inteligência** — domínio territorial das facções (CV/TCP/ADA/Milícia) + RELINT estruturado
-5. **Relatório** — síntese via Claude + plano de ação com botão Despachar (mailto:) + export .docx
+### Painel de análise (6 tabs)
+1. **Escala** — recurso humano alocável com modelo de 600 GM por turno
+2. **Dados** — 12 KPIs (incl. pop. residente, crimes per capita, cenas de drogas) + tipos de crime + distribuição horária + dia da semana + modus operandi + fatores por órgão + evolução mensal
+3. **Trechos** — top 10 com breakdown por tipo, pico horário e bingo layer (Crime/Fator/Sinal)
+4. **Denúncias** — DD por bairro + relatos com modus operandi e perfil de suspeito + KPI de cenas de drogas
+5. **Inteligência** — domínio territorial (CV/TCP/ADA/Milícia) + RELINT estruturado
+6. **Plano de Ação** — síntese via Claude + despacho por órgão (mailto:) + export .docx
 
 ### Score determinístico
 4 componentes ponderáveis ao vivo via sliders (mancha · pico · fatores · dinâmica) + bônus RELINT.
@@ -100,24 +102,38 @@ Formato oficial CompStat com identificação institucional, indicadores, dinâmi
 
 ## Dados utilizados
 
+### Fontes oficiais do hackathon
+
 | Fonte | Volume | Uso |
 |---|---|---|
 | Ocorrências ISP 2020-2024 | 115.318 | score, distribuições, mapa |
-| Disque Denúncia 2025 | 8.770 (R/F) | relatos, MO, dinâmica |
-| Fatores Urbanos 2026 | 2.085 | score, despacho |
-| Câmeras CIVITAS | 985 | KPI, camada |
+| Disque Denúncia 2025 | 8.770 (R/F) + 9.168 (drogas) | relatos, MO, dinâmica, fator SMAS |
+| Fatores Urbanos 2026 | 2.085 | score, despacho, fatores por órgão |
+| Câmeras CIVITAS | 985 | KPI, camada, gap analysis |
 | Polígonos Área FM | 8 | spatial join |
 | RELINTs | 8 | inteligência, síntese |
 | Domínio Territorial | 1.260 | camada, identificação |
 | Censo PSR | 23.332 | KPI, camada |
 
+### Fontes externas (enriquecimento)
+
+| Fonte | Arquivo | Volume | Uso |
+|---|---|---|---|
+| Bairros (data.rio) | `data/external/bairros_rio.geojson` | 166 | contexto geográfico, subprefeitura |
+| Censo 2022 (data.rio) | `data/external/censo_2022_bairros.geojson` | 165 | população residente, crimes per capita |
+| Central 1746 (BigQuery) | `data/external/chamados_1746_fm.csv` | opcional | validação de fatores por demanda cidadã |
+
 ## Features Novas
 
 - **Camera Gap Analysis (Pontos Cegos)** — Detecta áreas sem cobertura de câmeras usando buffer de 50 m. Classifica cada ponto entre `instalar` e `remanejar`. Exibido como camada toggleável no mapa e na tab Dados.
-- **Bingo / Coincidência de Camadas** — Identifica trechos onde crime, fatores urbanos e sinais do Disque Denúncia se sobrepõem. Tags **BINGO 2/3** e **3/3** nos trechos prioritários.
-- **Comparativo Cross-Area** — Página com radar chart multidimensional, ranking com gradiente e bar chart comparativo entre todas as 8 áreas FM.
+- **Bingo / Coincidência de Camadas** — Identifica trechos onde crime, fatores urbanos e sinais do Disque Denúncia se sobrepõem. Tags **BINGO 2/3** e **3/3** com breakdown por layer (Crime/Fator/Sinal).
+- **Comparativo Cross-Area** — Radar chart multidimensional, ranking com gradiente, bar chart comparativo com **toggle Absoluto / Per Capita**.
 - **Sinais de Risco Automatizados** — 8 regras de detecção automática de risco (alto volume, sem câmeras, % noturno, ORCRIM, etc.).
 - **Relatório Analítico In-Browser** — Relatório completo de 9 seções visível no dashboard, com download em `.md` e `.html`.
+- **Enriquecimento com Censo 2022** — População residente por bairro, crimes per capita (por 1.000 hab), chips de bairros no painel.
+- **Disque Denúncia aprimorado** — Cenas de drogas como fator SMAS, agregação por bairro no entorno, perfil de suspeito extraído dos dados de envolvidos.
+- **Marcadores de Trechos no Mapa** — Ao selecionar área, top trechos aparecem como marcadores numerados.
+- **Pop. FM no Header** — KPI de população total das áreas FM no cabeçalho global.
 
 ## Testes
 
@@ -133,6 +149,7 @@ npm run test:run
 
 ## Documentação
 
+- [Changelog](CHANGELOG.md)
 - [Arquitetura](docs/ARCHITECTURE.md)
 - [Dicionário de Dados](docs/DATA_DICTIONARY.md)
 - [Referência da API](docs/API_REFERENCE.md)

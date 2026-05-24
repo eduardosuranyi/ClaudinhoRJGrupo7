@@ -54,6 +54,12 @@ export interface AreaStats {
   psr_total: number
   /** Distribuição de modus operandi extraídos por NLP */
   modus_operandi: Record<string, number>
+  /** População estimada (Censo 2022) dos bairros FM */
+  populacao_estimada?: number
+  /** Crimes por 1.000 habitantes (normalizado) */
+  crimes_per_1000_hab?: number
+  /** Total de denúncias de consumo de drogas (SMAS signal) */
+  denuncias_drogas?: number
 }
 
 /** Identificação administrativa da área FM. */
@@ -68,6 +74,10 @@ export interface Identificacao {
   subprefeitura: string
   /** Facção com maior presença territorial */
   dominio_principal: string
+  /** Bairros que intersectam o polígono FM */
+  bairros?: string[]
+  /** População residente (Censo 2022) dos bairros intersectantes */
+  populacao_bairros_2022?: number
 }
 
 /** Relato individual do Disque Denúncia. */
@@ -80,6 +90,8 @@ export interface Relato {
   relato: string
   /** Modus operandi extraídos por regex */
   modus: string[]
+  /** Perfil do suspeito extraído de envolvidos (sexo, idade, pele) */
+  perfil_suspeito?: string
 }
 
 /** Seção estruturada de um documento RELINT. */
@@ -112,6 +124,7 @@ export interface MapLayers {
   fatores_points: { lat: number; lng: number; tipo: string; orgao: string; logradouro: string }[]
   cameras_points: { lat: number; lng: number }[]
   psr_points: { lat: number; lng: number }[]
+  chamados_points?: { lat: number; lng: number; tipo: string; orgao: string }[]
 }
 
 /** A camera gap / blind spot identified by the gap analysis. */
@@ -133,6 +146,51 @@ export interface CameraGapAnalysis {
   gaps: CameraGap[]
 }
 
+/** Tipo de chamado 1746 agrupado. */
+export interface Chamado1746Tipo {
+  tipo: string
+  orgao: string
+  total: number
+  atendidos: number
+  vencidos?: number
+}
+
+/** Chamados municipais (Central 1746) agregados por área FM. */
+export interface Chamados1746 {
+  total: number
+  com_coordenadas?: number
+  pct_atendido?: number
+  pct_vencido?: number
+  por_tipo: Chamado1746Tipo[]
+  evolucao_mensal?: { mes: string; total: number }[]
+}
+
+/** Cruzamento campo × demanda cidadã por órgão. */
+export interface ValidacaoCruzada {
+  orgao: string
+  fatores_campo: number
+  chamados_1746: number
+  chamados_atendidos: number
+  chamados_vencidos: number
+  validado: boolean
+}
+
+/** Distribuição de denúncias por bairro dentro/próximo da área FM. */
+export interface DenunciaBairro {
+  bairro: string
+  total: number
+  tipos: Record<string, number>
+}
+
+/** Bairro polygon in the FM area surroundings (entorno). */
+export interface BairroEntorno {
+  nome: string
+  populacao: number
+  denuncias: number
+  chamados_1746: number
+  geometry: GeoJSON.Geometry
+}
+
 /** Bingo layer breakdown per trecho. */
 export interface BingoLayers {
   crime: boolean
@@ -151,6 +209,8 @@ export interface Trecho {
   pico_hora: number
   bingo_count?: number
   bingo_layers?: BingoLayers
+  /** Actual street line geometry from the logradouros gazetteer */
+  line_geometry?: GeoJSON.Geometry
 }
 
 export interface Area {
@@ -171,6 +231,14 @@ export interface Area {
   evolucao_mensal: { mes: string; total: number }[]
   map_layers: MapLayers
   score: Score
+  /** Chamados 1746 para a área (se CSV exportado do BigQuery) */
+  chamados_1746?: Chamados1746
+  /** Cruzamento: fatores de campo × chamados 1746, agrupado por órgão */
+  validacao_cruzada?: ValidacaoCruzada[]
+  /** Denúncias agrupadas por bairro no entorno da área FM */
+  denuncias_por_bairro?: DenunciaBairro[]
+  /** Bairro polygons with stats for map overlay when area is selected */
+  bairros_entorno?: BairroEntorno[]
 }
 
 export interface AreasData {
@@ -186,6 +254,9 @@ export interface AreasData {
     periodo_criminal: string
     periodo_fatores: string
     periodo_denuncias: string
+    has_censo?: boolean
+    has_1746?: boolean
+    populacao_total_bairros_fm?: number
   }
 }
 

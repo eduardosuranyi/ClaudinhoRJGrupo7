@@ -17,8 +17,10 @@ interface LayerVisibility {
   fatores: boolean
   cameras: boolean
   psr: boolean
+  chamados: boolean
   dominio: boolean
   gaps: boolean
+  bairros: boolean
 }
 
 // Weighted score given current sliders
@@ -41,7 +43,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   const annotationsRef = useRef<any[]>([])
   const [mapReady, setMapReady] = useState(false)
   const [layers, setLayers] = useState<LayerVisibility>({
-    crime: false, fatores: false, cameras: false, psr: false, dominio: false, gaps: false,
+    crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true,
   })
   // Mirror of layers state accessible from refs (avoids stale closures in mapControlRef)
   const layersRef = useRef<LayerVisibility>({ crime: false, fatores: false, cameras: false, psr: false, dominio: false })
@@ -301,6 +303,27 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       },
     })
 
+    // ── Chamados 1746 ─────────────────────────────────
+    const chamadosFeatures = data.areas.flatMap(a =>
+      (a.map_layers.chamados_points || []).map(p => ({
+        type: 'Feature' as const,
+        properties: { tipo: p.tipo, orgao: p.orgao },
+        geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
+      }))
+    )
+    map.addSource('chamados', { type: 'geojson', data: { type: 'FeatureCollection', features: chamadosFeatures } })
+    map.addLayer({
+      id: 'chamados-dot',
+      type: 'circle',
+      source: 'chamados',
+      layout: { visibility: 'none' },
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 1.5, 15, 4],
+        'circle-color': '#f59e0b',
+        'circle-opacity': 0.5,
+      },
+    })
+
     // ── Domínio territorial ─────────────────────────────
     const dominioFeatures = data.areas.flatMap(a =>
       a.dominio_territorial.map(d => ({
@@ -344,15 +367,120 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       },
     })
 
+    // ── Bairros do entorno (shown on area selection) ──
+    map.addSource('bairros', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'bairros-fill',
+      type: 'fill',
+      source: 'bairros',
+      paint: {
+        'fill-color': '#38bdf8',
+        'fill-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.12, 14, 0.07],
+      },
+    })
+    map.addLayer({
+      id: 'bairros-stroke',
+      type: 'line',
+      source: 'bairros',
+      paint: {
+        'line-color': '#38bdf8',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.8, 15, 1.5],
+        'line-opacity': 0.7,
+        'line-dasharray': [3, 2],
+      },
+    })
+    map.addLayer({
+      id: 'bairros-label',
+      type: 'symbol',
+      source: 'bairros',
+      layout: {
+        'text-field': ['get', 'nome'],
+        'text-size': ['interpolate', ['linear'], ['zoom'], 11, 9, 14, 12],
+        'text-font': ['Open Sans Semibold'],
+        'text-allow-overlap': false,
+        'text-ignore-placement': false,
+        'text-padding': 4,
+      },
+      paint: {
+        'text-color': '#7dd3fc',
+        'text-halo-color': 'rgba(7,7,10,0.85)',
+        'text-halo-width': 1.5,
+      },
+    })
+
+    // ── Top trechos — line segments from gazetteer ──
+    map.addSource('trechos-lines', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'trechos-line',
+      type: 'line',
+      source: 'trechos-lines',
+      paint: {
+        'line-color': '#fbb040',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 2.5, 15, 5],
+        'line-opacity': 0.85,
+      },
+    })
+    map.addLayer({
+      id: 'trechos-line-glow',
+      type: 'line',
+      source: 'trechos-lines',
+      paint: {
+        'line-color': '#fbb040',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 8, 15, 14],
+        'line-opacity': 0.15,
+        'line-blur': 4,
+      },
+    })
+
+    // ── Top trechos — numbered point markers at centroids ──
+    map.addSource('trechos', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'trechos-circle',
+      type: 'circle',
+      source: 'trechos',
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 6, 15, 12],
+        'circle-color': '#fbb040',
+        'circle-opacity': 0.9,
+        'circle-stroke-color': '#07070a',
+        'circle-stroke-width': 1.5,
+      },
+    })
+    map.addLayer({
+      id: 'trechos-label',
+      type: 'symbol',
+      source: 'trechos',
+      layout: {
+        'text-field': ['get', 'rank'],
+        'text-size': 9,
+        'text-font': ['Open Sans Bold'],
+        'text-allow-overlap': true,
+      },
+      paint: {
+        'text-color': '#07070a',
+      },
+    })
+
+    // ── Nearly-invisible interaction layer on top of everything ──
+    // fill-opacity must be > 0 for MapLibre to fire mouse/click events
+    map.addLayer({
+      id: 'areas-interact',
+      type: 'fill',
+      source: 'areas',
+      paint: {
+        'fill-color': '#000000',
+        'fill-opacity': 0.01,
+      },
+    })
+
     // ── Interactions ─────────────────────────────────────
-    // Click area
-    map.on('click', 'areas-fill', (e: any) => {
+    // Click area (uses the top-most invisible layer)
+    map.on('click', 'areas-interact', (e: any) => {
       const id = e.features[0].properties.id
       const area = data.areas.find(a => a.id === id) ?? null
       if (!area) return
       onSelectArea(area)
       map.setFilter('areas-selected', ['==', ['get', 'id'], id])
-      // Smooth zoom into the area
       const bounds = geomBounds(area.geometry as any)
       if (bounds) {
         map.fitBounds(bounds, {
@@ -365,8 +493,8 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       popupRef.current?.remove()
     })
 
-    // Hover popup
-    map.on('mouseenter', 'areas-fill', (e: any) => {
+    // Hover popup on area
+    map.on('mouseenter', 'areas-interact', (e: any) => {
       map.getCanvas().style.cursor = 'pointer'
       const f = e.features[0]
       const id = f.properties.id
@@ -405,13 +533,42 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         .addTo(map)
     })
 
-    map.on('mousemove', 'areas-fill', (e: any) => {
+    map.on('mousemove', 'areas-interact', (e: any) => {
       popupRef.current?.setLngLat(e.lngLat)
     })
 
-    map.on('mouseleave', 'areas-fill', () => {
+    map.on('mouseleave', 'areas-interact', () => {
       map.getCanvas().style.cursor = ''
       map.setFilter('areas-hover', ['==', ['get', 'id'], -1])
+      popupRef.current?.remove()
+    })
+
+    // Hover on bairro entorno
+    map.on('mouseenter', 'bairros-fill', (e: any) => {
+      if (map.getCanvas().style.cursor === 'pointer') return
+      map.getCanvas().style.cursor = 'crosshair'
+      const p = e.features[0].properties
+      const pop = Number(p.populacao || 0)
+      const dd = Number(p.denuncias || 0)
+      const ch = Number(p.chamados_1746 || 0)
+      popupRef.current
+        .setLngLat(e.lngLat)
+        .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:180px">
+          <div style="font-size:9px;color:#38bdf8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Bairro do Entorno</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px">${p.nome}</div>
+          <div style="display:flex;gap:14px;font-size:11px">
+            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Populacao</div><div style="font-weight:500;font-variant-numeric:tabular-nums">${pop > 0 ? pop.toLocaleString('pt-BR') : '—'}</div></div>
+            <div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">Denuncias</div><div style="font-weight:500;font-variant-numeric:tabular-nums">${dd > 0 ? dd.toLocaleString('pt-BR') : '—'}</div></div>
+            ${ch > 0 ? `<div><div style="color:#4a4a55;font-size:9px;text-transform:uppercase">1746</div><div style="font-weight:500;font-variant-numeric:tabular-nums">${ch.toLocaleString('pt-BR')}</div></div>` : ''}
+          </div>
+        </div>`)
+        .addTo(map)
+    })
+    map.on('mousemove', 'bairros-fill', (e: any) => {
+      popupRef.current?.setLngLat(e.lngLat)
+    })
+    map.on('mouseleave', 'bairros-fill', () => {
+      if (map.getCanvas().style.cursor === 'crosshair') map.getCanvas().style.cursor = ''
       popupRef.current?.remove()
     })
 
@@ -434,7 +591,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
 
     // Click outside areas → deselect
     map.on('click', (e: any) => {
-      const features = map.queryRenderedFeatures(e.point, { layers: ['areas-fill'] })
+      const features = map.queryRenderedFeatures(e.point, { layers: ['areas-interact'] })
       if (features.length === 0) {
         onSelectArea(null)
         map.setFilter('areas-selected', ['==', ['get', 'id'], -1])
@@ -456,19 +613,53 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   // ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapInst.current || !mapReady) return
-    mapInst.current.setFilter('areas-selected', ['==', ['get', 'id'], selected?.id ?? -1])
+    const map = mapInst.current
+    map.setFilter('areas-selected', ['==', ['get', 'id'], selected?.id ?? -1])
+
+    const trechoPointFeatures = selected
+      ? selected.top_trechos
+          .filter(t => t.lat && t.lng)
+          .map((t, i) => ({
+            type: 'Feature' as const,
+            properties: { rank: String(i + 1), name: t.locf_norm, total: t.total },
+            geometry: { type: 'Point' as const, coordinates: [t.lng, t.lat] },
+          }))
+      : []
+    map.getSource('trechos')?.setData({ type: 'FeatureCollection', features: trechoPointFeatures })
+
+    const trechoLineFeatures = selected
+      ? selected.top_trechos
+          .filter(t => t.line_geometry)
+          .map((t, i) => ({
+            type: 'Feature' as const,
+            properties: { rank: i + 1, name: t.locf_norm, total: t.total },
+            geometry: t.line_geometry!,
+          }))
+      : []
+    map.getSource('trechos-lines')?.setData({ type: 'FeatureCollection', features: trechoLineFeatures })
+
+    const bairroFeatures = selected?.bairros_entorno
+      ? selected.bairros_entorno.map(b => ({
+          type: 'Feature' as const,
+          properties: { nome: b.nome, populacao: b.populacao, denuncias: b.denuncias, chamados_1746: b.chamados_1746 },
+          geometry: b.geometry,
+        }))
+      : []
+    map.getSource('bairros')?.setData({ type: 'FeatureCollection', features: bairroFeatures })
   }, [selected, mapReady])
 
   // ─────────────────────────────────────────────────────────
   // 5. LAYER TOGGLE
   // ─────────────────────────────────────────────────────────
   const LAYER_IDS: Record<string, string[]> = {
-    crime:   ['crime-heat', 'crime-dot'],
-    fatores: ['fatores-dot'],
-    cameras: ['cameras-dot'],
-    psr:     ['psr-dot'],
-    dominio: ['dominio-fill', 'dominio-stroke'],
-    gaps:    ['gaps-dot'],
+    crime:    ['crime-heat', 'crime-dot'],
+    fatores:  ['fatores-dot'],
+    cameras:  ['cameras-dot'],
+    psr:      ['psr-dot'],
+    chamados: ['chamados-dot'],
+    dominio:  ['dominio-fill', 'dominio-stroke'],
+    gaps:     ['gaps-dot'],
+    bairros:  ['bairros-fill', 'bairros-stroke', 'bairros-label'],
   }
 
   function setLayerVisible(key: keyof LayerVisibility, visible: boolean) {
@@ -557,8 +748,10 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   const totalFatores = data.areas.reduce((s, a) => s + a.map_layers.fatores_points.length, 0)
   const totalCameras = data.areas.reduce((s, a) => s + a.stats.cameras_total, 0)
   const totalPSR     = data.areas.reduce((s, a) => s + a.stats.psr_total, 0)
+  const totalChamados = data.areas.reduce((s, a) => s + (a.map_layers.chamados_points?.length || 0), 0)
   const totalDominio = data.areas.reduce((s, a) => s + a.dominio_territorial.length, 0)
   const totalGaps    = data.areas.reduce((s, a) => s + a.camera_gaps.gaps.length, 0)
+  const totalBairros = selected?.bairros_entorno?.length ?? 0
 
   return (
     <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
@@ -582,8 +775,10 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         <LayerBtn label="Fatores Urbanos"       color="#36c476" active={layers.fatores} n={totalFatores} onClick={() => toggleLayer('fatores')} />
         <LayerBtn label="Câmeras CIVITAS"       color="#4a90e2" active={layers.cameras} n={totalCameras} onClick={() => toggleLayer('cameras')} />
         <LayerBtn label="Pop. Situação de Rua"  color="#a855f7" active={layers.psr}     n={totalPSR}     onClick={() => toggleLayer('psr')} />
+        {totalChamados > 0 && <LayerBtn label="Chamados 1746"  color="#f59e0b" active={layers.chamados} n={totalChamados} onClick={() => toggleLayer('chamados')} />}
         <LayerBtn label="Domínio Territorial"   color="#fbb040" active={layers.dominio} n={totalDominio} onClick={() => toggleLayer('dominio')} />
         <LayerBtn label="Pontos Cegos"          color="#ef4444" active={layers.gaps}    n={totalGaps}    onClick={() => toggleLayer('gaps')} />
+        {selected && <LayerBtn label="Bairros Entorno" color="#38bdf8" active={layers.bairros} n={totalBairros} onClick={() => toggleLayer('bairros')} />}
 
         <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(42,42,53,0.7)' }}>
           <div className="label-overline" style={{ marginBottom: 5 }}>Legenda Facções</div>

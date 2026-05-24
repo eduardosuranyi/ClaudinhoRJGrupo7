@@ -56,11 +56,30 @@ export default function AreaPanel({ area, allAreas, weights, onClose }: Props) {
               {area.identificacao.aisp && <IdChip label="AISP" value={String(area.identificacao.aisp)} />}
               {area.identificacao.risp && <IdChip label="RISP" value={String(area.identificacao.risp)} />}
               <IdChip label="Base FM" value={area.identificacao.base_fm} />
+              {area.identificacao.subprefeitura && area.identificacao.subprefeitura !== '—' && (
+                <IdChip label="Subpref." value={area.identificacao.subprefeitura} />
+              )}
               {area.identificacao.dominio_principal && area.identificacao.dominio_principal !== '—' && (
                 <IdChip label="Domínio" value={area.identificacao.dominio_principal}
                   color={faccaoColor(area.identificacao.dominio_principal)} />
               )}
             </div>
+            {area.identificacao.bairros && area.identificacao.bairros.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 4 }}>
+                {area.identificacao.bairros.map(b => (
+                  <span key={b} style={{
+                    fontSize: 9,
+                    padding: '1px 5px',
+                    background: 'rgba(74,144,226,0.1)',
+                    border: '1px solid rgba(74,144,226,0.25)',
+                    color: '#4a90e2',
+                    borderRadius: 2,
+                  }}>
+                    {b}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
             <div style={{ textAlign: 'right' }}>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend,
@@ -42,17 +42,24 @@ function crimeBarColor(value: number, min: number, max: number): string {
 }
 
 export default function ComparativoPage({ data, weights }: Props) {
+  const hasPerCapita = data.areas.some(a => a.stats.crimes_per_1000_hab != null)
+  const [perCapita, setPerCapita] = useState(false)
+
   const crimeData = useMemo(() => {
-    const sorted = [...data.areas].sort((a, b) => b.stats.crimes_total - a.stats.crimes_total)
-    const counts = sorted.map(a => a.stats.crimes_total)
+    const getValue = (a: Area) =>
+      perCapita && a.stats.crimes_per_1000_hab != null
+        ? a.stats.crimes_per_1000_hab
+        : a.stats.crimes_total
+    const sorted = [...data.areas].sort((a, b) => getValue(b) - getValue(a))
+    const counts = sorted.map(getValue)
     const min = Math.min(...counts)
     const max = Math.max(...counts)
     return sorted.map(a => ({
       name: shortName(a.nome),
-      crimes: a.stats.crimes_total,
-      color: crimeBarColor(a.stats.crimes_total, min, max),
+      crimes: getValue(a),
+      color: crimeBarColor(getValue(a), min, max),
     }))
-  }, [data.areas])
+  }, [data.areas, perCapita])
 
   const radarData = useMemo(() => {
     const areas = data.areas
@@ -89,7 +96,15 @@ export default function ComparativoPage({ data, weights }: Props) {
   return (
     <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 24 }}>
       <section>
-        <div className="label-overline" style={{ marginBottom: 8 }}>Ocorrências por Área</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div className="label-overline">Ocorrências por Área</div>
+          {hasPerCapita && (
+            <div style={{ display: 'flex', gap: 0, borderRadius: 2, overflow: 'hidden', border: '1px solid var(--border)' }}>
+              <ToggleBtn active={!perCapita} label="Absoluto" onClick={() => setPerCapita(false)} />
+              <ToggleBtn active={perCapita} label="Per Capita" onClick={() => setPerCapita(true)} />
+            </div>
+          )}
+        </div>
         <div style={{ height: 360 }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -114,10 +129,13 @@ export default function ComparativoPage({ data, weights }: Props) {
               <Tooltip
                 {...TOOLTIP_STYLE}
                 cursor={{ fill: 'rgba(255,107,53,0.08)' }}
-                formatter={(value) => [
-                  fmt(typeof value === 'number' ? value : Number(value)),
-                  'Ocorrências',
-                ]}
+                formatter={(value) => {
+                  const n = typeof value === 'number' ? value : Number(value)
+                  return [
+                    perCapita ? n.toFixed(1) : fmt(n),
+                    perCapita ? 'Crimes/1k hab' : 'Ocorrências',
+                  ]
+                }}
               />
               <Bar
                 dataKey="crimes"
@@ -126,7 +144,10 @@ export default function ComparativoPage({ data, weights }: Props) {
                   position: 'right',
                   fill: '#8a8a95',
                   fontSize: 10,
-                  formatter: (v: unknown) => fmt(Number(v ?? 0)),
+                  formatter: (v: unknown) => {
+                    const n = Number(v ?? 0)
+                    return perCapita ? n.toFixed(1) : fmt(n)
+                  },
                 }}
               >
                 {crimeData.map((entry, i) => (
@@ -186,7 +207,7 @@ export default function ComparativoPage({ data, weights }: Props) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
             <thead>
               <tr style={{ background: 'var(--bg-1)', borderBottom: '1px solid var(--border)' }}>
-                {['#', 'Área', 'Score', 'Crimes', 'Fatores', 'Câmeras', 'Denúncias', 'Bingo'].map(col => (
+                {['#', 'Área', 'Score', 'Crimes', ...(hasPerCapita ? ['Per Capita'] : []), 'Fatores', 'Câmeras', 'Denúncias', 'Bingo'].map(col => (
                   <th
                     key={col}
                     className="label-overline"
@@ -226,6 +247,11 @@ export default function ComparativoPage({ data, weights }: Props) {
                   <td className="mono tnum" style={{ padding: '7px 10px', textAlign: 'right', color: 'var(--text)' }}>
                     {fmt(area.stats.crimes_total)}
                   </td>
+                  {hasPerCapita && (
+                    <td className="mono tnum" style={{ padding: '7px 10px', textAlign: 'right', color: 'var(--text-dim)' }}>
+                      {area.stats.crimes_per_1000_hab != null ? area.stats.crimes_per_1000_hab.toFixed(1) : '—'}
+                    </td>
+                  )}
                   <td className="mono tnum" style={{ padding: '7px 10px', textAlign: 'right', color: 'var(--text-dim)' }}>
                     {fmt(area.stats.fatores_urbanos_total)}
                   </td>
@@ -245,5 +271,21 @@ export default function ComparativoPage({ data, weights }: Props) {
         </div>
       </section>
     </div>
+  )
+}
+
+function ToggleBtn({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick} style={{
+      padding: '3px 10px',
+      fontSize: 9,
+      fontWeight: active ? 600 : 400,
+      background: active ? 'var(--accent-soft)' : 'var(--bg-1)',
+      color: active ? 'var(--accent)' : 'var(--text-muted)',
+      border: 'none',
+      cursor: 'pointer',
+    }}>
+      {label}
+    </button>
   )
 }

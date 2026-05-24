@@ -130,7 +130,7 @@ def build_report(area: dict, synthesis: str, output_path: str):
     c1.add_run('Período').font.size = Pt(8)
     c1.runs[0].font.color.rgb = RGBColor(0x70, 0x70, 0x78)
     p1 = tbl.cell(0, 1).add_paragraph()
-    p1.add_run(f"Dados criminais: 2020–2024\nFatores: 2026 · Denúncias: 2025").font.size = Pt(9)
+    p1.add_run(f"Crimes (ISP-RJ): 2020–2024\nChamados 1746: 2020–2024\nFatores campo: 2026 · Denúncias DD: 2025").font.size = Pt(9)
 
     doc.add_paragraph()
 
@@ -173,15 +173,23 @@ def build_report(area: dict, synthesis: str, output_path: str):
 
     # Identificação
     heading_para(doc, 'Identificação da Área', level=2)
-    id_tbl = doc.add_table(rows=2, cols=4)
+    id_tbl = doc.add_table(rows=3, cols=4)
     id_tbl.style = 'Table Grid'
+    ch1746 = area.get('chamados_1746', {})
+    ch_total = ch1746.get('total', 0)
+    ch_pct_at = ch1746.get('pct_atendido', 0)
+
     id_data = [
         [('Área FM', nome), ('Câmeras', str(stats['cameras_total'])),
          ('Score de Risco', f"{score['total']:.0f}/100"), ('Data', hoje)],
-        [('Crimes (período)', str(stats['crimes_total'])),
+        [('Crimes (ISP-RJ)', str(stats['crimes_total'])),
          ('Pico Horário', stats['pico_horario']),
-         ('Denúncias DD', str(stats.get('denuncias_total', 0))),
-         ('Fatores Urbanos', str(stats['fatores_urbanos_total']))],
+         ('DD (denúncia crime)', str(stats.get('denuncias_total', 0))),
+         ('Fatores Campo', str(stats['fatores_urbanos_total']))],
+        [('1746 (serviço público)', f"{ch_total:,}".replace(',', '.')),
+         ('1746 % Atendidos', f"{ch_pct_at}%"),
+         ('PSR', str(stats.get('psr_total', 0))),
+         ('', '')],
     ]
     for r_i, row_data in enumerate(id_data):
         set_cell_bg(id_tbl.cell(r_i, 0), '111113')
@@ -273,6 +281,12 @@ def build_report(area: dict, synthesis: str, output_path: str):
 
     # ── 4. FATORES URBANOS ────────────────────────────────────────────────────
     heading_para(doc, '4. Fatores de Incidência Criminal')
+    small_para(doc,
+        'Fontes distintas: "Campo" = observação da equipe FM (fatores urbanos). '
+        '"1746" = chamados da Central de Atendimento ao cidadão (serviços públicos). '
+        '"DD" = Disque Denúncia (crime anônimo). NÃO confundir 1746 com DD.',
+        '707078')
+
     if area['fatores_por_orgao']:
         fu_tbl = doc.add_table(rows=1, cols=3)
         fu_tbl.style = 'Table Grid'
@@ -291,6 +305,35 @@ def build_report(area: dict, synthesis: str, output_path: str):
                 row.cells[2].paragraphs[0].add_run(fo['orgao']).font.size = Pt(9)
 
     doc.add_paragraph()
+
+    # ── 4.1 VALIDAÇÃO CRUZADA ────────────────────────────────────────────────
+    validacao = area.get('validacao_cruzada', [])
+    if validacao:
+        heading_para(doc, '4.1 Validação Cruzada — Campo × Cidadão (1746)')
+        small_para(doc,
+            'Compara fatores observados em campo (equipe FM) com chamados 1746 (cidadão). '
+            'Quando ambos concordam, o problema é crônico e validado.',
+            '707078')
+
+        vc_tbl = doc.add_table(rows=1, cols=5)
+        vc_tbl.style = 'Table Grid'
+        for j, h in enumerate(['Órgão', 'Campo (fatores)', '1746 (chamados)', '% Atendidos', 'Vencidos']):
+            c = vc_tbl.cell(0, j)
+            set_cell_bg(c, '18181b')
+            r = c.paragraphs[0].add_run(h)
+            r.bold = True
+            r.font.size = Pt(8)
+            r.font.color.rgb = RGBColor(0x70, 0x70, 0x78)
+        for v in validacao:
+            row = vc_tbl.add_row()
+            row.cells[0].paragraphs[0].add_run(v['orgao']).font.size = Pt(9)
+            row.cells[1].paragraphs[0].add_run(str(v.get('fatores_campo', 0))).font.size = Pt(9)
+            row.cells[2].paragraphs[0].add_run(str(v.get('chamados_1746', 0))).font.size = Pt(9)
+            pct = round(v['chamados_atendidos'] / max(v['chamados_1746'], 1) * 100) if v.get('chamados_1746') else 0
+            row.cells[3].paragraphs[0].add_run(f"{pct}%").font.size = Pt(9)
+            row.cells[4].paragraphs[0].add_run(str(v.get('chamados_vencidos', 0))).font.size = Pt(9)
+
+        doc.add_paragraph()
 
     # ── 5. PLANO DE AÇÃO ──────────────────────────────────────────────────────
     heading_para(doc, '5. Plano de Ação e Responsabilização')
