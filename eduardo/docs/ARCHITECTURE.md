@@ -185,7 +185,7 @@ O resultado é serializado em `areas_data.json` (~7 MB), contendo metadados glob
 | **Tailwind CSS** | v4 | Estilização utilitária + variáveis CSS customizadas (tema escuro) |
 | **MapLibre GL** | latest | Mapa interativo com 6 camadas de dados |
 | **Recharts** | latest | Gráficos radar, barras e distribuições |
-| **Vitest** | latest | 19 testes unitários |
+| **Vitest** | latest | 93 testes unitários (7 suites) |
 
 ### Inteligência Artificial
 
@@ -364,6 +364,9 @@ O relatório `.docx` gerado pela plataforma pré-popula as 4 perguntas norteador
 |---|---|---|---|
 | `/api/synthesize` | POST | Síntese de dinâmica criminal via Claude | `ANTHROPIC_API_KEY` |
 | `/api/report` | POST | Geração de relatório `.docx` | Python 3.10+ + `python-docx` |
+| `/api/agent` | POST | Agente investigativo SSE (tool use loop) | `ANTHROPIC_API_KEY` |
+| `/api/censo` | GET | Censo 2022 (IBGE) GeoJSON (choropleth) / dados por bairro | — |
+| `/api/relint` | POST | Geração de relatório RELINT `.docx` | `ANTHROPIC_API_KEY` |
 
 Documentação completa com exemplos cURL: **[API_REFERENCE.md](API_REFERENCE.md)**
 
@@ -381,12 +384,17 @@ Documentação completa com exemplos cURL: **[API_REFERENCE.md](API_REFERENCE.md
 | `test_bingo.py` | 5 | Coincidência 2/3 e 3/3, contadores por área |
 | `test_camera_gaps.py` | 4 | Pontos cegos, recomendações instalar/remanejar |
 
-### Frontend — Vitest (19 testes)
+### Frontend — Vitest (93 testes)
 
 | Módulo | Testes | Escopo |
 |---|---|---|
-| `scoring.test.ts` | 4 | `computeScore` com pesos default, zero, customizados, bônus RELINT |
+| `agentRoute.test.ts` | 29 | `/api/agent` route, tool loop config, query tool execution, tool inventory |
+| `useMapAgent.test.ts` | 26 | `executeMapTool` map-side tool handlers |
 | `helpers.test.ts` | 15 | `fmt`, `scoreColor`, `faccaoColor`, `shortName`, `cap`, labels |
+| `censoData.test.ts` | 10 | Censo 2022 loader, normalização, região, proximidade |
+| `ontologyEvents.test.ts` | 5 | `loadOntologyEventsForArea` caching |
+| `scoring.test.ts` | 4 | `computeScore` com pesos default, zero, customizados, bônus RELINT |
+| `routing.test.ts` | 4 | `computeRoute` roteamento por ruas IBGE |
 
 ```bash
 cd eduardo/backend && pytest tests/ -v       # Backend
@@ -405,7 +413,7 @@ eduardo/
 │   ├── CONTRIBUTING.md          ← guia de contribuição e extensão
 │   └── DATA_DICTIONARY.md      ← schema do areas_data.json
 ├── backend/
-│   ├── data_pipeline.py         # Pipeline principal (12 fontes → JSON)
+│   ├── data_pipeline.py         # Pipeline principal (12 fontes → JSON + rio_context)
 │   ├── generate_report.py       # Gerador de relatório .docx (formato CompStat)
 │   ├── requirements.txt         # pandas, geopandas, python-docx, pytest
 │   ├── areas_data.json          # Output do pipeline (~7 MB)
@@ -419,16 +427,22 @@ eduardo/
 └── frontend/
     ├── app/
     │   ├── page.tsx             # Dashboard principal (orquestrador)
-    │   ├── types.ts             # Interfaces TypeScript centralizadas
+    │   ├── types.ts             # Interfaces TypeScript (Area, RioContext, etc.)
     │   ├── globals.css          # Tema escuro com variáveis CSS
     │   ├── lib/
     │   │   ├── helpers.ts       # Formatação, cores, labels
-    │   │   └── allocation.ts    # Modelo de alocação de 600 agentes FM
+    │   │   ├── allocation.ts    # Modelo de alocação de 600 agentes FM
+    │   │   ├── censoData.ts     # Censo 2022 (IBGE) server-side loader
+    │   │   ├── routing.ts       # Roteamento por ruas (grafo IBGE)
+    │   │   └── ontologyEvents.ts # Eventos NER / ontologia
+    │   ├── hooks/
+    │   │   └── useMapAgent.ts   # Hook do agente investigativo (tool handlers)
     │   ├── components/
     │   │   ├── TopHeader.tsx    # KPIs globais
     │   │   ├── Sidebar.tsx      # Ranking + sliders de peso
-    │   │   ├── MapView.tsx      # MapLibre + 6 camadas (~1000 linhas)
-    │   │   ├── AreaPanel.tsx    # Painel com 6 tabs
+    │   │   ├── MapView.tsx      # MapLibre + 14 camadas + choropleth + Rio Inteiro
+    │   │   ├── AreaPanel.tsx    # Painel com 5 tabs + card de Censo
+    │   │   ├── AgentPanel.tsx   # Chat do agente investigativo (SSE)
     │   │   ├── RiskSignals.tsx  # 8 regras de detecção de risco
     │   │   └── tabs/
     │   │       ├── EscalaTab.tsx
@@ -439,11 +453,17 @@ eduardo/
     │   │       ├── RelatorioTab.tsx
     │   │       └── ComparativoPage.tsx
     │   └── api/
-    │       ├── synthesize/route.ts  # Claude API
-    │       └── report/route.ts      # Python .docx subprocess
+    │       ├── agent/route.ts       # Agente investigativo SSE (~40 tools)
+    │       ├── censo/route.ts       # Censo 2022 GeoJSON / dados por bairro
+    │       ├── route/route.ts       # Roteamento por ruas (grafo IBGE)
+    │       ├── score/route.ts       # Ontology score + alocação
+    │       ├── relint/route.ts      # Geração RELINT .docx
+    │       ├── synthesize/route.ts  # Claude API — síntese
+    │       └── report/route.ts      # Relatório .docx
     ├── public/
-    │   └── areas_data.json      # Dados servidos estaticamente
-    └── __tests__/               # 19 testes Vitest
+    │   ├── areas_data.json      # Dados por área FM (~7 MB)
+    │   └── rio_context.json     # Camadas Rio inteiro (~10 MB, lazy-loaded)
+    └── __tests__/               # 93 testes Vitest (7 suites)
 ```
 
 ---

@@ -231,6 +231,11 @@ A plataforma cruza as duas perspectivas do mesmo problema:
 cd eduardo/backend
 python data_pipeline.py --data-dir ../data --output areas_data.json
 cp areas_data.json ../frontend/public/areas_data.json
+
+# (Opcional) Gerar rio_context.json — camadas city-wide + anéis de entorno
+python data_pipeline.py --data-dir ../data --output areas_data.json --with-rio-context
+# Produz rio_context.json (~10 MB): 115k crimes, 17.8k DD, 1.260 domínios, anéis 500m
+# O frontend carrega rio_context.json lazily quando o operador ativa "Rio Inteiro".
 ```
 
 ```python

@@ -262,7 +262,50 @@ export interface AreasData {
 
 // ─── Agent types ─────────────────────────────────────────────────────────────
 
-export type AgentLayerKey = 'crime' | 'fatores' | 'cameras' | 'psr' | 'dominio' | 'gaps' | 'chamados' | 'bairros'
+export type AgentLayerKey = 'crime' | 'fatores' | 'cameras' | 'psr' | 'dominio' | 'gaps' | 'chamados' | 'bairros' | 'censo'
+
+// ─── Rio Context (city-wide additive artifact) ──────────────────────────────
+
+export interface RioContextMeta {
+  generated_at: string
+  buffer_m: number
+  crime_total: number
+  crime_total_disponivel: number
+  dd_total: number
+  dominio_total: number
+  isp_period: string | null
+  isp_aisp_count: number
+}
+
+export interface RioRing {
+  fid: number
+  nome: string
+  crimes_in_ring: number
+  dd_in_ring: number
+  geometry: GeoJSON.Geometry
+}
+
+export interface RioCrimePoint {
+  lat: number
+  lng: number
+  tipo: string
+  h: number | null
+}
+
+export interface RioDDPoint {
+  lat: number
+  lng: number
+  tipo: string
+}
+
+export interface RioContext {
+  meta: RioContextMeta
+  rings: RioRing[]
+  crime_points: RioCrimePoint[]
+  dd_points: RioDDPoint[]
+  dominio: GeoJSON.FeatureCollection
+  aisp_violence: Record<string, Record<string, number>>
+}
 
 export interface AgentFindings {
   summary: string

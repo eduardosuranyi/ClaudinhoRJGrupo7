@@ -9,9 +9,11 @@ Output: areas_data.json (consumido por frontend e gerador de relatório)
 import argparse
 import json
 import re
+import shutil
 import unicodedata
 import warnings
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 import geopandas as gpd
@@ -1284,6 +1286,154 @@ def build_areas_data(data_dir: Path) -> dict:
     return {"areas": areas_raw, "meta": meta}
 
 
+# ───────────────────────────────────────────────────────────────────────────
+# 7. RIO CONTEXT (ADDITIVE) — city-wide layers + adjacency rings
+# ───────────────────────────────────────────────────────────────────────────
+# This block produces a SEPARATE artifact (rio_context.json). It never touches
+# areas_data.json. The frontend loads it lazily, only when the operator switches
+# to "Rio inteiro" mode or enables an entorno layer — so if this file is absent
+# the app behaves exactly as before.
+
+def load_isp_series(data_dir: Path) -> pd.DataFrame:
+    """ISP historical series (broad violence spectrum, aggregated by CISP/AISP).
+
+    No point coordinates — can only be attached at AISP-district granularity.
+    """
+    path = data_dir / "external" / "isp_rj_crimes_rio.csv"
+    if not path.is_file():
+        return pd.DataFrame()
+    return pd.read_csv(path, low_memory=False)
+
+
+def build_rio_context(data_dir: Path, buffer_m: float = 500.0,
+                      max_crime_points: int | None = None) -> dict:
+    """Build the additive city-wide context artifact.
+
+    Contents:
+      - rings: <buffer_m> ring around each FM polygon (surroundings only — the
+        union of all FM polygons is subtracted, so rings never overlap an area)
+      - crime_points / dd_points: ALL geolocated city-wide points (compact)
+      - dominio: city-wide OrCrim polygons (simplified)
+      - aisp_violence: ISP broad-violence series aggregated by AISP (data only —
+        no choropleth geometry available in the repo)
+    """
+    from shapely.ops import unary_union
+    from shapely.geometry import mapping
+
+    polys = load_polygons(data_dir)
+    oc = load_ocorrencias(data_dir)
+    dd = load_dd_all_geo(data_dir)
+    dominio = load_dominio(data_dir)
+    isp = load_isp_series(data_dir)
+
+    print(f"  Rio context — ocorrências: {len(oc):,} | DD geo: {len(dd):,} | "
+          f"domínio: {len(dominio):,} | ISP rows: {len(isp):,}")
+
+    # ── Adjacency rings: buffer in a metric CRS, subtract ALL FM polygons ──
+    polys_m = polys.to_crs(31983)  # SIRGAS 2000 / UTM 23S — meters
+    fm_union_m = unary_union(list(polys_m.geometry))
+    rings_m = [r.geometry.buffer(buffer_m).difference(fm_union_m)
+               for _, r in polys_m.iterrows()]
+    rings_gdf = gpd.GeoDataFrame(
+        {"fid": polys["fid"].values, "nome": polys["nome_area"].values},
+        geometry=rings_m, crs=31983,
+    ).to_crs(4326)
+
+    # Spillover counts: crimes / DD that fall inside each ring
+    oc_gdf = gpd.GeoDataFrame(oc, geometry=gpd.points_from_xy(oc.longitude, oc.latitude), crs=4326)
+    dd_gdf = gpd.GeoDataFrame(dd, geometry=gpd.points_from_xy(dd.longitude, dd.latitude), crs=4326)
+    oc_ring = gpd.sjoin(oc_gdf, rings_gdf[["fid", "geometry"]], how="inner", predicate="within")
+    dd_ring = gpd.sjoin(dd_gdf, rings_gdf[["fid", "geometry"]], how="inner", predicate="within")
+    oc_ring_counts = oc_ring.groupby("fid").size().to_dict()
+    dd_ring_counts = dd_ring.groupby("fid").size().to_dict()
+
+    rings_out = []
+    for _, r in rings_gdf.iterrows():
+        if r.geometry is None or r.geometry.is_empty:
+            continue
+        rings_out.append({
+            "fid": int(r["fid"]),
+            "nome": r["nome"],
+            "crimes_in_ring": int(oc_ring_counts.get(r["fid"], 0)),
+            "dd_in_ring": int(dd_ring_counts.get(r["fid"], 0)),
+            "geometry": mapping(r.geometry),
+        })
+
+    # ── City-wide crime points (ALL by default, compact + rounded) ──
+    oc_pts = oc
+    if max_crime_points and len(oc_pts) > max_crime_points:
+        oc_pts = oc_pts.sample(n=max_crime_points, random_state=42)
+    crime_points = [
+        {"lat": round(float(la), 5), "lng": round(float(lo), 5),
+         "tipo": str(t), "h": int(h) if pd.notna(h) else None}
+        for la, lo, t, h in zip(oc_pts["latitude"], oc_pts["longitude"],
+                                oc_pts["desc_delito"], oc_pts["hora_num"])
+    ]
+
+    # ── City-wide Disque Denúncia points ──
+    dd_tipos = dd["tipo"] if "tipo" in dd.columns else pd.Series([""] * len(dd), index=dd.index)
+    dd_points = [
+        {"lat": round(float(la), 5), "lng": round(float(lo), 5), "tipo": str(t)}
+        for la, lo, t in zip(dd["latitude"], dd["longitude"], dd_tipos)
+    ]
+
+    # ── City-wide OrCrim domination polygons (simplified) ──
+    dom_feats = []
+    for _, r in dominio.iterrows():
+        g = r.geometry
+        if g is None or g.is_empty:
+            continue
+        gs = g.simplify(0.0002, preserve_topology=True)
+        fac = str(r.get("dominio_orcrim") or r.get("faccao") or "—")
+        dom_feats.append({
+            "type": "Feature",
+            "properties": {"faccao": fac, "nome": str(r.get("nome_territorio") or "")},
+            "geometry": mapping(gs),
+        })
+    dominio_fc = {"type": "FeatureCollection", "features": dom_feats}
+
+    # ── ISP broad-violence series aggregated by AISP (no geometry) ──
+    aisp_violence: dict = {}
+    isp_period = None
+    if not isp.empty and "aisp" in isp.columns and "ano" in isp.columns:
+        years = sorted(int(y) for y in isp["ano"].dropna().unique())
+        recent = years[-3:] if len(years) >= 3 else years
+        sub = isp[isp["ano"].isin(recent)]
+        isp_period = f"{min(recent)}-{max(recent)}" if recent else None
+        cols = ["hom_doloso", "letalidade_violenta", "total_roubos", "roubo_transeunte",
+                "roubo_celular", "roubo_em_coletivo", "trafico_drogas", "total_furtos"]
+        present = [c for c in cols if c in sub.columns]
+        for aisp_val, grp in sub.groupby("aisp"):
+            try:
+                key = str(int(aisp_val))
+            except (ValueError, TypeError):
+                continue
+            aisp_violence[key] = {
+                c: int(pd.to_numeric(grp[c], errors="coerce").fillna(0).sum()) for c in present
+            }
+
+    return {
+        "meta": {
+            "generated_at": datetime.now().strftime("%Y-%m-%d"),
+            "buffer_m": buffer_m,
+            "crime_total": len(crime_points),
+            "crime_total_disponivel": int(len(oc)),
+            "dd_total": len(dd_points),
+            "dominio_total": len(dom_feats),
+            "isp_period": isp_period,
+            "isp_aisp_count": len(aisp_violence),
+            "note_isp": ("Série ISP agregada por AISP (homicídio, letalidade, tráfico). "
+                         "Sem coordenadas — não há choropleth por AISP sem os polígonos "
+                         "de AISP, que não estão no repositório."),
+        },
+        "rings": rings_out,
+        "crime_points": crime_points,
+        "dd_points": dd_points,
+        "dominio": dominio_fc,
+        "aisp_violence": aisp_violence,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1292,6 +1442,17 @@ def main():
         help="Pasta de dados: (1) repositório com data/clean/*.parquet ou (2) pacote legacy compstat/",
     )
     parser.add_argument("--output", default="areas_data.json")
+    parser.add_argument(
+        "--with-rio-context", action="store_true",
+        help="Gera ADICIONALMENTE rio_context.json (camadas Rio-inteiro + anéis de entorno). "
+             "Não altera areas_data.json.",
+    )
+    parser.add_argument("--ring-buffer-m", type=float, default=500.0,
+                        help="Raio do anel de entorno em metros (padrão 500).")
+    parser.add_argument("--rio-max-points", type=int, default=0,
+                        help="Limite de pontos de crime no rio_context (0 = todos).")
+    parser.add_argument("--rio-output", default="rio_context.json",
+                        help="Caminho do artefato de contexto Rio.")
     args = parser.parse_args()
 
     data_dir = Path(args.data_dir).resolve()
@@ -1300,6 +1461,25 @@ def main():
     with open(out, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     print(f"\nJSON: {out} ({out.stat().st_size // 1024} KB)")
+
+    if args.with_rio_context:
+        print("\nGerando rio_context.json (camadas adicionais — Rio inteiro + entorno)...")
+        ctx = build_rio_context(
+            data_dir,
+            buffer_m=args.ring_buffer_m,
+            max_crime_points=(args.rio_max_points or None),
+        )
+        rio_out = Path(args.rio_output)
+        with open(rio_out, "w", encoding="utf-8") as f:
+            json.dump(ctx, f, ensure_ascii=False, separators=(",", ":"))
+        print(f"Rio context: {rio_out} ({rio_out.stat().st_size // 1024} KB) — "
+              f"{ctx['meta']['crime_total']:,} crimes, {ctx['meta']['dd_total']:,} DD, "
+              f"{ctx['meta']['dominio_total']:,} domínios, {len(ctx['rings'])} anéis")
+        # Mirror into the frontend public/ dir if it exists (matches areas_data.json convention)
+        pub = Path("../frontend/public")
+        if pub.is_dir():
+            shutil.copy(rio_out, pub / "rio_context.json")
+            print(f"Copiado → {pub / 'rio_context.json'}")
 
 
 if __name__ == "__main__":

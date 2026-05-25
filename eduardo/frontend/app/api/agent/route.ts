@@ -7,6 +7,14 @@ import { buildAreaBrief, buildGlobalBrief } from '../../lib/areaBrief'
 import { loadOntologyEventsForArea } from '../../lib/ontologyEvents'
 import { loadAllAreas } from '../../lib/areasData'
 import { computeRoute } from '../../lib/routing'
+import {
+  getCensoBairro,
+  getCensoBairros,
+  getRegiaoAggregate,
+  getBairrosProximos,
+  getCidadeBaseline,
+  FONTE_CENSO,
+} from '../../lib/censoData'
 
 const SYSTEM_PROMPT = `Você é um analista investigativo de segurança pública municipal do Rio guiando outro analista pelo mapa CompStat. Você fala devagar, em ETAPAS curtas, mostrando uma coisa de cada vez.
 
@@ -74,9 +82,28 @@ Só chame complete_investigation quando o analista pedir explicitamente para enc
 - PSR → SMAS (assistência social), NUNCA repressão policial.
 - RELINT e domínio territorial são CLASSIFICADOS — cite conclusões, não reproduza literalmente.
 
+═══ FONTES (SEMPRE cite a origem do dado) ═══
+
+Toda afirmação baseada em dado DEVE citar a fonte inline, entre parênteses, logo após o número/fato. Ex.: "Centro perdeu 20% da população entre 2010 e 2022 (Censo 2022, IBGE)". Nunca apresente um número sem dizer de onde veio. Muitas tools retornam um campo "fonte"/"periodo" — use exatamente esse rótulo.
+
+Rótulos canônicos por base:
+- Crimes/ocorrências → ISP-RJ (2020–2024)
+- Disque Denúncia → Disque Denúncia (denúncia anônima)
+- Chamados 1746 → Central 1746 / Prefeitura do Rio
+- Fatores urbanos → levantamento de campo
+- Câmeras → CIVITAS/COR
+- População, domicílios, densidade, variação demográfica → Censo 2022 (IBGE)
+- Limites de bairro / região administrativa → IBGE
+- População em situação de rua → Censo PSR
+- RELINT / domínio territorial → RELINT (classificado)
+
+Ao cruzar bases para gerar insight (ex.: crimes por 1.000 hab, densidade × roubos, variação populacional × denúncias), cite TODAS as fontes envolvidas.
+
 ═══ TOOLS ═══
 
-Query (puxam dados): query_trechos, query_relatos_dd, query_chamados_1746, query_fatores, query_camera_gaps, validacao_cruzada, get_relint_section, evolucao_mensal, bairros_entorno, crimes_por_hora, ontology_events, previsao_risco, correlacao_fatores_crime, query_ocorrencias_recentes.
+Query (puxam dados): query_trechos, query_relatos_dd, query_chamados_1746, query_fatores, query_camera_gaps, validacao_cruzada, get_relint_section, evolucao_mensal, bairros_entorno, censo_bairro, censo_regiao, bairros_proximos, crimes_por_hora, ontology_events, previsao_risco, correlacao_fatores_crime, query_ocorrencias_recentes.
+
+Censo/demografia: censo_bairro (Censo 2022 por bairro: pop 2010/2022, variação, domicílios, densidade), censo_regiao (agrega/compara pela região administrativa), bairros_proximos (bairros vizinhos por raio de centróide com demografia). Cruze com crimes/denúncias para insights por bairro — e SEMPRE cite (Censo 2022, IBGE).
 
 Mapa (visualizam): toggle_layer, zoom_to_area, zoom_to_point, adjust_zoom, zoom_overview, show_annotation, highlight_trecho, highlight_top_trechos, clear_highlights, focus_bairro, set_time_filter, show_route, update_weights, add_radius_circle, compare_trechos, show_heatmap_custom, animate_timeline, cluster_crimes, play_route_animation, pulse_location.
 
@@ -274,6 +301,54 @@ export function qCrimesPorHora(area: Area) {
     pct_noturno: area.stats.pct_noturno,
     por_hora: area.stats.hora_distribution,
     por_dia_semana: area.stats.dia_distribution,
+  }
+}
+
+// ── Censo 2022 (IBGE) — demografia por bairro / região / proximidade ──────────
+// Cada retorno traz `fonte` para que o agente cite a origem do dado.
+function areaBairroNames(area: Area): string[] {
+  return (area.bairros_entorno ?? []).map(b => b.nome)
+}
+
+export function qCensoBairro(area: Area, { bairro }: { bairro?: string }) {
+  const nomes = bairro ? [bairro] : areaBairroNames(area)
+  const bairros = getCensoBairros(nomes)
+  return {
+    fonte: FONTE_CENSO,
+    periodo: '2010–2022',
+    disponivel: bairros.length > 0,
+    bairros,
+    comparacao_cidade: getCidadeBaseline(),
+  }
+}
+
+export function qCensoRegiao(area: Area, { regiao }: { regiao?: string }) {
+  let reg = regiao
+  if (!reg) {
+    const first = areaBairroNames(area)[0]
+    reg = (first ? getCensoBairro(first)?.regiao_adm : undefined) ?? undefined
+  }
+  const agg = reg ? getRegiaoAggregate(reg) : null
+  return {
+    fonte: FONTE_CENSO,
+    periodo: '2010–2022',
+    disponivel: !!agg,
+    regiao: agg,
+    comparacao_cidade: getCidadeBaseline(),
+  }
+}
+
+export function qBairrosProximos(area: Area, { bairro, raio_km }: { bairro?: string; raio_km?: number }) {
+  const nome = bairro ?? areaBairroNames(area)[0]
+  const raio = typeof raio_km === 'number' ? raio_km : 3
+  const prox = nome ? getBairrosProximos(nome, raio) : null
+  return {
+    fonte: FONTE_CENSO,
+    periodo: '2022',
+    disponivel: !!prox && prox.length > 0,
+    origem: nome ?? null,
+    raio_km: raio,
+    bairros: prox ?? [],
   }
 }
 
@@ -826,6 +901,40 @@ function buildQueryTools(opts: { area?: Area; areas?: Area[] }) {
       execute: async (args) => {
         const area = resolve(args)
         return isErr(area) ? area : qBairrosEntorno(area)
+      },
+    }),
+
+    censo_bairro: tool({
+      description: 'Demografia do Censo 2022 (IBGE) dos bairros da área (ou de um bairro específico): população 2010/2022, variação %, domicílios, pessoas por domicílio, densidade hab/km². Retorna campo "fonte" — SEMPRE cite. ' + COMMON_DESC,
+      inputSchema: withId({
+        bairro: z.string().optional().describe('Nome do bairro; se omitido, usa os bairros da área'),
+      }),
+      execute: async (args) => {
+        const area = resolve(args)
+        return isErr(area) ? area : qCensoBairro(area, args)
+      },
+    }),
+
+    censo_regiao: tool({
+      description: 'Agrega o Censo 2022 (IBGE) pela região administrativa do bairro (ou de uma região informada): população total, variação, densidade média e ranking dos bairros da região. Use para comparar o bairro com a média da sua região. Retorna "fonte".',
+      inputSchema: withId({
+        regiao: z.string().optional().describe('Região administrativa (ex.: "Copacabana", "Centro"); se omitida, deriva do 1º bairro da área'),
+      }),
+      execute: async (args) => {
+        const area = resolve(args)
+        return isErr(area) ? area : qCensoRegiao(area, args)
+      },
+    }),
+
+    bairros_proximos: tool({
+      description: 'Bairros vizinhos (por distância de centróide, dentro de um raio) ao bairro em foco, com demografia do Censo 2022 (IBGE) — útil para contexto de proximidade mesmo fora da área FM. Retorna "fonte".',
+      inputSchema: withId({
+        bairro: z.string().optional().describe('Bairro de origem; se omitido, usa o 1º bairro da área'),
+        raio_km: z.number().min(0.5).max(15).optional().describe('Raio em km (default 3)'),
+      }),
+      execute: async (args) => {
+        const area = resolve(args)
+        return isErr(area) ? area : qBairrosProximos(area, args)
       },
     }),
 

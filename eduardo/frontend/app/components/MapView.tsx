@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import type { Map as MaplibreMap, Popup, Marker, GeoJSONSource } from 'maplibre-gl'
-import type { Area, AreasData, MapControl, AgentLayerKey, InspectedPoint } from '../types'
+import type { Area, AreasData, MapControl, AgentLayerKey, InspectedPoint, RioContext } from '../types'
 import { scoreColor } from '../lib/helpers'
 
 interface Props {
@@ -26,6 +26,11 @@ interface LayerVisibility {
   dominio: boolean
   gaps: boolean
   bairros: boolean
+  censo: boolean
+  rioRings: boolean
+  rioCrime: boolean
+  rioDD: boolean
+  rioDominio: boolean
 }
 
 // Hour-window presets for the user-facing time filter
@@ -73,8 +78,12 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   const [layerPanelOpen, setLayerPanelOpen] = useState(false)
   const [layers, setLayers] = useState<LayerVisibility>({
     crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true,
+    censo: false, rioRings: false, rioCrime: false, rioDD: false, rioDominio: false,
   })
-  const layersRef = useRef<LayerVisibility>({ crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true })
+  const layersRef = useRef<LayerVisibility>({
+    crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true,
+    censo: false, rioRings: false, rioCrime: false, rioDD: false, rioDominio: false,
+  })
 
   const agentHighlightFeatures = useRef<any[]>([])
   // Accumulated agent features per source — tracked in refs instead of reading the
@@ -82,6 +91,13 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   // replace the previous one.
   const agentRadiusFeatures = useRef<any[]>([])
   const agentRouteFeatures = useRef<any[]>([])
+
+  // Lazy-loaded census choropleth GeoJSON (fetched on first toggle)
+  const censoLoaded = useRef(false)
+  const [censoCount, setCensoCount] = useState(0)
+  // Lazy-loaded Rio context (city-wide layers, fetched on first toggle)
+  const rioLoaded = useRef(false)
+  const [rioCtx, setRioCtx] = useState<RioContext | null>(null)
 
   // Active crime time filter (hour window) — shared by the agent and the user control + on-map badge
   const [timeFilter, setTimeFilter] = useState<{ start: number | null; end: number | null }>({ start: null, end: null })
@@ -607,6 +623,113 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         'text-halo-color': 'rgba(7,7,10,0.85)',
         'text-halo-width': 1.5,
       },
+    })
+
+    // ── Censo 2022 choropleth (lazy-loaded GeoJSON, initially empty) ──
+    map.addSource('censo', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'censo-fill',
+      type: 'fill',
+      source: 'censo',
+      paint: {
+        'fill-color': ['interpolate', ['linear'], ['get', 'densidade_hab_km2'],
+          0, '#eff6ff', 3000, '#93c5fd', 10000, '#3b82f6', 25000, '#1e40af', 50000, '#1e3a5f'],
+        'fill-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.45, 14, 0.25],
+      },
+      layout: { visibility: 'none' },
+    })
+    map.addLayer({
+      id: 'censo-stroke',
+      type: 'line',
+      source: 'censo',
+      paint: {
+        'line-color': '#60a5fa',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.3, 15, 1],
+        'line-opacity': 0.5,
+      },
+      layout: { visibility: 'none' },
+    })
+
+    // ── Rio context layers (lazy-loaded, initially empty) ──
+    map.addSource('rio-rings', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'rio-rings-fill',
+      type: 'fill',
+      source: 'rio-rings',
+      paint: {
+        'fill-color': '#a5f3fc',
+        'fill-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.08, 14, 0.04],
+      },
+      layout: { visibility: 'none' },
+    })
+    map.addLayer({
+      id: 'rio-rings-stroke',
+      type: 'line',
+      source: 'rio-rings',
+      paint: {
+        'line-color': '#22d3ee',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.6, 15, 1.5],
+        'line-opacity': 0.4,
+        'line-dasharray': [4, 3],
+      },
+      layout: { visibility: 'none' },
+    })
+
+    map.addSource('rio-crime', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'rio-crime-heat',
+      type: 'heatmap',
+      source: 'rio-crime',
+      paint: {
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 8, 0.15, 11, 0.4, 13, 1],
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 8, 8, 11, 14, 14, 22],
+        'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0.7, 15, 0],
+        'heatmap-color': [
+          'interpolate', ['linear'], ['heatmap-density'],
+          0, 'rgba(0,0,0,0)', 0.15, 'rgba(255,107,53,0.3)', 0.4, 'rgba(255,107,53,0.55)',
+          0.7, '#fbb040', 1, '#ef4444',
+        ],
+      },
+      layout: { visibility: 'none' },
+    })
+
+    map.addSource('rio-dd', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'rio-dd-dot',
+      type: 'circle',
+      source: 'rio-dd',
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 14, 4],
+        'circle-color': '#f59e0b',
+        'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.3, 14, 0.6],
+        'circle-blur': 0.3,
+      },
+      layout: { visibility: 'none' },
+    })
+
+    map.addSource('rio-dominio', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'rio-dominio-fill',
+      type: 'fill',
+      source: 'rio-dominio',
+      paint: {
+        'fill-color': ['match', ['get', 'faccao'],
+          'CV', '#ef4444', 'TCP', '#a855f7', 'ADA', '#4a90e2', 'Milícia', '#fbb040', '#888'],
+        'fill-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.08, 14, 0.04],
+      },
+      layout: { visibility: 'none' },
+    })
+    map.addLayer({
+      id: 'rio-dominio-stroke',
+      type: 'line',
+      source: 'rio-dominio',
+      paint: {
+        'line-color': ['match', ['get', 'faccao'],
+          'CV', '#ef4444', 'TCP', '#a855f7', 'ADA', '#4a90e2', 'Milícia', '#fbb040', '#888'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.4, 15, 1.2],
+        'line-opacity': 0.5,
+      },
+      layout: { visibility: 'none' },
     })
 
     // ── Top trechos — line segments from gazetteer (clipped to FM area) ──
@@ -1145,6 +1268,31 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       popupRef.current?.remove()
     })
 
+    // Hover on censo choropleth
+    map.on('mouseenter', 'censo-fill', (e: any) => {
+      if (map.getCanvas().style.cursor === 'pointer') return
+      const p = e.features[0].properties
+      const pop = Number(p.pop_2022 || 0)
+      const variacao = Number(p.variacao_pct || 0)
+      const dens = Number(p.densidade_hab_km2 || 0)
+      const varSign = variacao >= 0 ? '+' : ''
+      const varColor = variacao < 0 ? '#ef4444' : '#36c476'
+      popupRef.current
+        ?.setLngLat(e.lngLat)
+        .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:180px">
+          <div style="font-size:10px;color:#60a5fa;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Censo 2022 (IBGE)</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px">${p.nome}</div>
+          <div style="display:flex;gap:14px;font-size:11px">
+            <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Pop. 2022</div><div style="font-weight:500;font-variant-numeric:tabular-nums">${pop > 0 ? pop.toLocaleString('pt-BR') : '—'}</div></div>
+            <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Variação</div><div style="font-weight:500;color:${varColor};font-variant-numeric:tabular-nums">${varSign}${variacao.toFixed(1)}%</div></div>
+            <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Densidade</div><div style="font-weight:500;font-variant-numeric:tabular-nums">${dens > 0 ? dens.toLocaleString('pt-BR') : '—'}/km²</div></div>
+          </div>
+        </div>`)
+        .addTo(map)
+    })
+    map.on('mousemove', 'censo-fill', (e: any) => { popupRef.current?.setLngLat(e.lngLat) })
+    map.on('mouseleave', 'censo-fill', () => { popupRef.current?.remove() })
+
     // Hover on trecho markers
     map.on('mouseenter', 'trechos-circle', (e: any) => {
       map.getCanvas().style.cursor = 'pointer'
@@ -1428,7 +1576,63 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     dominio:  ['dominio-fill', 'dominio-stroke'],
     gaps:     ['gaps-dot'],
     bairros:  ['bairros-fill', 'bairros-stroke', 'bairros-label'],
+    censo:    ['censo-fill', 'censo-stroke'],
+    rioRings: ['rio-rings-fill', 'rio-rings-stroke'],
+    rioCrime: ['rio-crime-heat'],
+    rioDD:    ['rio-dd-dot'],
+    rioDominio: ['rio-dominio-fill', 'rio-dominio-stroke'],
   }
+
+  // Lazy-load censo GeoJSON when toggled on for the first time
+  useEffect(() => {
+    if (!layers.censo || censoLoaded.current || !mapReady) return
+    censoLoaded.current = true
+    fetch('/api/censo')
+      .then(r => r.ok ? r.json() : null)
+      .then(fc => {
+        if (!fc?.features) return
+        setCensoCount(fc.features.length)
+        ;(mapInst.current?.getSource('censo') as GeoJSONSource | undefined)?.setData(fc)
+      })
+      .catch(() => {})
+  }, [layers.censo, mapReady])
+
+  // Lazy-load rio_context.json when any Rio layer is toggled on
+  useEffect(() => {
+    const anyRio = layers.rioRings || layers.rioCrime || layers.rioDD || layers.rioDominio
+    if (!anyRio || rioLoaded.current || !mapReady) return
+    rioLoaded.current = true
+    fetch('/rio_context.json')
+      .then(r => r.ok ? r.json() : null)
+      .then((ctx: RioContext | null) => {
+        if (!ctx) return
+        setRioCtx(ctx)
+        const map = mapInst.current
+        if (!map) return
+        // Rings
+        const ringFeatures = ctx.rings
+          .filter(r => r.geometry)
+          .map(r => ({ type: 'Feature' as const, geometry: r.geometry, properties: { nome: r.nome, crimes: r.crimes_in_ring, dd: r.dd_in_ring } }))
+        ;(map.getSource('rio-rings') as GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: ringFeatures })
+        // Crime points
+        const crimeFeatures = ctx.crime_points.map(p => ({
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
+          properties: { tipo: p.tipo, h: p.h },
+        }))
+        ;(map.getSource('rio-crime') as GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: crimeFeatures })
+        // DD points
+        const ddFeatures = ctx.dd_points.map(p => ({
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
+          properties: { tipo: p.tipo },
+        }))
+        ;(map.getSource('rio-dd') as GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: ddFeatures })
+        // Domínio
+        ;(map.getSource('rio-dominio') as GeoJSONSource | undefined)?.setData(ctx.dominio)
+      })
+      .catch(() => {})
+  }, [layers.rioRings, layers.rioCrime, layers.rioDD, layers.rioDominio, mapReady])
 
   function setLayerVisible(key: keyof LayerVisibility, visible: boolean) {
     setLayers(prev => {
@@ -2032,6 +2236,26 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
               </div>
             )}
             {selected && <LayerBtn label="Bairros Entorno" color="#38bdf8" active={layers.bairros} n={totalBairros} onClick={() => toggleLayer('bairros')} shape="square" />}
+            <LayerBtn label="Censo (Densidade)" color="#3b82f6" active={layers.censo} n={censoCount || '…'} onClick={() => toggleLayer('censo')} shape="square" />
+            {layers.censo && (
+              <div style={{ paddingLeft: 17, marginBottom: 4, display: 'flex', gap: 4, alignItems: 'center' }}>
+                {([['#eff6ff','< 3k'], ['#93c5fd','3–10k'], ['#3b82f6','10–25k'], ['#1e40af','25k+']] as const).map(([c, label]) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <div style={{ width: 8, height: 8, background: c, border: '1px solid rgba(255,255,255,0.1)' }} />
+                    <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>{label}</span>
+                  </div>
+                ))}
+                <span style={{ fontSize: 9, color: 'var(--text-muted)', marginLeft: 2 }}>hab/km²</span>
+              </div>
+            )}
+
+            <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(42,42,53,0.7)' }}>
+              <div className="label-overline" style={{ marginBottom: 5 }}>Rio Inteiro</div>
+              <LayerBtn label="Anéis de Entorno" color="#22d3ee" active={layers.rioRings} n={rioCtx?.rings.length ?? '—'} onClick={() => toggleLayer('rioRings')} shape="square" />
+              <LayerBtn label="Crimes (Rio)" color="#ff6b35" active={layers.rioCrime} n={rioCtx?.meta.crime_total ?? '—'} onClick={() => toggleLayer('rioCrime')} shape="circle" />
+              <LayerBtn label="Denúncias DD (Rio)" color="#f59e0b" active={layers.rioDD} n={rioCtx?.meta.dd_total ?? '—'} onClick={() => toggleLayer('rioDD')} shape="circle" />
+              <LayerBtn label="Domínio (Rio)" color="#fbb040" active={layers.rioDominio} n={rioCtx?.meta.dominio_total ?? '—'} onClick={() => toggleLayer('rioDominio')} shape="square" />
+            </div>
 
             <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(42,42,53,0.7)' }}>
               <div className="label-overline" style={{ marginBottom: 5 }}>Legenda Facções</div>
@@ -2504,7 +2728,7 @@ function LegendIcon({ icon, color }: { icon: 'person' | 'phone' | 'bus'; color: 
 }
 
 function LayerBtn({ label, color, active, n, onClick, shape = 'square' }: {
-  label: string; color: string; active: boolean; n: number; onClick: () => void
+  label: string; color: string; active: boolean; n: number | string; onClick: () => void
   shape?: 'circle' | 'square' | 'diamond' | 'triangle' | 'camera' | 'warning'
 }) {
   let shapeEl: React.ReactNode

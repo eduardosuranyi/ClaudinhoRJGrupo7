@@ -140,7 +140,7 @@ Além das 5 fontes oficiais, integramos:
 | Fonte extra | O que trouxe |
 |---|---|
 | **Central 1746** (902k chamados via BigQuery) | Valida fatores de campo com demanda cidadã — "equipe viu poste apagado E cidadão reclama há 3 anos" |
-| **Censo 2022** (IBGE) | Normalização per capita — Pres. Vargas tem 107 crimes/1000 hab, Campo Grande tem 0,8 |
+| **Censo 2022** (IBGE) | Normalização per capita, choropleth de densidade, demografia por bairro/região para o agente (censo_bairro, censo_regiao, bairros_proximos) |
 | **Bairros data.rio** | Contexto geográfico: cada área FM fica dentro de 1-8 bairros com população e subprefeitura |
 | **Logradouros CadLog** (132k trechos) | Gazetteer para geoparsing de denúncias e resolução de trechos |
 
@@ -154,7 +154,7 @@ Não paramos no dashboard. O gestor gera o relatório `.docx` com um clique e de
 
 ### 7. Tudo determinístico e testável
 
-51 testes (32 backend + 19 frontend). Score é fórmula aberta, não caixa-preta. Alocação de efetivo é fórmula aberta. IA é usada apenas para síntese textual. O gestor pode ajustar os pesos dos componentes ao vivo e ver o ranking mudar — transparência total.
+125 testes (32 backend + 93 frontend). Score é fórmula aberta, não caixa-preta. Alocação de efetivo é fórmula aberta. IA é usada apenas para síntese textual. O gestor pode ajustar os pesos dos componentes ao vivo e ver o ranking mudar — transparência total.
 
 ---
 
@@ -176,7 +176,7 @@ Não paramos no dashboard. O gestor gera o relatório `.docx` com um clique e de
 | Desafio | Como abordamos |
 |---|---|
 | **Desafio 4 — Otimização de Câmeras** | Camera Gap Analysis com buffer 50m, classificação instalar/remanejar, camada no mapa |
-| **Desafio 2 — Migração do Crime** | Dados de bairros do entorno (20 bairros) + evolução mensal permitem detectar deslocamento |
+| **Desafio 2 — Migração do Crime** | Dados de bairros do entorno (20 bairros) + evolução mensal + anéis de entorno (500m) com crimes/DD spillover via `rio_context.json` + camadas "Rio Inteiro" (115k crimes, 17.8k DD, 1.260 domínios) |
 | **Desafio 3 — Permanência Operacional** | Série temporal de 24 meses por área para avaliar tendência |
 
 ---
@@ -189,7 +189,7 @@ Não paramos no dashboard. O gestor gera o relatório `.docx` com um clique e de
 | Frontend | Next.js 16 · TypeScript · Tailwind v4 · MapLibre GL · Recharts |
 | IA | Claude Sonnet 4.5 (síntese) · Claude Sonnet 4.6 (agente investigativo com tool use) · Claude Haiku 4.5 (geração do RELINT .docx) |
 | Relatório | docx (TypeScript) |
-| Testes | pytest (32) · Vitest (19) |
+| Testes | pytest (32) · Vitest (93) |
 
 ---
 
