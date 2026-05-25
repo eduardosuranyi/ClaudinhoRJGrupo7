@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import type { Map as MaplibreMap, Popup, Marker, GeoJSONSource } from 'maplibre-gl'
 import type { Area, AreasData, MapControl, AgentLayerKey, InspectedPoint } from '../types'
 import { scoreColor } from '../lib/helpers'
@@ -28,6 +28,20 @@ interface LayerVisibility {
   bairros: boolean
 }
 
+// Hour-window presets for the user-facing time filter
+const TIME_PRESETS: [string, number | null, number | null][] = [
+  ['Tudo', null, null],
+  ['Madrugada', 0, 6],
+  ['Manhã', 6, 12],
+  ['Tarde', 12, 18],
+  ['Noite', 18, 24],
+]
+
+// Period-of-day label for a given hour (matches TIME_PRESETS bands)
+function dayPart(h: number): string {
+  return h < 6 ? 'Madrugada' : h < 12 ? 'Manhã' : h < 18 ? 'Tarde' : 'Noite'
+}
+
 // Weighted score given current sliders
 function computeScore(area: Area, w: Props['weights']): number {
   const b = area.score.breakdown
@@ -48,6 +62,13 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   const annotationsRef = useRef<Marker[]>([])
   // Selected area mirror, so agent-control methods can look up trechos/bairros without stale closures
   const selectedRef = useRef<Area | null>(null)
+  // Manual route-picking ("Traçar rota"): the operator clicks origin then destination.
+  const routePickRef = useRef<{ active: boolean; from: [number, number] | null; onDone?: (r: any) => void }>({ active: false, from: null })
+  const routeStartMarkerRef = useRef<Marker | null>(null)
+  // Suppresses area select/deselect on the same click that drives a route pick.
+  const pickGuardRef = useRef(false)
+  const [routePickActive, setRoutePickActive] = useState(false)
+  const [routePickHint, setRoutePickHint] = useState<string | null>(null)
   const [mapReady, setMapReady] = useState(false)
   const [layerPanelOpen, setLayerPanelOpen] = useState(false)
   const [layers, setLayers] = useState<LayerVisibility>({
@@ -55,8 +76,158 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   })
   const layersRef = useRef<LayerVisibility>({ crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true })
 
+  const agentHighlightFeatures = useRef<any[]>([])
+  // Accumulated agent features per source — tracked in refs instead of reading the
+  // map source's private `_data`, which is unreliable and made each new circle/route
+  // replace the previous one.
+  const agentRadiusFeatures = useRef<any[]>([])
+  const agentRouteFeatures = useRef<any[]>([])
+
+  // Active crime time filter (hour window) — shared by the agent and the user control + on-map badge
+  const [timeFilter, setTimeFilter] = useState<{ start: number | null; end: number | null }>({ start: null, end: null })
+  // Comparison legend entries (compare_trechos)
+  const [comparison, setComparison] = useState<{ color: string; label: string; total: number }[] | null>(null)
+  // Timeline animation progress (animate_timeline)
+  const [timeline, setTimeline] = useState<{ hour: number; shown: number; total: number; done: boolean } | null>(null)
+  const timelineTimer = useRef<ReturnType<typeof setInterval> | null>(null)
+  const lastTimelineOptsRef = useRef<{ tipo?: 'transeunte' | 'celular' | 'coletivo'; stepMs?: number } | undefined>(undefined)
+  // Route animation (play_route_animation) + location pings (pulse_location)
+  const routeAnimRaf = useRef<number | null>(null)
+  const pulsesRef = useRef<Marker[]>([])
+
   const cbRef = useRef({ onToggleTrecho, onInspectPoint, onSetHighlightedTrechos })
   useEffect(() => { cbRef.current = { onToggleTrecho, onInspectPoint, onSetHighlightedTrechos } })
+
+  // Apply (or reset) the crime hour filter on the map AND mirror it into React state so the
+  // on-map badge + user control stay in sync. Shared by the agent tool and the user control.
+  const applyTimeFilter = useCallback((start: number | null, end: number | null) => {
+    const map = mapInst.current
+    const reset = start === null && end === null
+    const filter: any = reset
+      ? null
+      : [
+          'all',
+          ['!=', ['get', 'h'], null],
+          ['>=', ['to-number', ['get', 'h']], Math.max(0, start ?? 0)],
+          ['<', ['to-number', ['get', 'h']], Math.min(24, end ?? 24)],
+        ]
+    if (map) {
+      ;['crime-heat', 'crime-dot'].forEach(id => {
+        try { map.setFilter(id, filter) } catch { /* layer not ready */ }
+      })
+    }
+    setTimeFilter({ start: reset ? null : start, end: reset ? null : end })
+  }, [])
+
+  // Stop any running timeline animation and clear its layer + badge.
+  const stopTimeline = useCallback(() => {
+    if (timelineTimer.current) { clearInterval(timelineTimer.current); timelineTimer.current = null }
+    setTimeline(null)
+    const map = mapInst.current
+    ;(map?.getSource('crime-timeline') as GeoJSONSource | undefined)
+      ?.setData({ type: 'FeatureCollection', features: [] })
+  }, [])
+
+  // Run (or replay) the timeline animation. New crimes for the current hour are tagged isNew=1 so
+  // the paint can pop them; accumulated ones dim. Shared by the agent tool and the badge replay.
+  const runTimeline = useCallback((opts?: { tipo?: 'transeunte' | 'celular' | 'coletivo'; stepMs?: number }) => {
+    const map = mapInst.current
+    const sel = selectedRef.current
+    if (!map || !sel) return
+    stopTimeline()
+    lastTimelineOptsRef.current = opts
+    const src = map.getSource('crime-timeline') as GeoJSONSource | undefined
+    if (!src) return
+    const pts = sel.map_layers.crime_points.filter(p => p.h !== null && (!opts?.tipo || matchTipo(p.tipo, opts.tipo)))
+    if (pts.length === 0) { setTimeline(null); return }   // no broken empty run
+    const total = pts.length
+    const bounds = geomBounds(sel.geometry as any)
+    if (bounds) map.fitBounds(bounds, { padding: 80, maxZoom: 14, duration: 600 })
+    let hour = 0
+    const stepMs = Math.max(200, opts?.stepMs ?? 600)
+    const tick = () => {
+      const feats = pts
+        .filter(p => (p.h as number) <= hour)
+        .map(p => ({
+          type: 'Feature' as const,
+          properties: { isNew: (p.h as number) === hour ? 1 : 0 },
+          geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
+        }))
+      src.setData({ type: 'FeatureCollection', features: feats })
+      const done = hour >= 23
+      setTimeline({ hour, shown: feats.length, total, done })
+      if (done && timelineTimer.current) { clearInterval(timelineTimer.current); timelineTimer.current = null }
+      hour += 1
+    }
+    tick()
+    timelineTimer.current = setInterval(tick, stepMs)
+  }, [stopTimeline])
+
+  // Stop any running route animation and clear its layers.
+  const stopRouteAnim = useCallback(() => {
+    if (routeAnimRaf.current) { cancelAnimationFrame(routeAnimRaf.current); routeAnimRaf.current = null }
+    const map = mapInst.current
+    ;['agent-route-anim-line', 'agent-route-anim-trail', 'agent-route-anim-dot'].forEach(id => {
+      ;(map?.getSource(id) as GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: [] })
+    })
+  }, [])
+
+  // Animate a glowing dot traveling along a path, drawing a bright trail behind it.
+  // Smooth via requestAnimationFrame with ease-in-out motion.
+  const runRouteAnimation = useCallback((path: [number, number][], opts?: { durationMs?: number; color?: string; label?: string; loop?: boolean }) => {
+    const map = mapInst.current
+    if (!map || path.length < 2) return
+    stopRouteAnim()
+    const color = opts?.color ?? '#22d3ee'
+    ;(map.getSource('agent-route-anim-line') as GeoJSONSource | undefined)?.setData({
+      type: 'FeatureCollection',
+      features: [{ type: 'Feature', properties: { color, label: opts?.label ?? '' }, geometry: { type: 'LineString', coordinates: path } }],
+    })
+    const segLen: number[] = []
+    const cum = [0]
+    let totalLen = 0
+    for (let i = 1; i < path.length; i++) {
+      const d = haversineM(path[i - 1][0], path[i - 1][1], path[i][0], path[i][1])
+      segLen.push(d); totalLen += d; cum.push(totalLen)
+    }
+    const lngs = path.map(p => p[0]), lats = path.map(p => p[1])
+    map.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: 100, maxZoom: 15, duration: 600 })
+    const duration = Math.max(800, opts?.durationMs ?? 4000)
+    const dotSrc = map.getSource('agent-route-anim-dot') as GeoJSONSource | undefined
+    const trailSrc = map.getSource('agent-route-anim-trail') as GeoJSONSource | undefined
+    const ease = (x: number) => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2) // easeInOutQuad
+    let start: number | null = null
+    const frame = (ts: number) => {
+      if (start === null) start = ts
+      let raw = (ts - start) / duration
+      if (raw >= 1) { if (opts?.loop) { start = ts; raw = 0 } else raw = 1 }
+      const t = ease(Math.min(1, Math.max(0, raw)))
+      const target = t * totalLen
+      let pos: [number, number] = path[path.length - 1]
+      const traveled: [number, number][] = [path[0]]
+      for (let i = 0; i < segLen.length; i++) {
+        if (cum[i + 1] < target) { traveled.push(path[i + 1]); continue }
+        const f = segLen[i] > 0 ? (target - cum[i]) / segLen[i] : 0
+        pos = [path[i][0] + (path[i + 1][0] - path[i][0]) * f, path[i][1] + (path[i + 1][1] - path[i][1]) * f]
+        traveled.push(pos)
+        break
+      }
+      dotSrc?.setData({ type: 'FeatureCollection', features: [{ type: 'Feature', properties: { color }, geometry: { type: 'Point', coordinates: pos } }] })
+      trailSrc?.setData({ type: 'FeatureCollection', features: [{ type: 'Feature', properties: { color }, geometry: { type: 'LineString', coordinates: traveled } }] })
+      if (raw < 1 || opts?.loop) routeAnimRaf.current = requestAnimationFrame(frame)
+      else routeAnimRaf.current = null
+    }
+    routeAnimRaf.current = requestAnimationFrame(frame)
+  }, [stopRouteAnim])
+
+  // Stop animations when the selected area changes; cancel raf/interval on unmount.
+  useEffect(() => { stopTimeline(); stopRouteAnim() }, [selected, stopTimeline, stopRouteAnim])
+  useEffect(() => () => {
+    if (timelineTimer.current) clearInterval(timelineTimer.current)
+    if (routeAnimRaf.current) cancelAnimationFrame(routeAnimRaf.current)
+    pulsesRef.current.forEach(m => m.remove())
+    pulsesRef.current = []
+  }, [])
 
   // ─────────────────────────────────────────────────────────
   // 1. MAP INIT
@@ -180,15 +351,21 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       maxzoom: 15,
       paint: {
         'heatmap-weight': 1,
-        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 10, 0.6, 14, 2.5],
+        // Baixa no zoom-out p/ nao saturar tudo em branco (mancha grande "sem divisao"),
+        // sobe gradualmente conforme aproxima.
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 10, 0.25, 13, 1, 15, 2.5],
+        // Rampa com mais paradas e inicio translucido = bordas suaves (feather) e gradiente visivel.
         'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'],
-          0,   'rgba(0,0,0,0)',
-          0.15,'rgba(180,60,30,0.35)',
-          0.4, 'rgba(255,107,53,0.6)',
-          0.7, 'rgba(251,176,64,0.85)',
-          1,   'rgba(255,255,200,0.95)',
+          0,    'rgba(0,0,0,0)',
+          0.1,  'rgba(180,60,30,0.0)',
+          0.25, 'rgba(180,60,30,0.4)',
+          0.45, 'rgba(255,107,53,0.6)',
+          0.65, 'rgba(255,140,40,0.75)',
+          0.85, 'rgba(251,176,64,0.88)',
+          1,    'rgba(255,255,200,0.95)',
         ],
-        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 10, 6, 14, 22],
+        // Raio um pouco maior no zoom-out faz os kernels se misturarem suavemente.
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 10, 14, 14, 24],
         'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0.8, 15, 0],
       },
     })
@@ -196,7 +373,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       id: 'crime-dot',
       type: 'symbol',
       source: 'crime',
-      minzoom: 14,
+      minzoom: 13,
       layout: {
         visibility: 'none',
         'icon-image': ['match', ['get', 'tipo'],
@@ -210,7 +387,8 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         'icon-ignore-placement': true,
         'icon-padding': 0,
       },
-      paint: { 'icon-opacity': 0.9 },
+      // Fade de entrada em vez de 'pop' seco: cresce de 0 (z13.5) a 0.9 (z14.5).
+      paint: { 'icon-opacity': ['interpolate', ['linear'], ['zoom'], 13.5, 0, 14.5, 0.9] },
     })
 
     // ── Fatores urbanos ─────────────────────────────────
@@ -385,7 +563,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
           'Milícia','#fbb040',
           '#888',
         ],
-        'line-width': 1,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.8, 15, 2],
         'line-opacity': 0.7,
       },
     })
@@ -578,15 +756,32 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
 
     // ── Agent: temporary route lines (e.g. fuga from RELINT) ──
     map.addSource('agent-routes', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    // Real street-following routes (status ok): cyan dashed line.
     map.addLayer({
       id: 'agent-routes-line',
       type: 'line',
       source: 'agent-routes',
+      filter: ['!=', ['get', 'fallback'], 1],
       paint: {
         'line-color': '#22d3ee',
         'line-width': ['interpolate', ['linear'], ['zoom'], 11, 3, 15, 5],
         'line-opacity': 0.9,
         'line-dasharray': [2, 1.5],
+      },
+    })
+    // Fallback routes (no path in the network): gray, sparse dash, dimmer — an
+    // "approximate" line. MapLibre 5.x can't data-drive line-dasharray, so this
+    // is a separate layer filtered on the `fallback` property.
+    map.addLayer({
+      id: 'agent-routes-line-fallback',
+      type: 'line',
+      source: 'agent-routes',
+      filter: ['==', ['get', 'fallback'], 1],
+      paint: {
+        'line-color': '#9ca3af',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 2, 15, 3.5],
+        'line-opacity': 0.7,
+        'line-dasharray': [1, 2.5],
       },
     })
     map.addLayer({
@@ -624,8 +819,219 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       source: 'agent-bairro-focus',
       paint: {
         'line-color': '#38bdf8',
-        'line-width': 3,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 10, 2, 15, 4],
         'line-opacity': 0.95,
+      },
+    })
+
+    // ── Agent: radius circles (coverage / influence areas) ──
+    map.addSource('agent-radius', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'agent-radius-fill',
+      type: 'fill',
+      source: 'agent-radius',
+      paint: {
+        'fill-color': ['coalesce', ['get', 'color'], '#22d3ee'],
+        'fill-opacity': 0.12,
+      },
+    })
+    map.addLayer({
+      id: 'agent-radius-stroke',
+      type: 'line',
+      source: 'agent-radius',
+      paint: {
+        'line-color': ['coalesce', ['get', 'color'], '#22d3ee'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.2, 15, 2.8],
+        'line-opacity': 0.85,
+        'line-dasharray': [2, 1.5],
+      },
+    })
+    map.addLayer({
+      id: 'agent-radius-label',
+      type: 'symbol',
+      source: 'agent-radius',
+      layout: {
+        'text-field': ['get', 'label'],
+        'text-size': 11,
+        'text-font': ['Open Sans Semibold'],
+        'text-offset': [0, -0.6],
+        'text-allow-overlap': false,
+      },
+      paint: {
+        'text-color': '#e0f7ff',
+        'text-halo-color': 'rgba(7,7,10,0.95)',
+        'text-halo-width': 2,
+      },
+    })
+
+    // ── Agent: custom (filtered) crime heatmap — cyan/purple to read as "temporary" ──
+    map.addSource('crime-heat-custom', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'crime-heat-custom',
+      type: 'heatmap',
+      source: 'crime-heat-custom',
+      paint: {
+        'heatmap-weight': 1,
+        // Mesma logica do crime-heat: baixa intensity no zoom-out p/ nao saturar em branco.
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 10, 0.3, 13, 1.2, 15, 3],
+        // Rampa com mais paradas + inicio translucido = bordas suaves e gradiente visivel.
+        'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'],
+          0,    'rgba(0,0,0,0)',
+          0.1,  'rgba(34,211,238,0.0)',
+          0.25, 'rgba(34,211,238,0.4)',
+          0.45, 'rgba(74,144,226,0.6)',
+          0.65, 'rgba(120,110,240,0.75)',
+          0.85, 'rgba(168,85,247,0.88)',
+          1,    'rgba(255,255,255,0.95)',
+        ],
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 10, 16, 15, 30],
+        'heatmap-opacity': 0.85,
+      },
+    })
+
+    // ── Agent: timeline animation points (isNew=1 → current hour pops; older dims) ──
+    map.addSource('crime-timeline', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'crime-timeline-dot',
+      type: 'circle',
+      source: 'crime-timeline',
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'],
+          11, ['case', ['==', ['get', 'isNew'], 1], 5, 2.5],
+          15, ['case', ['==', ['get', 'isNew'], 1], 9, 5],
+        ],
+        'circle-color': ['case', ['==', ['get', 'isNew'], 1], '#fde68a', '#ff6b35'],
+        'circle-opacity': ['case', ['==', ['get', 'isNew'], 1], 1, 0.45],
+        // Feather leve p/ os pontos antigos nao virarem 'specks' duros no zoom-out;
+        // os 'isNew' ficam quase crisp p/ continuarem em destaque.
+        'circle-blur': ['case', ['==', ['get', 'isNew'], 1], 0.15, 0.4],
+        'circle-stroke-color': '#07070a',
+        'circle-stroke-width': ['case', ['==', ['get', 'isNew'], 1], 1, 0.4],
+      },
+    })
+
+    // ── Agent: route animation (traveling dot along a path) ──
+    map.addSource('agent-route-anim-line', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'agent-route-anim-line-glow',
+      type: 'line',
+      source: 'agent-route-anim-line',
+      paint: {
+        'line-color': ['coalesce', ['get', 'color'], '#22d3ee'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 8, 15, 16],
+        'line-opacity': 0.18,
+        'line-blur': 4,
+      },
+    })
+    map.addLayer({
+      id: 'agent-route-anim-line',
+      type: 'line',
+      source: 'agent-route-anim-line',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': ['coalesce', ['get', 'color'], '#22d3ee'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 2, 15, 3],
+        'line-opacity': 0.32,
+        'line-dasharray': [2, 1.5],
+      },
+    })
+    // Bright "traveled" trail that draws itself as the dot advances
+    map.addSource('agent-route-anim-trail', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'agent-route-anim-trail-glow',
+      type: 'line',
+      source: 'agent-route-anim-trail',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': ['coalesce', ['get', 'color'], '#22d3ee'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 9, 15, 18],
+        'line-opacity': 0.22,
+        'line-blur': 5,
+      },
+    })
+    map.addLayer({
+      id: 'agent-route-anim-trail',
+      type: 'line',
+      source: 'agent-route-anim-trail',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': ['coalesce', ['get', 'color'], '#22d3ee'],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, 3.5, 15, 6],
+        'line-opacity': 0.95,
+      },
+    })
+    map.addLayer({
+      id: 'agent-route-anim-line-label',
+      type: 'symbol',
+      source: 'agent-route-anim-line',
+      layout: {
+        'text-field': ['get', 'label'],
+        'text-size': 11,
+        'text-font': ['Open Sans Semibold'],
+        'symbol-placement': 'line-center',
+        'text-allow-overlap': false,
+      },
+      paint: {
+        'text-color': '#a5f3fc',
+        'text-halo-color': 'rgba(7,7,10,0.95)',
+        'text-halo-width': 2,
+      },
+    })
+    map.addSource('agent-route-anim-dot', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'agent-route-anim-dot-glow',
+      type: 'circle',
+      source: 'agent-route-anim-dot',
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 12, 15, 20],
+        'circle-color': ['coalesce', ['get', 'color'], '#22d3ee'],
+        'circle-opacity': 0.25,
+        'circle-blur': 1,
+      },
+    })
+    map.addLayer({
+      id: 'agent-route-anim-dot',
+      type: 'circle',
+      source: 'agent-route-anim-dot',
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 5, 15, 8],
+        'circle-color': '#ffffff',
+        'circle-stroke-color': ['coalesce', ['get', 'color'], '#22d3ee'],
+        'circle-stroke-width': 3,
+      },
+    })
+
+    // ── Agent: crime clusters (DBSCAN) ──
+    map.addSource('agent-clusters', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+    map.addLayer({
+      id: 'agent-clusters-circle',
+      type: 'circle',
+      source: 'agent-clusters',
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['get', 'count'], 1, 14, 100, 44],
+        'circle-color': ['interpolate', ['linear'], ['get', 'count'],
+          1, '#fde68a', 30, '#fbb040', 80, '#ef4444'],
+        // Feather + opacidade crescente com a densidade = blob suave em vez de puck chapado.
+        'circle-blur': 0.5,
+        'circle-opacity': ['interpolate', ['linear'], ['get', 'count'], 1, 0.3, 100, 0.6],
+        'circle-stroke-color': '#ffffff',
+        'circle-stroke-width': 1.5,
+      },
+    })
+    map.addLayer({
+      id: 'agent-clusters-label',
+      type: 'symbol',
+      source: 'agent-clusters',
+      layout: {
+        'text-field': ['to-string', ['get', 'count']],
+        'text-size': ['interpolate', ['linear'], ['zoom'], 11, 11, 15, 14],
+        'text-font': ['Open Sans Bold'],
+        'text-allow-overlap': true,
+      },
+      paint: {
+        'text-color': '#07070a',
+        'text-halo-color': 'rgba(255,255,255,0.75)',
+        'text-halo-width': 1,
       },
     })
 
@@ -641,6 +1047,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
 
     // Click area (skip if a more specific layer was hit)
     map.on('click', 'areas-interact', (e: any) => {
+      if (routePickRef.current.active || pickGuardRef.current) return
       if (hitsInteractive(e.point)) return
       const id = e.features[0].properties.id
       const area = data.areas.find(a => a.id === id) ?? null
@@ -744,6 +1151,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       const p = e.features[0].properties
       const picoH = Number(p.pico) || 0
       const bingo = Number(p.bingo) || 0
+      if (!popupRef.current) return
       popupRef.current
         .setLngLat(e.lngLat)
         .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:190px;max-width:240px">
@@ -777,6 +1185,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     map.on('mouseenter', 'fatores-dot', (e: any) => {
       map.getCanvas().style.cursor = 'pointer'
       const p = e.features[0].properties
+      if (!popupRef.current) return
       popupRef.current
         .setLngLat(e.lngLat)
         .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:180px;max-width:240px">
@@ -813,6 +1222,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     map.on('mouseenter', 'chamados-dot', (e: any) => {
       map.getCanvas().style.cursor = 'pointer'
       const p = e.features[0].properties
+      if (!popupRef.current) return
       popupRef.current
         .setLngLat(e.lngLat)
         .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:180px;max-width:240px">
@@ -859,8 +1269,64 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       popupRef.current?.remove()
     })
 
+    // Manual route-picking: 1st click = origin, 2nd click = destination → /api/route.
+    // Registered before the deselect handler so it captures the click first.
+    map.on('click', (e: any) => {
+      const pick = routePickRef.current
+      if (!pick.active) return
+      pickGuardRef.current = true
+      setTimeout(() => { pickGuardRef.current = false }, 0)
+      const lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat]
+      if (!pick.from) {
+        pick.from = lngLat
+        setRoutePickHint('Clique no destino da rota')
+        import('maplibre-gl').then(({ default: maplibregl }) => {
+          if (!mapInst.current) return
+          routeStartMarkerRef.current?.remove()
+          routeStartMarkerRef.current = new maplibregl.Marker({ color: '#22d3ee' })
+            .setLngLat(lngLat)
+            .addTo(mapInst.current)
+        })
+        return
+      }
+      const from = pick.from
+      const to = lngLat
+      const onDone = pick.onDone
+      routePickRef.current = { active: false, from: null }
+      setRoutePickActive(false)
+      setRoutePickHint('Calculando rota…')
+      map.getCanvas().style.cursor = ''
+      routeStartMarkerRef.current?.remove()
+      routeStartMarkerRef.current = null
+      fetch('/api/route', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from, to }),
+      })
+        .then(r => r.json())
+        .then((res: any) => {
+          if (res && Array.isArray(res.coordinates) && res.coordinates.length >= 2) {
+            mapControlRef?.current?.showRoute(res.coordinates, {
+              label: 'Rota manual',
+              fallback: res.status === 'fallback',
+              distanceM: res.distance_m,
+            })
+            setRoutePickHint(null)
+            onDone?.(res)
+          } else {
+            setRoutePickHint(null)
+            onDone?.({ error: res?.error ?? 'falha ao calcular rota' })
+          }
+        })
+        .catch((err: unknown) => {
+          setRoutePickHint(null)
+          onDone?.({ error: String(err) })
+        })
+    })
+
     // Click outside interactive elements → deselect
     map.on('click', (e: any) => {
+      if (routePickRef.current.active || pickGuardRef.current) return
       const areaHit = map.queryRenderedFeatures(e.point, { layers: ['areas-interact'] })
       if (areaHit.length > 0 || hitsInteractive(e.point)) return
       onSelectArea(null)
@@ -1010,12 +1476,16 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       addAnnotation: (lat: number, lng: number, title: string, body: string) => {
         import('maplibre-gl').then(({ default: maplibregl }) => {
           if (!mapInst.current) return
+          // Pulsing ring marker (orange core + animated halo) — visually distinct from the
+          // flat amber numbered trecho circles.
           const el = document.createElement('div')
-          el.style.cssText = [
-            'width:10px', 'height:10px', 'border-radius:50%',
-            'background:#fbb040', 'border:2px solid #07070a',
-            'cursor:pointer', 'box-shadow:0 0 6px rgba(251,176,64,0.5)',
-          ].join(';')
+          el.className = 'annotation-marker'
+          const ring = document.createElement('div')
+          ring.className = 'annotation-marker-ring'
+          const core = document.createElement('div')
+          core.className = 'annotation-marker-core'
+          el.appendChild(ring)
+          el.appendChild(core)
           const popup = new maplibregl.Popup({ closeButton: false, offset: 8, maxWidth: '200px' })
             .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3">
               <div style="font-size:10px;font-weight:600;margin-bottom:2px">${title}</div>
@@ -1055,17 +1525,15 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         const label = opts?.label ?? t.locf_norm
         const src = map.getSource('agent-highlights') as GeoJSONSource | undefined
         if (!src) return false
-        const existing = (src as any)._data?.features ?? []
+        const newFeature = {
+          type: 'Feature' as const,
+          properties: { color, label, total: t.total },
+          geometry: t.line_geometry,
+        }
+        agentHighlightFeatures.current = [...agentHighlightFeatures.current, newFeature]
         src.setData({
           type: 'FeatureCollection',
-          features: [
-            ...existing,
-            {
-              type: 'Feature',
-              properties: { color, label, total: t.total },
-              geometry: t.line_geometry,
-            },
-          ],
+          features: agentHighlightFeatures.current,
         })
         const bounds = geomBounds(t.line_geometry)
         if (bounds) {
@@ -1095,6 +1563,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
             },
             geometry: t.line_geometry!,
           }))
+        agentHighlightFeatures.current = features
         ;(map.getSource('agent-highlights') as GeoJSONSource | undefined)
           ?.setData({ type: 'FeatureCollection', features })
         if (trechos.length > 0) {
@@ -1115,15 +1584,26 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         }
       },
 
-      clearHighlights: () => {
+      clearHighlights: (opts?: { annotations?: boolean; timeFilter?: boolean }) => {
         const map = mapInst.current
         if (!map) return
-        ;(map.getSource('agent-highlights') as GeoJSONSource | undefined)
-          ?.setData({ type: 'FeatureCollection', features: [] })
-        ;(map.getSource('agent-routes') as GeoJSONSource | undefined)
-          ?.setData({ type: 'FeatureCollection', features: [] })
-        ;(map.getSource('agent-bairro-focus') as GeoJSONSource | undefined)
-          ?.setData({ type: 'FeatureCollection', features: [] })
+        agentHighlightFeatures.current = []
+        agentRadiusFeatures.current = []
+        agentRouteFeatures.current = []
+        ;['agent-highlights', 'agent-routes', 'agent-bairro-focus', 'agent-radius', 'agent-clusters', 'crime-heat-custom', 'agent-route-anim-line', 'agent-route-anim-trail', 'agent-route-anim-dot'].forEach(id => {
+          ;(map.getSource(id) as GeoJSONSource | undefined)
+            ?.setData({ type: 'FeatureCollection', features: [] })
+        })
+        stopTimeline()
+        stopRouteAnim()
+        pulsesRef.current.forEach(m => m.remove())
+        pulsesRef.current = []
+        setComparison(null)
+        if (opts?.annotations) {
+          annotationsRef.current.forEach(m => m.remove())
+          annotationsRef.current = []
+        }
+        if (opts?.timeFilter) applyTimeFilter(null, null)
       },
 
       focusBairro: (nome: string) => {
@@ -1152,42 +1632,243 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       },
 
       setTimeFilter: (horaInicio: number | null, horaFim: number | null) => {
+        applyTimeFilter(horaInicio, horaFim)
+      },
+
+      showRoute: (polyline: [number, number][], opts?: { label?: string; fallback?: boolean; distanceM?: number }) => {
         const map = mapInst.current
-        if (!map) return
-        const reset = horaInicio === null && horaFim === null
-        const filter: any = reset
-          ? null
-          : [
-              'all',
-              ['!=', ['get', 'h'], null],
-              ['>=', ['to-number', ['get', 'h']], Math.max(0, horaInicio ?? 0)],
-              ['<', ['to-number', ['get', 'h']], Math.min(24, horaFim ?? 24)],
-            ]
-        ;['crime-heat', 'crime-dot'].forEach(id => {
-          try { map.setFilter(id, filter) } catch { /* layer not ready */ }
+        if (!map || polyline.length < 2) return
+        const src = map.getSource('agent-routes') as GeoJSONSource | undefined
+        if (!src) return
+        const base = opts?.label ?? ''
+        const dist = typeof opts?.distanceM === 'number'
+          ? (opts.distanceM >= 1000 ? `${(opts.distanceM / 1000).toFixed(1)} km` : `${Math.round(opts.distanceM)} m`)
+          : ''
+        const label = opts?.fallback
+          ? `${base || 'rota aproximada'} — sem caminho na malha`
+          : [base, dist].filter(Boolean).join(' · ')
+        agentRouteFeatures.current = [
+          ...agentRouteFeatures.current,
+          {
+            type: 'Feature' as const,
+            properties: { label, fallback: opts?.fallback ? 1 : 0 },
+            geometry: { type: 'LineString' as const, coordinates: polyline.map(c => [c[0], c[1]]) },
+          },
+        ]
+        src.setData({ type: 'FeatureCollection', features: agentRouteFeatures.current })
+      },
+
+      startRoutePick: (onDone) => {
+        routePickRef.current = { active: true, from: null, onDone }
+        setRoutePickActive(true)
+        setRoutePickHint('Clique na origem da rota')
+        routeStartMarkerRef.current?.remove()
+        routeStartMarkerRef.current = null
+        const map = mapInst.current
+        if (map) map.getCanvas().style.cursor = 'crosshair'
+      },
+
+      cancelRoutePick: () => {
+        routePickRef.current = { active: false, from: null }
+        setRoutePickActive(false)
+        setRoutePickHint(null)
+        routeStartMarkerRef.current?.remove()
+        routeStartMarkerRef.current = null
+        const map = mapInst.current
+        if (map) map.getCanvas().style.cursor = ''
+      },
+
+      addRadiusCircle: (lat: number, lng: number, radiusM: number, opts?: { label?: string; color?: string }) => {
+        const map = mapInst.current
+        const src = map?.getSource('agent-radius') as GeoJSONSource | undefined
+        if (!map || !src) return
+        const color = opts?.color ?? '#22d3ee'
+        const label = opts?.label ?? `${Math.round(radiusM)}m`
+        const feature = {
+          type: 'Feature' as const,
+          properties: { color, label },
+          geometry: circlePolygon(lng, lat, radiusM),
+        }
+        agentRadiusFeatures.current = [...agentRadiusFeatures.current, feature]
+        src.setData({ type: 'FeatureCollection', features: agentRadiusFeatures.current })
+        // Frame all circles so adding the n-th one doesn't yank the camera off the others.
+        const bounds = featuresBounds(agentRadiusFeatures.current)
+        if (bounds) {
+          map.fitBounds(bounds, { padding: 80, maxZoom: 15, duration: 700 })
+        } else {
+          map.flyTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), 14), duration: 700 })
+        }
+      },
+
+      compareTrechos: (locfNorms: string[]) => {
+        const map = mapInst.current
+        const sel = selectedRef.current
+        if (!map || !sel) return
+        const palette = ['#ef4444', '#22d3ee', '#fbb040', '#a855f7', '#36c476']
+        const entries: { color: string; label: string; total: number }[] = []
+        const features: any[] = []
+        locfNorms.forEach((name, i) => {
+          const target = name.trim().toLowerCase()
+          const t = sel.top_trechos.find(x => x.locf_norm.trim().toLowerCase() === target)
+          if (!t || !t.line_geometry) return
+          const color = palette[i % palette.length]
+          entries.push({ color, label: t.locf_norm, total: t.total })
+          features.push({
+            type: 'Feature' as const,
+            properties: { color, label: t.locf_norm, total: t.total },
+            geometry: t.line_geometry,
+          })
+        })
+        agentHighlightFeatures.current = features
+        ;(map.getSource('agent-highlights') as GeoJSONSource | undefined)
+          ?.setData({ type: 'FeatureCollection', features })
+        setComparison(entries.length > 0 ? entries : null)
+        const allBounds = features
+          .map(f => geomBounds(f.geometry)).filter(Boolean) as [[number, number], [number, number]][]
+        if (allBounds.length > 0) {
+          const combined: [[number, number], [number, number]] = [
+            [Math.min(...allBounds.map(b => b[0][0])), Math.min(...allBounds.map(b => b[0][1]))],
+            [Math.max(...allBounds.map(b => b[1][0])), Math.max(...allBounds.map(b => b[1][1]))],
+          ]
+          map.fitBounds(combined, { padding: { top: 120, bottom: 120, left: 120, right: 120 }, maxZoom: 15.5, duration: 900 })
+        }
+      },
+
+      showHeatmapCustom: (opts?: { tipo?: 'transeunte' | 'celular' | 'coletivo'; horaInicio?: number | null; horaFim?: number | null }) => {
+        const map = mapInst.current
+        const sel = selectedRef.current
+        if (!map || !sel) return
+        const hi = opts?.horaInicio ?? null
+        const hf = opts?.horaFim ?? null
+        const pts = sel.map_layers.crime_points.filter(p => {
+          if (opts?.tipo && !matchTipo(p.tipo, opts.tipo)) return false
+          if (hi !== null && (p.h === null || p.h < hi)) return false
+          if (hf !== null && (p.h === null || p.h >= hf)) return false
+          return true
+        })
+        const features = pts.map(p => ({
+          type: 'Feature' as const,
+          properties: {},
+          geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
+        }))
+        ;(map.getSource('crime-heat-custom') as GeoJSONSource | undefined)
+          ?.setData({ type: 'FeatureCollection', features })
+        const bounds = geomBounds(sel.geometry as any)
+        if (bounds) map.fitBounds(bounds, { padding: 80, maxZoom: 14, duration: 800 })
+      },
+
+      animateTimeline: (opts?: { tipo?: 'transeunte' | 'celular' | 'coletivo'; stepMs?: number }) => {
+        runTimeline(opts)
+      },
+
+      playRouteAnimation: (path: [number, number][], opts?: { durationMs?: number; color?: string; label?: string; loop?: boolean }) => {
+        runRouteAnimation(path, opts)
+      },
+
+      pulseLocation: (lat: number, lng: number, opts?: { color?: string; label?: string; durationMs?: number }) => {
+        import('maplibre-gl').then(({ default: maplibregl }) => {
+          const map = mapInst.current
+          if (!map) return
+          const color = opts?.color ?? '#ff6b35'
+          const el = document.createElement('div')
+          el.className = 'location-ping'
+          el.style.color = color
+          const ring = document.createElement('div')
+          ring.className = 'location-ping-ring'
+          const core = document.createElement('div')
+          core.className = 'location-ping-core'
+          el.appendChild(ring)
+          el.appendChild(core)
+          const marker = new maplibregl.Marker({ element: el }).setLngLat([lng, lat]).addTo(map)
+          if (opts?.label) {
+            marker.setPopup(new maplibregl.Popup({ closeButton: false, offset: 14, maxWidth: '200px' })
+              .setHTML(`<div style="font-family:Inter,sans-serif;font-size:10px;color:#f0f0f3">${opts.label}</div>`))
+              .togglePopup()
+          }
+          pulsesRef.current.push(marker)
+          map.flyTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), 14), duration: 700 })
+          const ttl = Math.max(1000, opts?.durationMs ?? 4000)
+          setTimeout(() => {
+            marker.remove()
+            pulsesRef.current = pulsesRef.current.filter(m => m !== marker)
+          }, ttl)
         })
       },
 
-      showRoute: (from: [number, number], to: [number, number], label?: string) => {
+      clusterCrimes: (opts?: { epsM?: number; minPts?: number }) => {
+        const map = mapInst.current
+        const sel = selectedRef.current
+        const src = map?.getSource('agent-clusters') as GeoJSONSource | undefined
+        if (!map || !sel || !src) return
+        const epsM = opts?.epsM ?? 150
+        const minPts = opts?.minPts ?? 5
+        const pts = sel.map_layers.crime_points.map(p => ({ lat: p.lat, lng: p.lng }))
+        const clusters = dbscan(pts, epsM, minPts)
+        const features = clusters.map(c => ({
+          type: 'Feature' as const,
+          properties: { count: c.points.length },
+          geometry: { type: 'Point' as const, coordinates: [c.cx, c.cy] },
+        }))
+        src.setData({ type: 'FeatureCollection', features })
+        const bounds = geomBounds(sel.geometry as any)
+        if (bounds) map.fitBounds(bounds, { padding: 80, maxZoom: 15, duration: 800 })
+      },
+
+      stopAnimations: () => {
+        // Halt the ephemeral, moving/looping visuals (route dot, timeline, pulses)
+        // but keep static context (highlights, drawn routes, focus, radii, clusters).
+        stopRouteAnim()
+        stopTimeline()
+        pulsesRef.current.forEach(m => m.remove())
+        pulsesRef.current = []
+      },
+
+      zoomToPoint: (lat: number, lng: number, zoom?: number) => {
         const map = mapInst.current
         if (!map) return
-        const src = map.getSource('agent-routes') as GeoJSONSource | undefined
-        if (!src) return
-        const existing = (src as any)._data?.features ?? []
-        src.setData({
-          type: 'FeatureCollection',
-          features: [
-            ...existing,
-            {
-              type: 'Feature',
-              properties: { label: label ?? '' },
-              geometry: { type: 'LineString', coordinates: [[from[0], from[1]], [to[0], to[1]]] },
-            },
-          ],
+        map.flyTo({
+          center: [lng, lat],
+          zoom: typeof zoom === 'number' ? Math.max(10, Math.min(18, zoom)) : 16,
+          duration: 800,
+          easing: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
         })
       },
+
+      adjustZoom: (direction: 'in' | 'out', steps?: number) => {
+        const map = mapInst.current
+        if (!map) return
+        const delta = Math.max(1, Math.min(5, steps ?? 1))
+        const target = map.getZoom() + (direction === 'in' ? delta : -delta)
+        map.easeTo({ zoom: Math.max(10, Math.min(18, target)), duration: 600 })
+      },
+
+      zoomOverview: () => {
+        const map = mapInst.current
+        if (!map) return
+        const sel = selectedRef.current
+        const bounds = sel ? geomBounds(sel.geometry as any) : null
+        if (bounds) {
+          map.fitBounds(bounds, {
+            padding: { top: 80, bottom: 80, left: 80, right: 80 },
+            maxZoom: 14,
+            duration: 800,
+            easing: (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+          })
+          return
+        }
+        // Global / no selection: fit to every area so the analyst regains context.
+        const allBounds = data.areas
+          .map(a => geomBounds(a.geometry as any))
+          .filter(Boolean) as [[number, number], [number, number]][]
+        if (allBounds.length === 0) return
+        const combined: [[number, number], [number, number]] = [
+          [Math.min(...allBounds.map(b => b[0][0])), Math.min(...allBounds.map(b => b[0][1]))],
+          [Math.max(...allBounds.map(b => b[1][0])), Math.max(...allBounds.map(b => b[1][1]))],
+        ]
+        map.fitBounds(combined, { padding: 60, maxZoom: 13, duration: 800 })
+      },
     }
-  }, [mapReady, mapControlRef, data])
+  }, [mapReady, mapControlRef, data, applyTimeFilter, stopTimeline, stopRouteAnim, runTimeline, runRouteAnimation])
 
   // ─────────────────────────────────────────────────────────
   // 7. RENDER
@@ -1206,6 +1887,41 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
       {/* Map container */}
       <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+
+      {/* Manual route tool ("Traçar rota") — operator clicks two points */}
+      <div style={{ position: 'absolute', top: 12, left: 12, pointerEvents: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <button
+          onClick={() => {
+            if (routePickActive) mapControlRef?.current?.cancelRoutePick()
+            else mapControlRef?.current?.startRoutePick()
+          }}
+          title="Traçar uma rota seguindo as ruas entre dois pontos"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 7,
+            background: 'rgba(7,7,10,0.88)',
+            backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid', borderColor: routePickActive ? 'rgba(34,211,238,0.6)' : 'rgba(42,42,53,0.9)',
+            borderRadius: 3, padding: '8px 12px', cursor: 'pointer',
+            color: routePickActive ? '#22d3ee' : 'var(--text-dim)',
+            fontSize: 11, fontWeight: 500, transition: 'border-color 0.2s, color 0.2s',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="6" cy="19" r="2" /><circle cx="18" cy="5" r="2" />
+            <path d="M8 18c6-1 8-3 8-11" />
+          </svg>
+          <span>{routePickActive ? 'Cancelar rota' : 'Traçar rota'}</span>
+        </button>
+        {routePickHint && (
+          <div style={{
+            background: 'rgba(7,7,10,0.92)', border: '1px solid rgba(34,211,238,0.35)',
+            borderRadius: 3, padding: '6px 10px', color: '#a5f3fc', fontSize: 10.5, fontWeight: 500,
+            maxWidth: 200,
+          }}>
+            {routePickHint}
+          </div>
+        )}
+      </div>
 
       {/* Layer controls — collapsible */}
       <div style={{ position: 'absolute', top: 12, right: 12, pointerEvents: 'auto' }}>
@@ -1330,6 +2046,126 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         )}
       </div>
 
+      {/* Time filter control + active-window indicator */}
+      <div style={{
+        position: 'absolute', bottom: 28, right: 12,
+        background: 'rgba(7,7,10,0.88)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        border: '1px solid',
+        borderColor: timeFilter.start !== null ? 'rgba(255,107,53,0.45)' : 'rgba(42,42,53,0.9)',
+        borderRadius: 3, padding: '8px 12px', width: 212, pointerEvents: 'auto',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span className="label-overline">⏱ Filtro Horário</span>
+          {timeFilter.start !== null && (
+            <span className="mono" style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent)' }}>
+              {timeFilter.start}h–{timeFilter.end}h
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
+          {TIME_PRESETS.map(([label, s, e]) => {
+            const active = timeFilter.start === s && timeFilter.end === e
+            return (
+              <button
+                key={label}
+                onClick={() => applyTimeFilter(s, e)}
+                style={{
+                  fontSize: 10, padding: '3px 7px', borderRadius: 2, cursor: 'pointer',
+                  border: '1px solid',
+                  borderColor: active ? 'var(--accent)' : 'rgba(42,42,53,0.9)',
+                  background: active ? 'var(--accent-soft)' : 'transparent',
+                  color: active ? 'var(--accent)' : 'var(--text-dim)',
+                }}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-muted)' }}>
+              <span>Início</span><span className="mono">{timeFilter.start ?? 0}h</span>
+            </div>
+            <input
+              type="range" min={0} max={23} className="range-slider"
+              value={timeFilter.start ?? 0}
+              onChange={e => { const v = +e.target.value; applyTimeFilter(v, Math.max(v + 1, timeFilter.end ?? 24)) }}
+            />
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-muted)' }}>
+              <span>Fim</span><span className="mono">{timeFilter.end ?? 24}h</span>
+            </div>
+            <input
+              type="range" min={1} max={24} className="range-slider"
+              value={timeFilter.end ?? 24}
+              onChange={e => { const v = +e.target.value; applyTimeFilter(Math.min(timeFilter.start ?? 0, v - 1), v) }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Timeline animation badge — hour, day-part, progress, count, controls */}
+      {timeline !== null && (
+        <div style={{
+          position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
+          background: 'rgba(7,7,10,0.9)',
+          backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,107,53,0.45)',
+          borderRadius: 3, padding: '7px 12px', pointerEvents: 'auto', minWidth: 230,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+            <span className="mono" style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent)' }}>
+              🕐 {String(timeline.hour).padStart(2, '0')}h
+            </span>
+            <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>{dayPart(timeline.hour)}</span>
+            <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+              {timeline.shown} / {timeline.total} crimes
+            </span>
+            {timeline.done && (
+              <span style={{ display: 'flex', gap: 4, marginLeft: 6 }}>
+                <button
+                  onClick={() => runTimeline(lastTimelineOptsRef.current)}
+                  title="Repetir"
+                  style={{ cursor: 'pointer', background: 'transparent', border: '1px solid rgba(42,42,53,0.9)', borderRadius: 2, color: 'var(--accent)', fontSize: 11, padding: '1px 6px' }}
+                >↻</button>
+                <button
+                  onClick={() => stopTimeline()}
+                  title="Fechar"
+                  style={{ cursor: 'pointer', background: 'transparent', border: '1px solid rgba(42,42,53,0.9)', borderRadius: 2, color: 'var(--text-dim)', fontSize: 11, padding: '1px 6px' }}
+                >✕</button>
+              </span>
+            )}
+          </div>
+          <div style={{ height: 3, background: 'rgba(42,42,53,0.9)', borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${(timeline.hour / 23) * 100}%`, background: 'var(--accent)', transition: 'width 0.25s linear' }} />
+          </div>
+        </div>
+      )}
+
+      {/* Comparison legend (compare_trechos) */}
+      {comparison && comparison.length > 0 && (
+        <div style={{
+          position: 'absolute', bottom: 96, left: 48,
+          background: 'rgba(7,7,10,0.88)',
+          backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(42,42,53,0.9)',
+          borderRadius: 3, padding: '8px 12px', minWidth: 170, maxWidth: 240, pointerEvents: 'auto',
+        }}>
+          <div className="label-overline" style={{ marginBottom: 5 }}>Comparação de Trechos</div>
+          {comparison.map(c => (
+            <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+              <div style={{ width: 14, height: 3, background: c.color, flexShrink: 0, borderRadius: 1 }} />
+              <span style={{ fontSize: 10, color: 'var(--text-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.label}</span>
+              <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>{c.total}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Score legend */}
       <div style={{
         position: 'absolute', bottom: 28, left: 48,
@@ -1403,6 +2239,91 @@ function geomBounds(geom: any): [[number, number], [number, number]] | null {
   if (!coords.length) return null
   const lngs = coords.map(c => c[0]), lats = coords.map(c => c[1])
   return [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]]
+}
+
+// Combined bounds over a list of GeoJSON features (each with a `.geometry`).
+function featuresBounds(features: { geometry: any }[]): [[number, number], [number, number]] | null {
+  const all = features.map(f => geomBounds(f.geometry)).filter(Boolean) as [[number, number], [number, number]][]
+  if (all.length === 0) return null
+  return [
+    [Math.min(...all.map(b => b[0][0])), Math.min(...all.map(b => b[0][1]))],
+    [Math.max(...all.map(b => b[1][0])), Math.max(...all.map(b => b[1][1]))],
+  ]
+}
+
+// Metric distance (meters) between two lng/lat points (haversine).
+function haversineM(aLng: number, aLat: number, bLng: number, bLat: number): number {
+  const R = 6371000
+  const toRad = (d: number) => (d * Math.PI) / 180
+  const dLat = toRad(bLat - aLat)
+  const dLng = toRad(bLng - aLng)
+  const lat1 = toRad(aLat), lat2 = toRad(bLat)
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(h))
+}
+
+// Build a GeoJSON polygon approximating a circle of `radiusM` meters around [lng, lat].
+function circlePolygon(lng: number, lat: number, radiusM: number, steps = 64): GeoJSON.Polygon {
+  const coords: [number, number][] = []
+  const latR = radiusM / 111320
+  const lngR = radiusM / (111320 * Math.cos((lat * Math.PI) / 180))
+  for (let i = 0; i <= steps; i++) {
+    const theta = (i / steps) * 2 * Math.PI
+    coords.push([lng + lngR * Math.cos(theta), lat + latR * Math.sin(theta)])
+  }
+  return { type: 'Polygon', coordinates: [coords] }
+}
+
+// Match a crime's full descrição (e.g. "Roubo a transeunte") against a short tipo key.
+function matchTipo(desc: string, tipo: 'transeunte' | 'celular' | 'coletivo'): boolean {
+  const d = desc.toLowerCase()
+  if (tipo === 'transeunte') return d.includes('transeunte')
+  if (tipo === 'celular') return d.includes('celular') || d.includes('aparelho')
+  if (tipo === 'coletivo') return d.includes('coletivo')
+  return true
+}
+
+// Minimal DBSCAN over lng/lat points (eps in meters). Returns clusters with centroid + members.
+function dbscan(
+  pts: { lat: number; lng: number }[],
+  epsM: number,
+  minPts: number,
+): { cx: number; cy: number; points: { lat: number; lng: number }[] }[] {
+  const n = pts.length
+  const visited = new Array(n).fill(false)
+  const assigned = new Array(n).fill(false)
+  const neighbors = (i: number): number[] => {
+    const out: number[] = []
+    for (let j = 0; j < n; j++) {
+      if (haversineM(pts[i].lng, pts[i].lat, pts[j].lng, pts[j].lat) <= epsM) out.push(j)
+    }
+    return out
+  }
+  const clusters: { cx: number; cy: number; points: { lat: number; lng: number }[] }[] = []
+  for (let i = 0; i < n; i++) {
+    if (visited[i]) continue
+    visited[i] = true
+    let nb = neighbors(i)
+    if (nb.length < minPts) continue
+    const members: number[] = []
+    const queue = [...nb]
+    assigned[i] = true
+    members.push(i)
+    while (queue.length) {
+      const q = queue.shift() as number
+      if (!visited[q]) {
+        visited[q] = true
+        const qnb = neighbors(q)
+        if (qnb.length >= minPts) queue.push(...qnb)
+      }
+      if (!assigned[q]) { assigned[q] = true; members.push(q) }
+    }
+    const memberPts = members.map(m => pts[m])
+    const cx = memberPts.reduce((s, p) => s + p.lng, 0) / memberPts.length
+    const cy = memberPts.reduce((s, p) => s + p.lat, 0) / memberPts.length
+    clusters.push({ cx, cy, points: memberPts })
+  }
+  return clusters.sort((a, b) => b.points.length - a.points.length)
 }
 
 // ─────────────────────────────────────────────────────────

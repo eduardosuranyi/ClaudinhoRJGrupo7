@@ -17,7 +17,6 @@ import { useEffect, useState } from 'react'
 import type {
   OntologyAreaScore,
   AreaAllocation,
-  OntologyReason,
 } from '../lib/ontologyScore'
 
 interface Props {

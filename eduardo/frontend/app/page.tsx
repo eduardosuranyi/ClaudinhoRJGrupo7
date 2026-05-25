@@ -46,7 +46,7 @@ export default function Home() {
       })
   }, [])
 
-  const { messages, status, findings, areaId, isActive, isPaused, nextSuggestions, sendMessage, startAgent, abortAgent } =
+  const { messages, status, findings, areaId, isActive, isPaused, nextSuggestions, sendMessage, startAgent, startGlobalAgent, abortAgent } =
     useMapAgent({
       mapControlRef,
       setWeights,
@@ -77,7 +77,12 @@ export default function Home() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--bg)', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <div style={{ flex: 1 }}><TopHeader data={data} /></div>
+        <div style={{ flex: 1 }}>
+          <TopHeader
+            data={data}
+            onStartGlobal={agentIsActive ? undefined : startGlobalAgent}
+          />
+        </div>
         <button
           onClick={() => { setShowComparativo(v => !v); if (!showComparativo) setSelected(null) }}
           style={{

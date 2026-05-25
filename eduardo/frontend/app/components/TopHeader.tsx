@@ -6,9 +6,11 @@ import { useEffect, useState } from 'react'
 
 interface Props {
   data: AreasData
+  /** Launches the full-map AI assistant. Undefined while an agent is already active. */
+  onStartGlobal?: () => void
 }
 
-export default function TopHeader({ data }: Props) {
+export default function TopHeader({ data, onStartGlobal }: Props) {
   const [now, setNow] = useState(new Date())
   useEffect(() => {
     const i = setInterval(() => setNow(new Date()), 60000)
@@ -64,6 +66,39 @@ export default function TopHeader({ data }: Props) {
         {data.meta.populacao_total_bairros_fm != null && (
           <KPI label="Pop. FM" value={fmt(data.meta.populacao_total_bairros_fm)} sub="Censo 2022" />
         )}
+      </div>
+
+      {/* Full-map AI assistant launcher */}
+      <div style={{
+        padding: '0 14px',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        borderLeft: '1px solid var(--border)',
+      }}>
+        <button
+          onClick={() => onStartGlobal?.()}
+          disabled={!onStartGlobal}
+          title={onStartGlobal ? 'Investigar todas as áreas com a IA' : 'Encerre a investigação atual primeiro'}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '6px 12px',
+            background: onStartGlobal ? 'var(--accent-soft)' : 'none',
+            border: `1px solid ${onStartGlobal ? 'var(--accent)' : 'var(--border)'}`,
+            color: onStartGlobal ? 'var(--accent)' : 'var(--text-muted)',
+            fontSize: 11,
+            fontWeight: 600,
+            cursor: onStartGlobal ? 'pointer' : 'default',
+            borderRadius: 3,
+            whiteSpace: 'nowrap',
+            letterSpacing: '0.02em',
+          }}
+        >
+          <span style={{ fontSize: 12, lineHeight: 1 }}>✦</span>
+          Assistente do mapa
+        </button>
       </div>
 
       {/* Status & time */}

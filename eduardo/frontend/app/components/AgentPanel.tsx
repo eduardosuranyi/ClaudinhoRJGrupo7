@@ -30,6 +30,16 @@ const TOOL_LABELS: Record<string, string> = {
   bairros_entorno: 'Bairros do entorno',
   crimes_por_hora: 'Distribuição horária',
   ontology_events: 'Eventos NER',
+  previsao_risco: 'Previsão de risco',
+  correlacao_fatores_crime: 'Correlação fatores × crime',
+  query_ocorrencias_recentes: 'Crimes recentes',
+  add_radius_circle: 'Raio de cobertura',
+  compare_trechos: 'Comparando ruas',
+  show_heatmap_custom: 'Heatmap filtrado',
+  animate_timeline: 'Linha do tempo',
+  cluster_crimes: 'Focos de crime',
+  list_areas: 'Listando áreas',
+  compare_areas: 'Comparando áreas',
   pause_for_user: 'Aguardando',
 }
 
@@ -151,7 +161,7 @@ export default function AgentPanel({
             }}
           />
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', letterSpacing: '0.03em' }}>
-            {currentArea?.nome ?? 'Investigação'}
+            {currentArea?.nome ?? 'Mapa inteiro (RJ)'}
           </span>
           <span className="label-overline" style={{ fontSize: 9 }}>
             {isError
@@ -301,8 +311,7 @@ export default function AgentPanel({
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) handleSubmit() }}
-          placeholder={isRunning ? 'Aguarde…' : isComplete ? 'Pergunte algo sobre a análise…' : 'Responda ou direcione a investigação…'}
-          disabled={isRunning}
+          placeholder={isRunning ? 'Escreva sua próxima pergunta… (envia quando a IA terminar)' : isComplete ? 'Pergunte algo sobre a análise…' : 'Responda ou direcione a investigação…'}
           style={{
             flex: 1,
             background: 'var(--bg-2)',
@@ -312,7 +321,6 @@ export default function AgentPanel({
             fontSize: 11,
             color: 'var(--text)',
             outline: 'none',
-            opacity: isRunning ? 0.5 : 1,
           }}
         />
         <button

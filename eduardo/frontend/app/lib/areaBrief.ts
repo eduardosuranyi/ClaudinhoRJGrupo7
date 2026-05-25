@@ -81,3 +81,44 @@ Use as tools query_* para puxar detalhes específicos. Não responda de cor — 
     },
   }
 }
+
+/**
+ * Build the initial brief for the FULL-MAP (global) agent: a compact ranked
+ * table of every FM area plus instructions on how to navigate across them.
+ * The agent then pulls per-area detail on demand via query tools (passing
+ * area_id) and focuses areas via zoom_to_area before using map tools.
+ */
+export function buildGlobalBrief(areas: Area[]): string {
+  const ranked = areas
+    .slice()
+    .sort((a, b) => b.score.total - a.score.total)
+
+  const rows = ranked
+    .map((a, i) => {
+      const flags: string[] = []
+      if (a.n_triple_bingo > 0) flags.push(`bingo 3/3: ${a.n_triple_bingo}`)
+      if (a.relint_disponivel) flags.push('RELINT')
+      const nomeCurto = a.nome.split(' - ')[0]
+      return `${i + 1}. [id ${a.id}] ${nomeCurto} — score ${a.score.total.toFixed(0)} | ${a.stats.crimes_total} crimes | pico ${a.stats.pico_horario} | ${a.stats.pct_noturno}% noturno${flags.length ? ` | ${flags.join(', ')}` : ''}`
+    })
+    .join('\n')
+
+  const totalCrimes = areas.reduce((s, a) => s + a.stats.crimes_total, 0)
+  const emAlerta = areas.filter(a => a.score.total >= 40).length
+
+  return `# Briefing — Mapa inteiro (todas as áreas FM do Rio)
+
+PANORAMA
+- ${areas.length} áreas FM | ${emAlerta} em alerta (score ≥ 40) | ${totalCrimes} crimes no total
+
+ÁREAS RANQUEADAS POR SCORE
+${rows}
+
+COMO TRABALHAR NO MODO MAPA INTEIRO
+- Toda tool de query exige area_id (use os ids acima).
+- Antes de destacar/analisar ruas ou bairros de uma área no mapa, chame zoom_to_area(area_id) para focá-la.
+- Use compare_areas para ranquear por outra métrica (crimes, % noturno, fatores, denúncias, bingo).
+- set_time_filter e toggle_layer agem sobre o mapa inteiro.
+
+Proponha um ponto de partida (ex.: a área de maior score, ou uma comparação) e PARE com pause_for_user. Não responda de cor — consulte os dados.`
+}

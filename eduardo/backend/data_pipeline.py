@@ -596,6 +596,7 @@ def sample_crime_points(crimes_df, max_points=600):
             "lng": float(r.longitude),
             "tipo": str(r.desc_delito),
             "h": int(r.hora_num) if pd.notna(r.hora_num) else None,
+            "data": str(r.data) if ("data" in s.columns and pd.notna(r.data)) else None,
         }
         for r in s.itertuples()
     ]

@@ -120,7 +120,7 @@ export interface DominioFeature {
 
 /** Camadas de pontos georreferenciados para renderização no mapa. */
 export interface MapLayers {
-  crime_points: { lat: number; lng: number; tipo: string; h: number | null }[]
+  crime_points: { lat: number; lng: number; tipo: string; h: number | null; data?: string | null }[]
   fatores_points: { lat: number; lng: number; tipo: string; orgao: string; logradouro: string }[]
   cameras_points: { lat: number; lng: number }[]
   psr_points: { lat: number; lng: number }[]
@@ -299,12 +299,50 @@ export interface MapControl {
   highlightTrecho: (locfNorm: string, opts?: { color?: string; label?: string }) => boolean
   /** Highlight the top-N trechos of the currently selected area at once. */
   highlightTopTrechos: (n: number) => void
-  /** Clear all agent-driven highlights (lines, routes, focused bairro). */
-  clearHighlights: () => void
+  /**
+   * Clear agent-driven visualizations to make room for an unrelated new one.
+   * By default clears lines, routes, focused bairro, radii, clusters, custom
+   * heatmap, animations, pulses and comparisons. Pass `annotations: true` to
+   * also remove pins and `timeFilter: true` to reset the hour filter.
+   */
+  clearHighlights: (opts?: { annotations?: boolean; timeFilter?: boolean }) => void
   /** Highlight and zoom to a single bairro from the selected area's `bairros_entorno`. */
   focusBairro: (nome: string) => boolean
   /** Filter the crime layer by an hour window. Pass nulls to reset. */
   setTimeFilter: (horaInicio: number | null, horaFim: number | null) => void
-  /** Draw a temporary route line (e.g. a fuga route described in RELINT/DD). */
-  showRoute: (from: [number, number], to: [number, number], label?: string) => void
+  /**
+   * Draw a street-following route as a full polyline ([lng,lat] pairs).
+   * `fallback` renders it in a distinct dashed/gray "rota aproximada" style.
+   */
+  showRoute: (polyline: [number, number][], opts?: { label?: string; fallback?: boolean; distanceM?: number }) => void
+  /**
+   * Enter manual route-picking: the operator clicks two points on the map; the
+   * second click resolves a street route via /api/route and draws it. `onDone`
+   * receives the route result (or an error). Returns immediately.
+   */
+  startRoutePick: (onDone?: (r: { status: 'ok' | 'fallback'; distance_m: number; message?: string } | { error: string }) => void) => void
+  /** Cancel an active manual route-picking session. */
+  cancelRoutePick: () => void
+  /** Draw a radius circle (meters) around a point to show a coverage/influence area. */
+  addRadiusCircle: (lat: number, lng: number, radiusM: number, opts?: { label?: string; color?: string }) => void
+  /** Paint and compare 2+ trechos side by side with a colored comparison legend. */
+  compareTrechos: (locfNorms: string[]) => void
+  /** Show a temporary heatmap built from the selected area's crime points, filtered by type/hour. */
+  showHeatmapCustom: (opts?: { tipo?: 'transeunte' | 'celular' | 'coletivo'; horaInicio?: number | null; horaFim?: number | null }) => void
+  /** Animate crimes accumulating over the hours of the day (0→23). */
+  animateTimeline: (opts?: { tipo?: 'transeunte' | 'celular' | 'coletivo'; stepMs?: number }) => void
+  /** Run spatial clustering (DBSCAN) on the selected area's crime points and mark clusters on the map. */
+  clusterCrimes: (opts?: { epsM?: number; minPts?: number }) => void
+  /** Animate a glowing dot traveling along a path ([lng,lat] pairs). */
+  playRouteAnimation: (path: [number, number][], opts?: { durationMs?: number; color?: string; label?: string; loop?: boolean }) => void
+  /** Emit a temporary sonar-ping pulse at a point to draw attention (auto-removes). */
+  pulseLocation: (lat: number, lng: number, opts?: { color?: string; label?: string; durationMs?: number }) => void
+  /** Fly to a precise coordinate and zoom in tight (default zoom 16, clamped 10–18). */
+  zoomToPoint: (lat: number, lng: number, zoom?: number) => void
+  /** Zoom in/out relative to the current view by `steps` levels (1–5, default 1), keeping center. */
+  adjustZoom: (direction: 'in' | 'out', steps?: number) => void
+  /** Pull back to a full-context overview: the selected area, or all areas if none is selected. */
+  zoomOverview: () => void
+  /** Stop ephemeral moving/looping visuals (route animation, timeline, pulses); leaves static highlights/routes/focus intact. */
+  stopAnimations: () => void
 }

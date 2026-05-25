@@ -218,95 +218,92 @@ function AreaRow({ area, rank, score, selected, agentActive, onClick, onInvestig
   onClick: () => void; onInvestigate?: () => void
 }) {
   return (
-    <div style={{
-      position: 'relative',
-      borderBottom: '1px solid var(--border-dim)',
-      borderLeft: agentActive ? '2px solid var(--amber)' : selected ? '2px solid var(--accent)' : '2px solid transparent',
-      transition: 'border-left-color 0.15s',
-    }}>
-      <button onClick={onClick} style={{
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
+      style={{
         display: 'grid', gridTemplateColumns: '20px 1fr 56px 36px',
         gap: 8,
         width: '100%', padding: '8px 16px',
         alignItems: 'center',
         background: agentActive ? 'rgba(251,176,64,0.06)' : selected ? 'var(--bg-3)' : 'transparent',
-        border: 'none',
         cursor: 'pointer', textAlign: 'left',
         transition: 'background 0.15s',
+        borderBottom: '1px solid var(--border-dim)',
+        borderLeft: agentActive ? '2px solid var(--amber)' : selected ? '2px solid var(--accent)' : '2px solid transparent',
       }}
       onMouseEnter={e => { if (!selected && !agentActive) e.currentTarget.style.background = 'var(--bg-2)' }}
       onMouseLeave={e => { if (!selected && !agentActive) e.currentTarget.style.background = 'transparent' }}
-      >
-        <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-          {String(rank).padStart(2, '0')}
-        </span>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 12, color: selected || agentActive ? 'var(--text)' : 'var(--text-dim)', fontWeight: selected || agentActive ? 500 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {shortName(area.nome)}
-          </div>
-          <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
-            {area.identificacao.aisp && (
-              <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>AISP {area.identificacao.aisp}</span>
-            )}
-            {area.relint_disponivel && (
-              <span style={{ fontSize: 10, color: 'var(--accent)' }}>· RELINT</span>
-            )}
-            {agentActive && (
-              <span style={{ fontSize: 10, color: 'var(--amber)' }}>· IA ativa</span>
-            )}
-          </div>
+    >
+      <span className="mono tnum" style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+        {String(rank).padStart(2, '0')}
+      </span>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 12, color: selected || agentActive ? 'var(--text)' : 'var(--text-dim)', fontWeight: selected || agentActive ? 500 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {shortName(area.nome)}
         </div>
-        <span className="mono tnum" style={{ fontSize: 11, textAlign: 'right', color: 'var(--text-dim)' }}>
-          {fmt(area.stats.crimes_total)}
-        </span>
-        <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-          <span className="mono tnum" style={{
-            fontSize: 12,
-            color: scoreColor(score),
-            fontWeight: 600,
-          }}>
-            {score.toFixed(0)}
-          </span>
-          {area.n_triple_bingo > 0 && (
-            <span style={{
-              fontSize: 8, fontWeight: 700, color: '#ef4444',
-              background: 'rgba(239,68,68,0.12)', padding: '0px 3px',
-              borderRadius: 2, lineHeight: '14px', letterSpacing: '0.02em',
-            }}>
-              {area.n_triple_bingo}x3/3
-            </span>
+        <div style={{ display: 'flex', gap: 6, marginTop: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          {area.identificacao.aisp && (
+            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>AISP {area.identificacao.aisp}</span>
+          )}
+          {area.relint_disponivel && (
+            <span style={{ fontSize: 10, color: 'var(--accent)' }}>· RELINT</span>
+          )}
+          {agentActive && (
+            <span style={{ fontSize: 10, color: 'var(--amber)' }}>· IA ativa</span>
+          )}
+          {onInvestigate && !agentActive && (
+            <button
+              onClick={e => { e.stopPropagation(); onInvestigate() }}
+              title="Investigar com IA"
+              className="investigate-btn"
+              style={{
+                background: 'linear-gradient(135deg, rgba(168,85,247,0.12), rgba(251,176,64,0.12))',
+                border: '1px solid rgba(168,85,247,0.35)',
+                borderRadius: 3, padding: '2px 7px',
+                fontSize: 9, color: '#c4b5fd',
+                cursor: 'pointer', opacity: 0,
+                transition: 'opacity 0.12s, background 0.15s, border-color 0.15s',
+                display: 'flex', alignItems: 'center', gap: 3,
+                fontWeight: 600,
+                letterSpacing: '0.03em',
+                marginLeft: 2,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168,85,247,0.25), rgba(251,176,64,0.25))'; e.currentTarget.style.borderColor = 'rgba(168,85,247,0.7)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168,85,247,0.12), rgba(251,176,64,0.12))'; e.currentTarget.style.borderColor = 'rgba(168,85,247,0.35)' }}
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path d="M12 1l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6z" />
+                <path d="M19 11l1.2 3.6 3.6 1.2-3.6 1.2-1.2 3.6-1.2-3.6-3.6-1.2 3.6-1.2 1.2-3.6z" opacity="0.6" />
+              </svg>
+              Investigar
+            </button>
           )}
         </div>
-      </button>
-
-      {/* Investigate button — inline in the subtitle row */}
-      {onInvestigate && !agentActive && (
-        <button
-          onClick={e => { e.stopPropagation(); onInvestigate() }}
-          title="Investigar com IA"
-          style={{
-            position: 'absolute', left: 38, bottom: 6,
-            background: 'linear-gradient(135deg, rgba(168,85,247,0.12), rgba(251,176,64,0.12))',
-            border: '1px solid rgba(168,85,247,0.35)',
-            borderRadius: 3, padding: '2px 7px',
-            fontSize: 9, color: '#c4b5fd',
-            cursor: 'pointer', opacity: 0,
-            transition: 'opacity 0.12s, background 0.15s, border-color 0.15s',
-            display: 'flex', alignItems: 'center', gap: 3,
-            fontWeight: 600,
-            letterSpacing: '0.03em',
-          }}
-          className="investigate-btn"
-          onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168,85,247,0.25), rgba(251,176,64,0.25))'; e.currentTarget.style.borderColor = 'rgba(168,85,247,0.7)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168,85,247,0.12), rgba(251,176,64,0.12))'; e.currentTarget.style.borderColor = 'rgba(168,85,247,0.35)' }}
-        >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-            <path d="M12 1l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6z" />
-            <path d="M19 11l1.2 3.6 3.6 1.2-3.6 1.2-1.2 3.6-1.2-3.6-3.6-1.2 3.6-1.2 1.2-3.6z" opacity="0.6" />
-          </svg>
-          Investigar
-        </button>
-      )}
+      </div>
+      <span className="mono tnum" style={{ fontSize: 11, textAlign: 'right', color: 'var(--text-dim)' }}>
+        {fmt(area.stats.crimes_total)}
+      </span>
+      <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+        <span className="mono tnum" style={{
+          fontSize: 12,
+          color: scoreColor(score),
+          fontWeight: 600,
+        }}>
+          {score.toFixed(0)}
+        </span>
+        {area.n_triple_bingo > 0 && (
+          <span style={{
+            fontSize: 8, fontWeight: 700, color: '#ef4444',
+            background: 'rgba(239,68,68,0.12)', padding: '0px 3px',
+            borderRadius: 2, lineHeight: '14px', letterSpacing: '0.02em',
+          }}>
+            {area.n_triple_bingo}x3/3
+          </span>
+        )}
+      </div>
     </div>
   )
 }

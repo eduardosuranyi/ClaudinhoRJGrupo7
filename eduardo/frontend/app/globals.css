@@ -118,7 +118,8 @@ button:focus { outline: none; }
 
 /* Investigate button visible on row hover */
 div:hover > .investigate-btn,
-div:focus-within > .investigate-btn {
+div:hover .investigate-btn,
+div:focus-within .investigate-btn {
   opacity: 1 !important;
 }
 
@@ -141,6 +142,86 @@ div:focus-within > .investigate-btn {
 
 .pulse-dot {
   animation: pulse-accent 2s ease-in-out infinite;
+}
+
+/* Agent annotation marker — pulsing ring, distinct from flat trecho circles */
+@keyframes annotation-pulse {
+  0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0.7; }
+  70%  { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+}
+
+.annotation-marker {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.annotation-marker-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 8px rgba(255, 107, 53, 0.9);
+  z-index: 2;
+}
+
+.annotation-marker-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  transform: translate(-50%, -50%);
+  animation: annotation-pulse 1.8s ease-out infinite;
+  z-index: 1;
+}
+
+/* Location ping (pulse_location) — sonar ring that expands & fades, color via inline `color` */
+@keyframes location-ping {
+  0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(3.2); opacity: 0; }
+}
+
+.location-ping {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.location-ping-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  z-index: 2;
+}
+
+.location-ping-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  transform: translate(-50%, -50%);
+  animation: location-ping 1.4s ease-out infinite;
+  z-index: 1;
 }
 
 /* Section labels */

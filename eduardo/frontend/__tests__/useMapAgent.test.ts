@@ -15,6 +15,19 @@ const mapControl: MapControl = {
   focusBairro: vi.fn().mockReturnValue(true),
   setTimeFilter: vi.fn(),
   showRoute: vi.fn(),
+  startRoutePick: vi.fn(),
+  cancelRoutePick: vi.fn(),
+  addRadiusCircle: vi.fn(),
+  compareTrechos: vi.fn(),
+  showHeatmapCustom: vi.fn(),
+  animateTimeline: vi.fn(),
+  clusterCrimes: vi.fn(),
+  playRouteAnimation: vi.fn(),
+  pulseLocation: vi.fn(),
+  zoomToPoint: vi.fn(),
+  adjustZoom: vi.fn(),
+  zoomOverview: vi.fn(),
+  stopAnimations: vi.fn(),
 }
 
 const mockArea = { id: 1, nome: 'Área Teste' } as any
@@ -105,9 +118,46 @@ describe('executeMapTool — highlight_top_trechos', () => {
 })
 
 describe('executeMapTool — clear_highlights', () => {
-  it('test_calls_clearHighlights', () => {
+  it('test_clears_visualizations_only_by_default', () => {
     executeMapTool('clear_highlights', {}, makeDeps())
-    expect(mapControl.clearHighlights).toHaveBeenCalled()
+    expect(mapControl.clearHighlights).toHaveBeenCalledWith({ annotations: false, timeFilter: false })
+  })
+
+  it('test_forwards_annotations_and_time_filter_flags', () => {
+    executeMapTool('clear_highlights', { annotations: true, time_filter: true }, makeDeps())
+    expect(mapControl.clearHighlights).toHaveBeenCalledWith({ annotations: true, timeFilter: true })
+  })
+})
+
+describe('executeMapTool — zoom tools', () => {
+  it('test_zoom_to_point_passes_coords_and_optional_zoom', () => {
+    executeMapTool('zoom_to_point', { lat: -22.9, lng: -43.2, zoom: 17 }, makeDeps())
+    expect(mapControl.zoomToPoint).toHaveBeenCalledWith(-22.9, -43.2, 17)
+  })
+
+  it('test_zoom_to_point_omits_zoom_when_absent', () => {
+    executeMapTool('zoom_to_point', { lat: -22.9, lng: -43.2 }, makeDeps())
+    expect(mapControl.zoomToPoint).toHaveBeenCalledWith(-22.9, -43.2, undefined)
+  })
+
+  it('test_adjust_zoom_in_with_steps', () => {
+    executeMapTool('adjust_zoom', { direction: 'in', steps: 2 }, makeDeps())
+    expect(mapControl.adjustZoom).toHaveBeenCalledWith('in', 2)
+  })
+
+  it('test_adjust_zoom_defaults_to_in', () => {
+    executeMapTool('adjust_zoom', {}, makeDeps())
+    expect(mapControl.adjustZoom).toHaveBeenCalledWith('in', undefined)
+  })
+
+  it('test_adjust_zoom_out', () => {
+    executeMapTool('adjust_zoom', { direction: 'out' }, makeDeps())
+    expect(mapControl.adjustZoom).toHaveBeenCalledWith('out', undefined)
+  })
+
+  it('test_zoom_overview', () => {
+    executeMapTool('zoom_overview', {}, makeDeps())
+    expect(mapControl.zoomOverview).toHaveBeenCalled()
   })
 })
 
@@ -131,13 +181,33 @@ describe('executeMapTool — set_time_filter', () => {
 })
 
 describe('executeMapTool — show_route', () => {
-  it('test_converts_to_lnglat_pairs', () => {
-    executeMapTool(
-      'show_route',
-      { from_lat: -22.9, from_lng: -43.2, to_lat: -22.91, to_lng: -43.21, label: 'fuga' },
-      makeDeps(),
+  const input = { from_lat: -22.9, from_lng: -43.2, to_lat: -22.91, to_lng: -43.21, label: 'fuga' }
+
+  it('test_draws_routed_polyline_from_server_output', () => {
+    const coords = [[-43.2, -22.9], [-43.205, -22.905], [-43.21, -22.91]]
+    executeMapTool('show_route', input, makeDeps(), {
+      status: 'ok', coordinates: coords, distance_m: 1234, label: 'fuga',
+    })
+    expect(mapControl.showRoute).toHaveBeenCalledWith(coords, {
+      label: 'fuga', fallback: false, distanceM: 1234,
+    })
+  })
+
+  it('test_flags_fallback_when_no_path', () => {
+    const coords = [[-43.2, -22.9], [-43.21, -22.91]]
+    executeMapTool('show_route', input, makeDeps(), {
+      status: 'fallback', coordinates: coords, distance_m: 980,
+      message: 'rota aproximada — sem caminho na malha',
+    })
+    expect(mapControl.showRoute).toHaveBeenCalledWith(coords, expect.objectContaining({ fallback: true }))
+  })
+
+  it('test_falls_back_to_straight_line_without_output', () => {
+    executeMapTool('show_route', input, makeDeps())
+    expect(mapControl.showRoute).toHaveBeenCalledWith(
+      [[-43.2, -22.9], [-43.21, -22.91]],
+      expect.objectContaining({ label: 'fuga', fallback: true }),
     )
-    expect(mapControl.showRoute).toHaveBeenCalledWith([-43.2, -22.9], [-43.21, -22.91], 'fuga')
   })
 })
 

@@ -11,7 +11,9 @@ const mockToolLoopAgent = vi.hoisted(() =>
   }),
 )
 const mockBuildAreaBrief = vi.hoisted(() => vi.fn())
+const mockBuildGlobalBrief = vi.hoisted(() => vi.fn())
 const mockLoadOntologyEvents = vi.hoisted(() => vi.fn())
+const mockLoadAllAreas = vi.hoisted(() => vi.fn())
 
 vi.mock('ai', async (importOriginal) => {
   const actual = await importOriginal<typeof import('ai')>()
@@ -28,13 +30,27 @@ vi.mock('@ai-sdk/anthropic', () => ({
 
 vi.mock('@/lib/areaBrief', () => ({
   buildAreaBrief: mockBuildAreaBrief,
+  buildGlobalBrief: mockBuildGlobalBrief,
 }))
 
 vi.mock('@/lib/ontologyEvents', () => ({
   loadOntologyEventsForArea: mockLoadOntologyEvents,
 }))
 
-import { POST } from '@/api/agent/route'
+vi.mock('@/lib/areasData', () => ({
+  loadAllAreas: mockLoadAllAreas,
+}))
+
+// Avoid loading the on-disk routing artifact (and `server-only`) during tests.
+vi.mock('@/lib/routing', () => ({
+  computeRoute: vi.fn(() => ({
+    status: 'ok',
+    coordinates: [[-43.2, -22.9], [-43.21, -22.91]],
+    distance_m: 100,
+  })),
+}))
+
+import { POST, listAreas, compareAreas } from '@/api/agent/route'
 import { NextRequest } from 'next/server'
 
 const area = {
@@ -157,6 +173,8 @@ beforeEach(() => {
   })
   mockLoadOntologyEvents.mockReturnValue([])
   mockCreateAgentUIStreamResponse.mockResolvedValue(new Response('ok'))
+  mockBuildGlobalBrief.mockReturnValue('BRIEFING GLOBAL')
+  mockLoadAllAreas.mockReturnValue([area, { ...area, id: 21, nome: 'Área Dois', score: { total: 90, breakdown: {} } }])
 })
 
 describe('POST /api/agent — first turn', () => {
@@ -235,6 +253,9 @@ describe('POST /api/agent — ToolLoopAgent configuration', () => {
     // Map tools
     expect(tools).toHaveProperty('toggle_layer')
     expect(tools).toHaveProperty('zoom_to_area')
+    expect(tools).toHaveProperty('zoom_to_point')
+    expect(tools).toHaveProperty('adjust_zoom')
+    expect(tools).toHaveProperty('zoom_overview')
     expect(tools).toHaveProperty('show_annotation')
     expect(tools).toHaveProperty('update_weights')
     expect(tools).toHaveProperty('complete_investigation')
@@ -347,5 +368,80 @@ describe('POST /api/agent — query tool execution against closed-over area', ()
     const tools = await getTools()
     const result = await tools.ontology_events.execute({})
     expect(result.disponivel).toBe(false)
+  })
+})
+
+describe('POST /api/agent — global (full-map) scope', () => {
+  it('test_global_uses_buildGlobalBrief_not_areaBrief', async () => {
+    await POST(makeRequest({ messages: [], scope: 'global' }))
+    expect(mockBuildGlobalBrief).toHaveBeenCalledOnce()
+    expect(mockBuildAreaBrief).not.toHaveBeenCalled()
+    const callArgs = mockCreateAgentUIStreamResponse.mock.calls[0][0]
+    expect(callArgs.uiMessages[0].parts[0].text).toBe('BRIEFING GLOBAL')
+  })
+
+  it('test_global_does_not_require_area', async () => {
+    const res = await POST(makeRequest({ messages: [], scope: 'global' }))
+    // 200-ish: createAgentUIStreamResponse mock returns a Response('ok')
+    expect(res.status).toBe(200)
+  })
+
+  it('test_global_returns_500_when_no_areas', async () => {
+    mockLoadAllAreas.mockReturnValue([])
+    const res = await POST(makeRequest({ messages: [], scope: 'global' }))
+    expect(res.status).toBe(500)
+  })
+
+  it('test_global_agent_has_list_areas_and_compare_areas', async () => {
+    await POST(makeRequest({ messages: [], scope: 'global' }))
+    const tools = (agentSettingsRef.current as Record<string, unknown>).tools as Record<string, unknown>
+    expect(tools).toHaveProperty('list_areas')
+    expect(tools).toHaveProperty('compare_areas')
+    expect(tools).toHaveProperty('query_trechos')
+    expect(tools).toHaveProperty('zoom_to_area')
+  })
+
+  it('test_global_query_tool_resolves_area_by_id', async () => {
+    await POST(makeRequest({ messages: [], scope: 'global' }))
+    const tools = (agentSettingsRef.current as any).tools
+    const result = await tools.query_trechos.execute({ area_id: 1 })
+    expect(result.total_disponivel).toBe(2)
+    expect(result.retornados[0].locf_norm).toBe('Rua A')
+  })
+
+  it('test_global_query_tool_errors_on_unknown_area_id', async () => {
+    await POST(makeRequest({ messages: [], scope: 'global' }))
+    const tools = (agentSettingsRef.current as any).tools
+    const result = await tools.query_trechos.execute({ area_id: 999 })
+    expect(result.erro).toMatch(/não encontrada/)
+  })
+})
+
+describe('cross-area helpers', () => {
+  const areas = [
+    { id: 1, nome: 'A - x', score: { total: 50 }, n_triple_bingo: 0, relint_disponivel: false,
+      stats: { crimes_total: 100, pico_horario: '20h', pct_noturno: 40, fatores_urbanos_total: 10, denuncias_total: 5 } },
+    { id: 2, nome: 'B - y', score: { total: 90 }, n_triple_bingo: 3, relint_disponivel: true,
+      stats: { crimes_total: 50, pico_horario: '22h', pct_noturno: 70, fatores_urbanos_total: 30, denuncias_total: 2 } },
+  ] as any
+
+  it('test_list_areas_sorted_by_score_desc', () => {
+    const out = listAreas(areas)
+    expect(out.total_areas).toBe(2)
+    expect(out.areas[0].id).toBe(2)
+    expect(out.areas[0].score).toBe(90)
+  })
+
+  it('test_compare_areas_by_crimes_total', () => {
+    const out = compareAreas(areas, 'crimes_total')
+    expect(out.metric).toBe('crimes_total')
+    expect(out.ranking[0].id).toBe(1)
+    expect(out.ranking[0].valor).toBe(100)
+  })
+
+  it('test_compare_areas_by_pct_noturno', () => {
+    const out = compareAreas(areas, 'pct_noturno')
+    expect(out.ranking[0].id).toBe(2)
+    expect(out.ranking[0].valor).toBe(70)
   })
 })
