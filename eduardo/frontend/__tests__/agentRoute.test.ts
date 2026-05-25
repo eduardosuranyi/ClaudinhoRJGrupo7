@@ -50,6 +50,16 @@ vi.mock('@/lib/routing', () => ({
   })),
 }))
 
+// Avoid loading the census GeoJSON (and `server-only`) during tests.
+vi.mock('@/lib/censoData', () => ({
+  FONTE_CENSO: 'Censo 2022 (IBGE)',
+  getCensoBairro: vi.fn(() => ({ nome: 'Centro', regiao_adm: 'CENTRO', pop_2022: 23642, pop_2010: 29555, variacao_pct: -20 })),
+  getCensoBairros: vi.fn(() => [{ nome: 'Centro', pop_2022: 23642, variacao_pct: -20 }]),
+  getRegiaoAggregate: vi.fn(() => ({ regiao_adm: 'CENTRO', n_bairros: 5, pop_2022: 100000, variacao_pct: -15, bairros: [] })),
+  getBairrosProximos: vi.fn(() => [{ nome: 'Lapa', distancia_km: 1.2, pop_2022: 5000 }]),
+  getCidadeBaseline: vi.fn(() => ({ n_bairros: 165, pop_2022: 6700000, variacao_pct: 3.4, densidade_mediana_hab_km2: 8000 })),
+}))
+
 import { POST, listAreas, compareAreas } from '@/api/agent/route'
 import { NextRequest } from 'next/server'
 
@@ -278,6 +288,22 @@ describe('POST /api/agent — ToolLoopAgent configuration', () => {
     expect(tools).toHaveProperty('bairros_entorno')
     expect(tools).toHaveProperty('crimes_por_hora')
     expect(tools).toHaveProperty('ontology_events')
+    // Census / demographic tools
+    expect(tools).toHaveProperty('censo_bairro')
+    expect(tools).toHaveProperty('censo_regiao')
+    expect(tools).toHaveProperty('bairros_proximos')
+    // Analytical tools
+    expect(tools).toHaveProperty('previsao_risco')
+    expect(tools).toHaveProperty('correlacao_fatores_crime')
+    expect(tools).toHaveProperty('query_ocorrencias_recentes')
+    // Map visual tools
+    expect(tools).toHaveProperty('add_radius_circle')
+    expect(tools).toHaveProperty('compare_trechos')
+    expect(tools).toHaveProperty('show_heatmap_custom')
+    expect(tools).toHaveProperty('animate_timeline')
+    expect(tools).toHaveProperty('cluster_crimes')
+    expect(tools).toHaveProperty('play_route_animation')
+    expect(tools).toHaveProperty('pulse_location')
     // Removed
     expect(tools).not.toHaveProperty('checkpoint')
     expect(tools).not.toHaveProperty('narrate')

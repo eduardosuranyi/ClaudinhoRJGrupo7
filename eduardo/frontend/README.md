@@ -33,35 +33,45 @@ frontend/
 │   ├── page.tsx                    # Orquestrador (estado global, fetch de dados)
 │   ├── layout.tsx                  # Layout raiz (metadata, fonts)
 │   ├── globals.css                 # Tema escuro + variáveis CSS
-│   ├── types.ts                    # Interfaces TypeScript centralizadas
+│   ├── types.ts                    # Interfaces TypeScript (Area, RioContext, MapControl, etc.)
 │   ├── lib/
 │   │   ├── helpers.ts              # Formatação, cores, labels
-│   │   └── allocation.ts           # Modelo de alocação de 600 agentes FM
+│   │   ├── allocation.ts           # Modelo de alocação de 600 agentes FM
+│   │   ├── censoData.ts            # Censo 2022 (IBGE) server-side loader
+│   │   ├── routing.ts              # Roteamento por ruas (grafo IBGE)
+│   │   ├── areasData.ts            # Loader de areas_data.json
+│   │   ├── ontologyScore.ts        # Score ontológico (valente)
+│   │   └── ontologyEvents.ts       # Eventos NER / ontologia
 │   ├── hooks/
-│   │   └── useMapAgent.ts          # Hook para interação com agente IA no mapa
+│   │   └── useMapAgent.ts          # Hook do agente investigativo (tool handlers)
 │   ├── components/
-│   │   ├── TopHeader.tsx           # KPIs globais
+│   │   ├── TopHeader.tsx           # KPIs globais + "Investigar todas as áreas"
 │   │   ├── Sidebar.tsx             # Ranking + sliders de peso
-│   │   ├── MapView.tsx             # MapLibre GL + 6 camadas
-│   │   ├── AreaPanel.tsx           # Painel detalhado (6 tabs)
-│   │   ├── AgentPanel.tsx          # Painel do agente IA
-│   │   ├── AgentCheckpoint.tsx     # Checkpoints do agente
+│   │   ├── MapView.tsx             # MapLibre GL + 13 camadas + Rio Inteiro + choropleth
+│   │   ├── AreaPanel.tsx           # Painel detalhado (5 tabs + card Demografia)
+│   │   ├── AgentPanel.tsx          # Chat do agente investigativo (streaming)
+│   │   ├── OntologyScorePanel.tsx  # Score ontológico por área
 │   │   ├── RiskSignals.tsx         # 8 regras de detecção de risco
 │   │   └── tabs/
 │   │       ├── EscalaTab.tsx       # Alocação FM por turno
-│   │       ├── OverviewTab.tsx     # KPIs, gráficos, modus
+│   │       ├── OverviewTab.tsx     # KPIs, gráficos, modus, pop/capita
 │   │       ├── TrechosTab.tsx      # Top trechos + bingo
 │   │       ├── DenunciasTab.tsx    # Disque Denúncia
-│   │       ├── InteligenciaTab.tsx # RELINT + domínio territorial
+│   │       ├── InteligenciaTab.tsx # RELINT + domínio + download .docx
 │   │       ├── RelatorioTab.tsx    # Síntese IA + export
 │   │       └── ComparativoPage.tsx # Comparação cross-area
 │   └── api/
-│       ├── agent/route.ts          # Rota do agente IA
+│       ├── agent/route.ts          # Agente investigativo SSE (~42 tools)
+│       ├── censo/route.ts          # Censo 2022 GeoJSON / dados por bairro
+│       ├── route/route.ts          # Roteamento por ruas (grafo IBGE)
+│       ├── score/route.ts          # Ontology score + alocação
+│       ├── relint/route.ts         # Geração RELINT .docx (Haiku)
 │       ├── synthesize/route.ts     # Claude: dinâmica criminal
 │       └── report/route.ts         # Python: relatório .docx
-├── __tests__/                      # 19 testes Vitest
+├── __tests__/                      # 93 testes Vitest (7 suites)
 ├── public/
-│   └── areas_data.json             # Dados do pipeline (~7 MB)
+│   ├── areas_data.json             # Dados por área FM (~7 MB)
+│   └── rio_context.json            # Camadas Rio inteiro (~10 MB, lazy-loaded)
 ├── package.json
 ├── tsconfig.json
 └── vitest.config.ts
@@ -85,7 +95,7 @@ frontend/
 
 | Variável | Obrigatória | Uso |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Para síntese IA | Chave da API Anthropic (Claude Sonnet 4.5) |
+| `ANTHROPIC_API_KEY` | Para síntese IA e agente | Chave da API Anthropic (Claude Sonnet 4.6 / Haiku 4.5) |
 
 Definir em `.env.local` (gitignored).
 
@@ -93,7 +103,7 @@ Definir em `.env.local` (gitignored).
 
 ## Testes
 
-19 testes unitários em 4 módulos:
+93 testes unitários em 7 suites:
 
 ```bash
 npm run test:run
@@ -101,10 +111,13 @@ npm run test:run
 
 | Módulo | Testes | Escopo |
 |---|---|---|
-| `scoring.test.ts` | 4 | `computeScore` com pesos variados |
+| `agentRoute.test.ts` | 29 | `/api/agent`, ToolLoopAgent, query tools, inventário de ~42 tools |
+| `useMapAgent.test.ts` | 26 | `executeMapTool` — handlers de todas as map tools |
 | `helpers.test.ts` | 15 | Formatação, cores, labels |
-| `agentRoute.test.ts` | — | Rota do agente IA |
-| `useMapAgent.test.ts` | — | Hook de interação com agente |
+| `censoData.test.ts` | 10 | Censo 2022 loader, normalização, região, proximidade |
+| `ontologyEvents.test.ts` | 5 | `loadOntologyEventsForArea` caching |
+| `scoring.test.ts` | 4 | `computeScore` com pesos variados |
+| `routing.test.ts` | 4 | `computeRoute` roteamento por ruas IBGE |
 
 ---
 
@@ -112,7 +125,7 @@ npm run test:run
 
 - [README principal](../README.md) — visão geral, funcionalidades, como rodar
 - [Arquitetura](../docs/ARCHITECTURE.md) — componentes, fluxo de dados, decisões
-- [API Reference](../docs/API_REFERENCE.md) — rotas `/api/synthesize` e `/api/report`
+- [API Reference](../docs/API_REFERENCE.md) — 7 rotas: agent, synthesize, report, relint, route, censo, score
 - [Dicionário de Dados](../docs/DATA_DICTIONARY.md) — schema do `areas_data.json`
 - [Contribuição](../docs/CONTRIBUTING.md) — como adicionar camadas, tabs, métricas
 

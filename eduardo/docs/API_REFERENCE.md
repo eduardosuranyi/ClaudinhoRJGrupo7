@@ -1,6 +1,16 @@
 # Referência de API — CompStat Municipal RJ
 
-Documentação das rotas de API do frontend Next.js (`eduardo/frontend/app/api/`). Ambas são endpoints **POST** executados server-side via App Router do Next.js 16.
+Documentação das 7 rotas de API do frontend Next.js (`eduardo/frontend/app/api/`), executadas server-side via App Router do Next.js 16.
+
+| Rota | Método | Propósito |
+|---|---|---|
+| `/api/agent` | POST | Agente investigativo SSE (~42 tools, Sonnet 4.6) |
+| `/api/synthesize` | POST | Síntese de dinâmica criminal (Sonnet 4.6) |
+| `/api/report` | POST | Geração de relatório `.docx` (Python subprocess) |
+| `/api/relint` | POST | Geração de RELINT `.docx` (Haiku 4.5, TypeScript) |
+| `/api/route` | POST | Roteamento por ruas reais (grafo IBGE) |
+| `/api/censo` | GET | Censo 2022 GeoJSON choropleth / dados por bairro |
+| `/api/score` | GET | Ontology score + alocação de frota |
 
 Estas rotas implementam os requisitos das seções 7 (Papel da IA) e 10.4 (Módulo de geração de relatório) do [briefing técnico](../../claude_impact_lab_compstat_rio/Briefing_Hackathon_Desenvolvedores_CompStat-2.pdf).
 
@@ -49,8 +59,8 @@ Gera um **plano de ação executivo** via Claude Sonnet 4.5, sintetizando a din�
 | Requisito | Detalhe |
 |---|---|
 | Variável de ambiente | `ANTHROPIC_API_KEY` em `frontend/.env.local` |
-| Modelo | `claude-sonnet-4-5` |
-| SDK | `@anthropic-ai/sdk` |
+| Modelo | `claude-sonnet-4-6` |
+| SDK | `@ai-sdk/anthropic` (Vercel AI SDK) |
 | `max_tokens` | 1500 |
 
 ### Request
@@ -326,6 +336,77 @@ curl -X POST http://localhost:3000/api/report \
   "synthesis": "A área concentra roubos a transeunte e furto de celular no entorno da Av. Presidente Vargas, com pico às 20h e 63% das ocorrências no período noturno. Denúncias indicam ação de menores e grupos em pontos de retenção de tráfego."
 }
 EOF
+```
+
+---
+
+## POST `/api/agent`
+
+Agente investigativo que controla o mapa em tempo real via ~42 tools (query, mapa, controle). Usa Claude Sonnet 4.6 com Vercel AI SDK (`ToolLoopAgent`).
+
+**Modos:** por área (`area` no body) ou global (`scope: 'global'`).
+
+```bash
+curl -X POST http://localhost:3000/api/agent \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"Investigue essa área"}],"area":"Metrô Botafogo"}'
+```
+
+Retorna stream de mensagens (Vercel AI SDK format). Tools incluem: `query_trechos`, `query_relatos_dd`, `query_chamados_1746`, `censo_bairro`, `censo_regiao`, `bairros_proximos`, `previsao_risco`, `toggle_layer`, `highlight_trecho`, `show_route`, `cluster_crimes`, `play_route_animation`, `pulse_location`, entre outras.
+
+---
+
+## POST `/api/relint`
+
+Gera relatório RELINT em formato `.docx` usando Claude Haiku 4.5 (TypeScript, `docx` library).
+
+```bash
+curl -X POST http://localhost:3000/api/relint \
+  -H "Content-Type: application/json" \
+  -d '{"area":{...},"allAreas":[...]}' \
+  --output relint.docx
+```
+
+---
+
+## POST `/api/route`
+
+Calcula rota seguindo ruas reais usando grafo de logradouros IBGE (Dijkstra via `geojson-path-finder`).
+
+```bash
+curl -X POST http://localhost:3000/api/route \
+  -H "Content-Type: application/json" \
+  -d '{"from":{"lat":-22.9068,"lng":-43.1729},"to":{"lat":-22.9110,"lng":-43.1750}}'
+```
+
+Retorna `{ status, coordinates, distance_m, message }`.
+
+---
+
+## GET `/api/censo`
+
+Retorna dados do Censo 2022 (IBGE) para o choropleth ou para cards de bairro.
+
+```bash
+# GeoJSON completo (choropleth do mapa)
+curl http://localhost:3000/api/censo
+
+# Filtrado por bairros (card do AreaPanel)
+curl "http://localhost:3000/api/censo?bairros=Centro,Copacabana"
+```
+
+---
+
+## GET `/api/score`
+
+Ontology score e alocação de frota (gerado por `valente-ontology`).
+
+```bash
+# Score de uma área
+curl "http://localhost:3000/api/score?area=Metrô%20Botafogo"
+
+# Report completo
+curl "http://localhost:3000/api/score?all=1"
 ```
 
 ---

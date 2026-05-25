@@ -105,21 +105,17 @@ Cada item acima é gerado a partir dos dados reais — não é mock, não é exe
 
 ### 1. Agente investigativo com tool use — IA que navega o mapa
 
-O analista clica "Investigar" e o Claude **assume o controle do mapa**: liga camadas, dá zoom na área, marca as ruas mais perigosas com anotações, narra o que encontra em linguagem simples e **pausa em checkpoints para o analista fazer perguntas ou redirecionar a análise**. No final, gera achados principais + plano de ação priorizado.
+O analista clica "Investigar" e o Claude **assume o controle do mapa**: liga camadas, dá zoom na área, destaca ruas, traça rotas pelas ruas reais, mostra heatmaps, anima clusters e **pausa para o analista fazer perguntas ou redirecionar a análise**. No final, gera achados principais + plano de ação priorizado.
 
-**7 tools que o agente usa em tempo real:**
+**~42 tools em 3 grupos — o agente usa em tempo real:**
 
-| Tool | O que faz no mapa |
-|---|---|
-| `zoom_to_area` | Centraliza e anima o mapa na área selecionada |
-| `toggle_layer` | Liga/desliga camadas (crime, fatores, câmeras, PSR, domínio territorial) |
-| `show_annotation` | Marca pontos no mapa com título e observação (ex: rua mais perigosa) |
-| `update_weights` | Ajusta os pesos do score para destacar a dimensão sendo analisada |
-| `narrate` | Mostra texto explicativo no painel lateral com dados concretos |
-| `checkpoint` | Pausa e pergunta ao analista — com opções pré-definidas ou texto livre |
-| `complete_investigation` | Finaliza com achados-chave + plano de ação por órgão |
+| Grupo | Exemplos | O que fazem |
+|---|---|---|
+| **Query** (14) | `query_trechos`, `query_relatos_dd`, `query_chamados_1746`, `censo_bairro`, `censo_regiao`, `bairros_proximos`, `previsao_risco`, `correlacao_fatores_crime` | Consultam dados reais da área — crimes, denúncias, 1746, Censo 2022, RELINT, ontologia |
+| **Mapa** (22) | `toggle_layer`, `zoom_to_area`, `highlight_trecho`, `show_route`, `show_heatmap_custom`, `cluster_crimes`, `animate_timeline`, `play_route_animation`, `pulse_location`, `focus_bairro` | Controlam o mapa: zoom, camadas, rotas por ruas reais, heatmaps, animações, clusters DBSCAN |
+| **Controle** (6) | `pause_for_user`, `complete_investigation`, `update_weights` | Pausas human-in-the-loop, achados finais, ajuste de pesos |
 
-O fluxo é streaming via SSE, com **human-in-the-loop**: o agente faz 3 pausas (checkpoints) onde o analista pode pedir mais detalhes, mudar o foco ou seguir em frente. Não é um chatbot genérico — é um **roteiro investigativo guiado** que usa os dados reais da área.
+O fluxo é streaming via Vercel AI SDK, com **human-in-the-loop**: o agente pausa após cada etapa para o analista fazer perguntas ou redirecionar. Funciona em modo **por área** (investigação focada) e **global** (comparação de todas as áreas). Toda afirmação baseada em dado cita a fonte inline (regras FONTES no system prompt).
 
 ### 2. Cruzamento real das 3 camadas — não apenas dashboards
 
@@ -140,7 +136,7 @@ Além das 5 fontes oficiais, integramos:
 | Fonte extra | O que trouxe |
 |---|---|
 | **Central 1746** (902k chamados via BigQuery) | Valida fatores de campo com demanda cidadã — "equipe viu poste apagado E cidadão reclama há 3 anos" |
-| **Censo 2022** (IBGE) | Normalização per capita — Pres. Vargas tem 107 crimes/1000 hab, Campo Grande tem 0,8 |
+| **Censo 2022** (IBGE) | Normalização per capita, choropleth de densidade, demografia por bairro/região para o agente (censo_bairro, censo_regiao, bairros_proximos) |
 | **Bairros data.rio** | Contexto geográfico: cada área FM fica dentro de 1-8 bairros com população e subprefeitura |
 | **Logradouros CadLog** (132k trechos) | Gazetteer para geoparsing de denúncias e resolução de trechos |
 
@@ -154,7 +150,7 @@ Não paramos no dashboard. O gestor gera o relatório `.docx` com um clique e de
 
 ### 7. Tudo determinístico e testável
 
-51 testes (32 backend + 19 frontend). Score é fórmula aberta, não caixa-preta. Alocação de efetivo é fórmula aberta. IA é usada apenas para síntese textual. O gestor pode ajustar os pesos dos componentes ao vivo e ver o ranking mudar — transparência total.
+125 testes (32 backend + 93 frontend). Score é fórmula aberta, não caixa-preta. Alocação de efetivo é fórmula aberta. IA é usada apenas para síntese textual. O gestor pode ajustar os pesos dos componentes ao vivo e ver o ranking mudar — transparência total.
 
 ---
 
@@ -176,7 +172,7 @@ Não paramos no dashboard. O gestor gera o relatório `.docx` com um clique e de
 | Desafio | Como abordamos |
 |---|---|
 | **Desafio 4 — Otimização de Câmeras** | Camera Gap Analysis com buffer 50m, classificação instalar/remanejar, camada no mapa |
-| **Desafio 2 — Migração do Crime** | Dados de bairros do entorno (20 bairros) + evolução mensal permitem detectar deslocamento |
+| **Desafio 2 — Migração do Crime** | Dados de bairros do entorno (20 bairros) + evolução mensal + anéis de entorno (500m) com crimes/DD spillover via `rio_context.json` + camadas "Rio Inteiro" (115k crimes, 17.8k DD, 1.260 domínios) |
 | **Desafio 3 — Permanência Operacional** | Série temporal de 24 meses por área para avaliar tendência |
 
 ---
@@ -187,9 +183,9 @@ Não paramos no dashboard. O gestor gera o relatório `.docx` com um clique e de
 |---|---|
 | Pipeline | Python · Pandas · GeoPandas · Shapely |
 | Frontend | Next.js 16 · TypeScript · Tailwind v4 · MapLibre GL · Recharts |
-| IA | Claude Sonnet 4.5 (síntese) · Claude Sonnet 4.6 (agente investigativo com tool use) · Claude Haiku 4.5 (geração do RELINT .docx) |
+| IA | Claude Sonnet 4.6 (agente investigativo ~42 tools + síntese) · Claude Haiku 4.5 (geração do RELINT .docx) |
 | Relatório | docx (TypeScript) |
-| Testes | pytest (32) · Vitest (19) |
+| Testes | pytest (32) · Vitest (93) |
 
 ---
 

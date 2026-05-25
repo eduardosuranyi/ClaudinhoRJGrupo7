@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { Area, InspectedPoint } from '../types'
 import { scoreColor, faccaoColor } from '../lib/helpers'
 import OverviewTab from './tabs/OverviewTab'
@@ -188,6 +188,7 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
         {tab === 'analise' && (
           <>
             <OverviewTab area={area} allAreas={allAreas} />
+            <CensoCard bairros={area.identificacao.bairros} />
             <div style={{ margin: '0 16px', padding: '12px 0', borderTop: '1px solid var(--border)' }}>
               <span className="label-overline" style={{ fontSize: 10 }}>
                 Trechos Críticos · {area.top_trechos.length}
@@ -374,6 +375,92 @@ function RelintDownloadBtn({ area, allAreas }: { area: Area; allAreas: Area[] })
         </>
       ) : '↓ RELINT'}
     </button>
+  )
+}
+
+interface CensoBairro {
+  nome: string
+  pop_2022: number
+  pop_2010: number
+  variacao_pct: number
+  domicilios_ocupados: number
+  pessoas_por_domicilio: number
+  densidade_hab_km2: number
+  area_km2: number
+}
+
+function CensoCard({ bairros }: { bairros?: string[] }) {
+  const [data, setData] = useState<CensoBairro[] | null>(null)
+  const [open, setOpen] = useState(false)
+
+  const load = useCallback(async () => {
+    if (data || !bairros?.length) return
+    try {
+      const res = await fetch(`/api/censo?bairros=${encodeURIComponent(bairros.join(','))}`)
+      if (!res.ok) return
+      const json = await res.json()
+      if (Array.isArray(json.bairros) && json.bairros.length) setData(json.bairros)
+    } catch { /* silently degrade */ }
+  }, [bairros, data])
+
+  useEffect(() => { if (open) load() }, [open, load])
+
+  if (!bairros?.length) return null
+
+  const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n)
+  const totPop = data?.reduce((s, b) => s + b.pop_2022, 0) ?? 0
+  const totPop2010 = data?.reduce((s, b) => s + b.pop_2010, 0) ?? 0
+  const avgDensidade = data?.length ? Math.round(data.reduce((s, b) => s + b.densidade_hab_km2, 0) / data.length) : 0
+  const varPct = totPop2010 > 0 ? ((totPop - totPop2010) / totPop2010 * 100) : 0
+
+  return (
+    <div style={{ margin: '0 16px', padding: '10px 0', borderTop: '1px solid var(--border)' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          display: 'flex', alignItems: 'center', gap: 6, width: '100%',
+        }}
+      >
+        <span className="label-overline" style={{ fontSize: 10 }}>Demografia (Censo 2022)</span>
+        <span style={{ fontSize: 10, color: 'var(--text-muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span>
+      </button>
+
+      {open && data && (
+        <div style={{ marginTop: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginBottom: 8 }}>
+            <MiniKpi label="Pop. Total" value={fmt(totPop)} />
+            <MiniKpi label="Variação 10→22" value={`${varPct >= 0 ? '+' : ''}${varPct.toFixed(1)}%`} color={varPct < 0 ? '#ef4444' : '#36c476'} />
+            <MiniKpi label="Densid. Média" value={`${fmt(avgDensidade)} hab/km²`} />
+          </div>
+          {data.length > 1 && (
+            <div style={{ fontSize: 10, color: 'var(--text-dim)' }}>
+              {data.map(b => (
+                <div key={b.nome} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontWeight: 500 }}>{b.nome}</span>
+                  <span className="mono tnum">{fmt(b.pop_2022)} · {b.variacao_pct >= 0 ? '+' : ''}{b.variacao_pct.toFixed(1)}% · {fmt(b.densidade_hab_km2)}/km²</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 6, fontStyle: 'italic' }}>
+            Fonte: Censo 2022 (IBGE)
+          </div>
+        </div>
+      )}
+      {open && !data && (
+        <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 6 }}>Carregando…</div>
+      )}
+    </div>
+  )
+}
+
+function MiniKpi({ label, value, color }: { label: string; value: string; color?: string }) {
+  return (
+    <div style={{ background: 'var(--bg-1)', border: '1px solid var(--border)', borderRadius: 2, padding: '5px 8px' }}>
+      <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+      <div className="mono tnum" style={{ fontSize: 12, fontWeight: 600, color: color ?? 'var(--text)', marginTop: 2 }}>{value}</div>
+    </div>
   )
 }
 
