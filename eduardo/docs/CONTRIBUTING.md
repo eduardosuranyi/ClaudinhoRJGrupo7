@@ -151,7 +151,7 @@ python -m pytest tests/ -v --cov=data_pipeline  # com cobertura de código
 | `test_bingo.py` | 5 | Coincidência 2/3 e 3/3, contadores |
 | `test_camera_gaps.py` | 4 | Pontos cegos, recomendações instalar/remanejar |
 
-### Frontend (19 testes)
+### Frontend (93 testes em 7 suites)
 
 ```bash
 cd eduardo/frontend
@@ -161,8 +161,13 @@ npm test             # modo watch (re-executa ao salvar)
 
 | Módulo | Testes | O que valida |
 |---|---|---|
+| `agentRoute.test.ts` | 29 | `/api/agent` route, ToolLoopAgent, query tools, inventário de 42 tools |
+| `useMapAgent.test.ts` | 26 | `executeMapTool` — handlers de todas as map tools |
+| `helpers.test.ts` | 15 | `fmt`, `scoreColor`, `faccaoColor`, `shortName`, `cap`, labels |
+| `censoData.test.ts` | 10 | Censo 2022 loader, normalização, região, proximidade |
+| `ontologyEvents.test.ts` | 5 | `loadOntologyEventsForArea` caching |
 | `scoring.test.ts` | 4 | `computeScore` com pesos default, zero, customizados, bônus RELINT |
-| `helpers.test.ts` | 15 | `fmt`, `scoreColor`, `faccaoColor`, `shortName`, `cap`, labels de modus/órgãos |
+| `routing.test.ts` | 4 | `computeRoute` roteamento por ruas IBGE |
 
 ### Antes de abrir PR
 
@@ -258,12 +263,15 @@ map.addLayer({
 
 **Passo 4 — Toggle na UI**
 
-1. Adicione a chave em `LayerVisibility` (interface no topo do MapView)
-2. Inicialize em `useState` com `false`
-3. Registre os IDs da layer em `layerIds` dentro de `toggleLayer()`
-4. Adicione um `<LayerBtn>` no painel de controles
+1. Adicione a chave em `LayerVisibility` (interface no topo do MapView — 13 keys atualmente)
+2. Inicialize em `useState` e `useRef` com `false`
+3. Registre os IDs da layer em `LAYER_IDS` (Record)
+4. Adicione um `<LayerBtn>` no painel Camadas (seção FM ou Rio Inteiro)
+5. Para dados lazy-loaded, use o padrão de fetch on first toggle (ver `censoLoaded.current` ou `rioLoaded.current`)
 
-Referência: camada **Pontos Cegos** (`gaps`) — source `gaps`, layer `gaps-dot`.
+Referência simples: camada **Pontos Cegos** (`gaps`).
+Referência lazy-load: camada **Censo (Densidade)** (`censo`) — busca `/api/censo` na primeira ativação.
+Referência Rio Inteiro: camadas `rioRings`/`rioCrime`/`rioDD`/`rioDominio` — buscam `rio_context.json`.
 
 ---
 

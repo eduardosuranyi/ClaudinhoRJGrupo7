@@ -379,11 +379,40 @@ python data_pipeline.py --data-dir ../../compstat --output areas_data.json
 
 # Copiar para o frontend
 cp areas_data.json ../frontend/public/areas_data.json
+
+# (Opcional) Gerar rio_context.json — camadas city-wide + anéis de entorno
+python data_pipeline.py --data-dir ../data --output areas_data.json --with-rio-context
+cp rio_context.json ../frontend/public/rio_context.json
 ```
 
 ---
 
-## 7. Referências
+## 7. `rio_context.json` (artefato adicional)
+
+Gerado com `--with-rio-context`. Carregado lazily pelo frontend quando o operador ativa camadas "Rio Inteiro".
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `meta.generated_at` | `string` | Data de geração |
+| `meta.buffer_m` | `number` | Raio do anel de entorno (default 500m) |
+| `meta.crime_total` | `number` | Total de pontos de crime city-wide |
+| `meta.dd_total` | `number` | Total de denúncias DD city-wide |
+| `meta.dominio_total` | `number` | Total de polígonos de domínio |
+| `meta.isp_period` | `string?` | Período dos dados ISP agregados |
+| `rings[]` | `object[]` | Anéis de entorno (buffer 500m menos FM) |
+| `rings[].fid` | `number` | ID da área FM |
+| `rings[].nome` | `string` | Nome da área FM |
+| `rings[].crimes_in_ring` | `number` | Crimes dentro do anel |
+| `rings[].dd_in_ring` | `number` | Denúncias dentro do anel |
+| `rings[].geometry` | `GeoJSON.Geometry` | Polígono do anel |
+| `crime_points[]` | `{lat, lng, tipo, h}[]` | Todos os crimes georreferenciados |
+| `dd_points[]` | `{lat, lng, tipo}[]` | Todas as denúncias DD georreferenciadas |
+| `dominio` | `FeatureCollection` | Polígonos de domínio OrCrim (simplificados) |
+| `aisp_violence` | `Record<string, Record<string, number>>` | Série ISP por AISP (sem geometria) |
+
+---
+
+## 8. Referências
 
 - [Arquitetura](ARCHITECTURE.md) — fluxo de dados e decisões técnicas
 - [Referência da API](API_REFERENCE.md) — como o frontend consome os dados

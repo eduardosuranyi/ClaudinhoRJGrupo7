@@ -183,7 +183,7 @@ O resultado é serializado em `areas_data.json` (~7 MB), contendo metadados glob
 | **Next.js** | 16 (App Router) | Framework React com rotas de API server-side |
 | **TypeScript** | strict | Tipagem estática centralizada em `types.ts` |
 | **Tailwind CSS** | v4 | Estilização utilitária + variáveis CSS customizadas (tema escuro) |
-| **MapLibre GL** | latest | Mapa interativo com 6 camadas de dados |
+| **MapLibre GL** | latest | Mapa interativo com 13 camadas toggleáveis + Rio Inteiro |
 | **Recharts** | latest | Gráficos radar, barras e distribuições |
 | **Vitest** | latest | 93 testes unitários (7 suites) |
 
@@ -191,8 +191,8 @@ O resultado é serializado em `areas_data.json` (~7 MB), contendo metadados glob
 
 | Serviço | Modelo | Papel na plataforma |
 |---|---|---|
-| **Anthropic API** | Claude Sonnet 4.5 | Síntese da dinâmica criminal (seção 7.1 do briefing) |
-| | | Cruzamento e identificação de coincidências (seção 7.2) |
+| **Anthropic API** | Claude Sonnet 4.6 | Agente investigativo (~42 tools, `/api/agent`) + Síntese (`/api/synthesize`) |
+| | | Claude Haiku 4.5 para `/api/relint` (.docx) |
 | | | Resposta às perguntas norteadoras (seção 7.3) |
 | | | Geração de plano de ação com 5-8 ações priorizadas |
 
@@ -206,7 +206,7 @@ O resultado é serializado em `areas_data.json` (~7 MB), contendo metadados glob
 page.tsx (Orquestrador)
 ├── TopHeader          KPIs globais consolidados
 ├── Sidebar            Ranking + sliders de peso
-├── MapView            MapLibre + 6 camadas toggleáveis
+├── MapView            MapLibre + 13 camadas toggleáveis + Rio Inteiro
 ├── AreaPanel          Painel detalhado (420px lateral)
 │   ├── EscalaTab      Alocação de 600 agentes por área/turno
 │   ├── OverviewTab    KPIs, gráficos temporais, modus + RiskSignals
@@ -239,29 +239,42 @@ KPIs agregados de todas as áreas: total de crimes, denúncias, fatores urbanos,
 
 #### `MapView`
 
-MapLibre GL com estilo CARTO Dark Matter. 6 camadas toggleáveis:
+MapLibre GL com estilo CARTO Dark Matter. 13 camadas toggleáveis em dois grupos:
+
+**Por área FM:**
 
 | Camada | Tipo de visualização | Fonte de dados |
 |---|---|---|
-| **Crime** | Heatmap / pontos | `map_layers.crime_points` |
+| **Crime** | Heatmap + pontos (transição por zoom) | `map_layers.crime_points` |
 | **Fatores Urbanos** | Pontos coloridos por órgão | `map_layers.fatores_points` |
 | **Câmeras** | Marcadores CIVITAS | `map_layers.cameras_points` |
 | **PSR** | Pontos do censo | `map_layers.psr_points` |
+| **Chamados 1746** | Triângulos por tipo | `map_layers.chamados_points` |
 | **Domínio Territorial** | Polígonos por facção | `dominio_territorial` |
 | **Pontos Cegos** | Marcadores vermelho/amarelo | `camera_gaps.gaps` |
+| **Bairros Entorno** | Polígonos + popup (pop/DD/1746) | `bairros_entorno` |
+| **Censo (Densidade)** | Choropleth azul (lazy-loaded) | `GET /api/censo` |
+
+**Rio Inteiro (lazy-loaded de `rio_context.json`):**
+
+| Camada | Tipo de visualização | Fonte |
+|---|---|---|
+| **Anéis de Entorno** | Polígono 500m buffer (auto-ativa Crimes + DD) | `rio_context.rings` |
+| **Crimes (Rio)** | Heatmap + dots (115k pontos) | `rio_context.crime_points` |
+| **Denúncias DD (Rio)** | Círculos laranja (17.8k pontos) | `rio_context.dd_points` |
+| **Domínio (Rio)** | Polígonos por facção (1.260) | `rio_context.dominio` |
 
 Polígonos FM são coloridos dinamicamente pelo score recalculado com os pesos atuais.
 
-#### `AreaPanel` — 6 Tabs
+#### `AreaPanel` — 5 Tabs
 
 | Tab | Mapeamento ao Briefing | Dados consumidos |
 |---|---|---|
-| **EscalaTab** | Pergunta 3 (modelo de emprego FM) | `stats`, `score`, alocação de 600 agentes |
-| **OverviewTab** | Seções 1-4 do relatório | `stats`, `hora_distribution`, `dia_distribution`, `modus_operandi`, `fatores_por_orgao` |
-| **TrechosTab** | Seção 5 (Painel de Coincidências) | `top_trechos`, `bingo_layers` |
-| **DenunciasTab** | Seção 4.1 (dados qualitativos) | `relatos_sample`, `denuncias_por_bairro` |
-| **InteligenciaTab** | Seção 2 (Dinâmica Criminal) | `relint`, `dominio_territorial` |
-| **RelatorioTab** | Seção 6 (Relatório completo) | Todos os dados + síntese Claude |
+| **Efetivo FM** | Pergunta 3 (modelo de emprego FM) | `stats`, `score`, alocação de 600 agentes |
+| **Mancha Criminal** | Seções 1-5 do relatório | `stats`, KPIs, trechos, bingo, validação 1746 + card Demografia (Censo 2022, lazy) |
+| **Ontologia** | Score ontológico (valente) | `/api/score` |
+| **Dinâmica** | Seção 2 (Dinâmica Criminal) | `relint`, `dominio_territorial`, download RELINT .docx |
+| **Plano de Ação** | Seção 6 (Relatório completo) | Todos os dados + síntese Claude |
 
 #### `ComparativoPage`
 
@@ -362,11 +375,13 @@ O relatório `.docx` gerado pela plataforma pré-popula as 4 perguntas norteador
 
 | Rota | Método | Função | Dependência |
 |---|---|---|---|
-| `/api/synthesize` | POST | Síntese de dinâmica criminal via Claude | `ANTHROPIC_API_KEY` |
+| `/api/agent` | POST | Agente investigativo (Vercel AI SDK, ~42 tools, Sonnet 4.6) | `ANTHROPIC_API_KEY` |
+| `/api/synthesize` | POST | Síntese de dinâmica criminal (Sonnet 4.6) | `ANTHROPIC_API_KEY` |
 | `/api/report` | POST | Geração de relatório `.docx` | Python 3.10+ + `python-docx` |
-| `/api/agent` | POST | Agente investigativo SSE (tool use loop) | `ANTHROPIC_API_KEY` |
-| `/api/censo` | GET | Censo 2022 (IBGE) GeoJSON (choropleth) / dados por bairro | — |
-| `/api/relint` | POST | Geração de relatório RELINT `.docx` | `ANTHROPIC_API_KEY` |
+| `/api/relint` | POST | Geração de relatório RELINT `.docx` (Haiku 4.5, TypeScript) | `ANTHROPIC_API_KEY` |
+| `/api/route` | POST | Roteamento por ruas reais (grafo IBGE, Dijkstra) | — |
+| `/api/censo` | GET | Censo 2022 (IBGE) GeoJSON choropleth / dados por bairro | — |
+| `/api/score` | GET | Ontology score + alocação de frota | — |
 
 Documentação completa com exemplos cURL: **[API_REFERENCE.md](API_REFERENCE.md)**
 

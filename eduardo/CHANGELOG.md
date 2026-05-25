@@ -5,6 +5,40 @@ Convenção: versões seguem `vMAJOR.MINOR.PATCH`. Cada entrada detalha impacto 
 
 ---
 
+## v2.3.0 — Censo Choropleth, Rio Inteiro, Roteamento por Ruas, UI Polish (2026-05-25)
+
+### Backend
+- **`build_rio_context()`** em `data_pipeline.py` (`--with-rio-context`): gera `rio_context.json` (~10 MB) com 115k crimes, 17.8k DD, 1.260 domínios e anéis de entorno 500m
+- **`censoData.ts`** (server-side): loader do Censo 2022 com área real calculada da geometria, densidade, variação 2010→2022, proximidade por centróide
+
+### Frontend — Camadas e Mapa (13 layers, de 6 para 13)
+- **Censo (Densidade)**: choropleth azul por `densidade_hab_km2` com hover popup (lazy-loaded de `/api/censo`)
+- **Rio Inteiro**: 4 novas camadas lazy-loaded (`rio_context.json`): Anéis de Entorno, Crimes (Rio), Denúncias DD (Rio), Domínio (Rio)
+- **Ring auto-enable**: ativar "Anéis de Entorno" automaticamente habilita Crimes (Rio) + DD (Rio)
+- **Chamados 1746**: camada de pontos no mapa
+- **Bairros Entorno**: polígonos com popup (pop/DD/1746)
+- **Heatmap fix**: crime-heat e crime-heat-custom não saturam mais no zoom-out (intensity/radius/opacity corrigidos)
+- **Clusters**: `circle-blur: 0.5` + opacidade crescente (blob suave vs puck duro)
+- **Strokes**: line-width interpolado por zoom (dominio, bairro-focus, radius)
+- **Crime dots**: fade suave (z13.5→z14.5) em vez de pop seco
+- **Timeline dots**: circle-blur diferenciado (isNew vs antigos)
+
+### Frontend — Agente e UI
+- **3 tools de Censo**: `censo_bairro`, `censo_regiao`, `bairros_proximos` — demografia IBGE com fonte citada
+- **FONTES**: seção no system prompt obriga citação inline da fonte de todo dado (ISP-RJ, DD, 1746, Censo, RELINT)
+- **GET /api/censo**: endpoint para choropleth e card de bairro
+- **Demografia card**: card colapsável "Demografia (Censo 2022)" na tab Mancha Criminal
+- **AgentPanel labels**: labels amigáveis para as 3 tools de Censo
+- **Roteamento por ruas**: `POST /api/route` + grafo IBGE (Dijkstra) — rotas e animações seguem ruas reais
+
+### Testes
+- 93 testes frontend (de 19 para 93, 7 suites): censoData (10), agentRoute (29 com inventário de ~42 tools), useMapAgent (26), routing (4), ontologyEvents (5)
+
+### Docs
+- README, ARCHITECTURE, CONTRIBUTING, API_REFERENCE, DATA_DICTIONARY, data/README atualizados
+
+---
+
 ## v2.1.0 — Enriquecimento de Dados e Normalização Per Capita (2026-05-24)
 
 Integração de 3 fontes externas (bairros, Censo 2022, Central 1746) para normalização per capita e contextualização geográfica das áreas FM. Esta versão não altera o modelo de scoring — os novos dados são contextuais.

@@ -658,7 +658,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       source: 'rio-rings',
       paint: {
         'fill-color': '#a5f3fc',
-        'fill-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.08, 14, 0.04],
+        'fill-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.1, 14, 0.06, 16, 0.04],
       },
       layout: { visibility: 'none' },
     })
@@ -668,8 +668,8 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       source: 'rio-rings',
       paint: {
         'line-color': '#22d3ee',
-        'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.6, 15, 1.5],
-        'line-opacity': 0.4,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.8, 14, 1.5, 16, 2.5],
+        'line-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.5, 16, 0.7],
         'line-dasharray': [4, 3],
       },
       layout: { visibility: 'none' },
@@ -681,14 +681,33 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       type: 'heatmap',
       source: 'rio-crime',
       paint: {
-        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 8, 0.15, 11, 0.4, 13, 1],
-        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 8, 8, 11, 14, 14, 22],
-        'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0.7, 15, 0],
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 8, 0.15, 11, 0.4, 13, 1, 15, 1.5],
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 8, 8, 11, 14, 14, 22, 16, 28],
+        'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0.7, 15, 0.35, 16, 0],
         'heatmap-color': [
           'interpolate', ['linear'], ['heatmap-density'],
           0, 'rgba(0,0,0,0)', 0.15, 'rgba(255,107,53,0.3)', 0.4, 'rgba(255,107,53,0.55)',
           0.7, '#fbb040', 1, '#ef4444',
         ],
+      },
+      layout: { visibility: 'none' },
+    })
+    map.addLayer({
+      id: 'rio-crime-dot',
+      type: 'circle',
+      source: 'rio-crime',
+      minzoom: 13,
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 2, 16, 5],
+        'circle-color': ['match', ['get', 'tipo'],
+          'Roubo a transeunte', '#ff6b35',
+          'Roubo de aparelho celular', '#fbb040',
+          'Roubo em coletivo', '#a855f7',
+          '#ff6b35'],
+        'circle-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0, 14, 0.5, 16, 0.8],
+        'circle-blur': 0.15,
+        'circle-stroke-color': 'rgba(7,7,10,0.5)',
+        'circle-stroke-width': 0.5,
       },
       layout: { visibility: 'none' },
     })
@@ -699,10 +718,12 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       type: 'circle',
       source: 'rio-dd',
       paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 14, 4],
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 14, 4, 16, 6],
         'circle-color': '#f59e0b',
-        'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.3, 14, 0.6],
-        'circle-blur': 0.3,
+        'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.3, 14, 0.6, 16, 0.8],
+        'circle-blur': 0.2,
+        'circle-stroke-color': 'rgba(7,7,10,0.4)',
+        'circle-stroke-width': 0.4,
       },
       layout: { visibility: 'none' },
     })
@@ -715,7 +736,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       paint: {
         'fill-color': ['match', ['get', 'faccao'],
           'CV', '#ef4444', 'TCP', '#a855f7', 'ADA', '#4a90e2', 'Milícia', '#fbb040', '#888'],
-        'fill-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.08, 14, 0.04],
+        'fill-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.1, 14, 0.07, 16, 0.05],
       },
       layout: { visibility: 'none' },
     })
@@ -726,8 +747,8 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       paint: {
         'line-color': ['match', ['get', 'faccao'],
           'CV', '#ef4444', 'TCP', '#a855f7', 'ADA', '#4a90e2', 'Milícia', '#fbb040', '#888'],
-        'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.4, 15, 1.2],
-        'line-opacity': 0.5,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 15, 1.5, 16, 2],
+        'line-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 16, 0.7],
       },
       layout: { visibility: 'none' },
     })
@@ -1293,6 +1314,27 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     map.on('mousemove', 'censo-fill', (e: any) => { popupRef.current?.setLngLat(e.lngLat) })
     map.on('mouseleave', 'censo-fill', () => { popupRef.current?.remove() })
 
+    // Hover on Rio entorno rings
+    map.on('mouseenter', 'rio-rings-fill', (e: any) => {
+      if (map.getCanvas().style.cursor === 'pointer') return
+      const p = e.features[0].properties
+      const crimes = Number(p.crimes || 0)
+      const dd = Number(p.dd || 0)
+      popupRef.current
+        ?.setLngLat(e.lngLat)
+        .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:170px">
+          <div style="font-size:10px;color:#22d3ee;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Anel de Entorno (500m)</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px">${p.nome}</div>
+          <div style="display:flex;gap:14px;font-size:11px">
+            <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Crimes</div><div style="font-weight:500;font-variant-numeric:tabular-nums;color:#ff6b35">${crimes > 0 ? crimes.toLocaleString('pt-BR') : '—'}</div></div>
+            <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Denúncias</div><div style="font-weight:500;font-variant-numeric:tabular-nums;color:#f59e0b">${dd > 0 ? dd.toLocaleString('pt-BR') : '—'}</div></div>
+          </div>
+        </div>`)
+        .addTo(map)
+    })
+    map.on('mousemove', 'rio-rings-fill', (e: any) => { popupRef.current?.setLngLat(e.lngLat) })
+    map.on('mouseleave', 'rio-rings-fill', () => { popupRef.current?.remove() })
+
     // Hover on trecho markers
     map.on('mouseenter', 'trechos-circle', (e: any) => {
       map.getCanvas().style.cursor = 'pointer'
@@ -1578,7 +1620,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     bairros:  ['bairros-fill', 'bairros-stroke', 'bairros-label'],
     censo:    ['censo-fill', 'censo-stroke'],
     rioRings: ['rio-rings-fill', 'rio-rings-stroke'],
-    rioCrime: ['rio-crime-heat'],
+    rioCrime: ['rio-crime-heat', 'rio-crime-dot'],
     rioDD:    ['rio-dd-dot'],
     rioDominio: ['rio-dominio-fill', 'rio-dominio-stroke'],
   }
@@ -1648,7 +1690,12 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   }
 
   function toggleLayer(key: keyof LayerVisibility) {
-    setLayerVisible(key, !layersRef.current[key])
+    const next = !layersRef.current[key]
+    setLayerVisible(key, next)
+    if (key === 'rioRings' && next) {
+      if (!layersRef.current.rioCrime) setLayerVisible('rioCrime', true)
+      if (!layersRef.current.rioDD) setLayerVisible('rioDD', true)
+    }
   }
 
   // ─────────────────────────────────────────────────────────
