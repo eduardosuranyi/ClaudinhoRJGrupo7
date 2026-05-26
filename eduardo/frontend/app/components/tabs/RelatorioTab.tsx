@@ -209,9 +209,6 @@ Prefeitura do Rio de Janeiro`)
       {error && !loading && (
         <div style={{ padding: '10px 12px', background: 'var(--red-soft)', border: '1px solid var(--red)', borderRadius: 2 }}>
           <p style={{ fontSize: 11, color: 'var(--red)', margin: 0 }}>{error}</p>
-          <p style={{ fontSize: 10, color: 'var(--text-muted)', margin: '4px 0 0' }}>
-            Verifique ANTHROPIC_API_KEY em .env.local
-          </p>
         </div>
       )}
 

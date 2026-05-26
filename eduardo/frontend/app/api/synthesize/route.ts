@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import Anthropic, { APIConnectionError, AuthenticationError } from '@anthropic-ai/sdk'
 import type { Trecho, Relato, FatorOrgao, AreaStats, Chamados1746, ValidacaoCruzada } from '../../types'
-
-const client = new Anthropic()
 
 interface SynthesizeBody {
   nome: string
@@ -16,6 +14,16 @@ interface SynthesizeBody {
 }
 
 export async function POST(req: NextRequest) {
+  const apiKey = process.env.ANTHROPIC_API_KEY?.trim()
+  if (!apiKey) {
+    return NextResponse.json({
+      error: 'ANTHROPIC_API_KEY não encontrada em process.env. ' +
+        'Confira o arquivo eduardo/frontend/.env (ou .env.local) e ' +
+        'reinicie o servidor (next dev carrega .env apenas no startup).',
+    }, { status: 500 })
+  }
+  const client = new Anthropic({ apiKey })
+
   const { nome, relint, stats, top_trechos, fatores, relatos, chamados_1746, validacao_cruzada } = await req.json() as SynthesizeBody
 
   const trechos_txt = top_trechos
@@ -124,9 +132,18 @@ Regras:
   try {
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 1500,
+      max_tokens: 8000,
       messages: [{ role: 'user', content: prompt }],
     })
+    // Diagnóstico imediato: se o modelo bateu no teto, a resposta vai
+    // estar truncada no meio de uma string → JSON.parse falha com
+    // "Unterminated string". Devolver erro mais útil que o do parser.
+    if (response.stop_reason === 'max_tokens') {
+      throw new Error(
+        `Resposta truncada (max_tokens atingido, output=${response.usage?.output_tokens}). ` +
+        `Aumente max_tokens em /api/synthesize ou reduza o tamanho do prompt.`
+      )
+    }
     const block = response.content[0]
     if (block.type !== 'text') throw new Error('Unexpected response type from Claude')
     const raw = block.text.trim()
@@ -135,6 +152,27 @@ Regras:
     const parsed = JSON.parse(clean)
     return NextResponse.json(parsed)
   } catch (e: unknown) {
+    // Surfacing the real cause: APIConnectionError esconde o erro de fetch
+    // subjacente em `cause` (UND_ERR_CONNECT_TIMEOUT, ENOTFOUND, cert chain,
+    // etc.). Sem isso, o usuário vê apenas "Connection error." e suspeita da
+    // chave por causa do hint da UI.
+    if (e instanceof APIConnectionError) {
+      const cause = (e as { cause?: unknown }).cause
+      const causeMsg = cause instanceof Error
+        ? `${cause.name}: ${cause.message}${(cause as NodeJS.ErrnoException).code ? ` [${(cause as NodeJS.ErrnoException).code}]` : ''}`
+        : cause ? String(cause) : 'sem detalhes'
+      return NextResponse.json({
+        error: `Falha de rede ao chamar api.anthropic.com: ${causeMsg}. ` +
+          `A chave está carregada — o problema é conectividade do processo Node ` +
+          `(proxy corporativo, firewall, MITM TLS sem NODE_EXTRA_CA_CERTS, ou IPv6 quebrado).`,
+      }, { status: 502 })
+    }
+    if (e instanceof AuthenticationError) {
+      return NextResponse.json({
+        error: `Chave Anthropic rejeitada (401): ${e.message}. ` +
+          `A variável foi carregada mas é inválida/revogada.`,
+      }, { status: 401 })
+    }
     const msg = e instanceof Error ? e.message : String(e)
     return NextResponse.json({ error: msg }, { status: 500 })
   }

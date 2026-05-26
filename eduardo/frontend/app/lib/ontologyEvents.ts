@@ -14,7 +14,7 @@ export interface CrimeEventSummary {
 
 const ONTOLOGY_PATH = path.resolve(
   process.cwd(),
-  '../../../../valente/data/ontology/crime_events.jsonl',
+  '../../valente/data/ontology/crime_events.jsonl',
 )
 
 // Module-level cache: areaFm(lowercase) -> events
