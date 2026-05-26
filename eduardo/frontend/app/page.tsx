@@ -15,6 +15,8 @@ export default function Home() {
   const [data, setData] = useState<AreasData | null>(null)
   const [selected, setSelected] = useState<Area | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [reloadTick, setReloadTick] = useState(0)
   const [showComparativo, setShowComparativo] = useState(false)
 
   const [weights, setWeights] = useState({
@@ -38,13 +40,27 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setLoadError(false)
     fetch('/areas_data.json')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`areas_data.json HTTP ${r.status}`)
+        return r.json()
+      })
       .then((d: AreasData) => {
+        if (cancelled) return
         setData(d)
         setLoading(false)
       })
-  }, [])
+      .catch((err: unknown) => {
+        if (cancelled) return
+        console.error('[Home] falha ao carregar areas_data.json:', err)
+        setLoadError(true)
+        setLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [reloadTick])
 
   const { messages, status, findings, areaId, isActive, isPaused, nextSuggestions, sendMessage, startAgent, startGlobalAgent, abortAgent } =
     useMapAgent({
@@ -55,6 +71,30 @@ export default function Home() {
     })
 
   const agentIsActive = isActive
+
+  if (loadError) {
+    return (
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        height: '100vh', background: 'var(--bg)', flexDirection: 'column', gap: 14,
+      }}>
+        <p style={{ fontSize: 13, color: '#fecaca', margin: 0, maxWidth: 360, textAlign: 'center' }}>
+          Não foi possível carregar os dados base (areas_data.json).
+          Verifique sua conexão e tente novamente.
+        </p>
+        <button
+          onClick={() => setReloadTick(t => t + 1)}
+          style={{
+            background: 'var(--accent-soft)', border: '1px solid var(--accent)',
+            color: 'var(--accent)', fontSize: 12, fontWeight: 600,
+            padding: '6px 16px', borderRadius: 2, cursor: 'pointer',
+          }}
+        >
+          Tentar de novo
+        </button>
+      </div>
+    )
+  }
 
   if (loading || !data) {
     return (

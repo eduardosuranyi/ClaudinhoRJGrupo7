@@ -92,12 +92,21 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   const agentRadiusFeatures = useRef<any[]>([])
   const agentRouteFeatures = useRef<any[]>([])
 
-  // Lazy-loaded census choropleth GeoJSON (fetched on first toggle)
+  // Lazy-loaded census choropleth GeoJSON (fetched on first toggle).
+  // `*Loaded` flips to true only after a successful fetch; `*Loading` guards
+  // against firing a second fetch while one is in flight.
   const censoLoaded = useRef(false)
+  const censoLoading = useRef(false)
   const [censoCount, setCensoCount] = useState(0)
   // Lazy-loaded Rio context (city-wide layers, fetched on first toggle)
   const rioLoaded = useRef(false)
+  const rioLoading = useRef(false)
   const [rioCtx, setRioCtx] = useState<RioContext | null>(null)
+  // Whether a lazy layer load failed — surfaced to the user so an empty map
+  // never looks like "no data" when it's really a failed download.
+  const [layerError, setLayerError] = useState<{ rio: boolean; censo: boolean }>({ rio: false, censo: false })
+  // Bumped by the "Tentar de novo" button to re-fire the lazy-load effects.
+  const [reloadTick, setReloadTick] = useState(0)
 
   // Active crime time filter (hour window) — shared by the agent and the user control + on-map badge
   const [timeFilter, setTimeFilter] = useState<{ start: number | null; end: number | null }>({ start: null, end: null })
@@ -1626,28 +1635,47 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   }
 
   // Lazy-load censo GeoJSON when toggled on for the first time
+  // The "loaded" guard is only set after a successful fetch so a failed load
+  // can be retried on the next toggle instead of silently leaving it empty.
   useEffect(() => {
-    if (!layers.censo || censoLoaded.current || !mapReady) return
-    censoLoaded.current = true
+    if (!layers.censo || censoLoaded.current || censoLoading.current || !mapReady) return
+    censoLoading.current = true
+    setLayerError(prev => ({ ...prev, censo: false }))
     fetch('/api/censo')
-      .then(r => r.ok ? r.json() : null)
+      .then(r => {
+        if (!r.ok) throw new Error(`/api/censo HTTP ${r.status}`)
+        return r.json()
+      })
       .then(fc => {
-        if (!fc?.features) return
+        if (!fc?.features) throw new Error('/api/censo returned no features')
+        censoLoaded.current = true
         setCensoCount(fc.features.length)
         ;(mapInst.current?.getSource('censo') as GeoJSONSource | undefined)?.setData(fc)
       })
-      .catch(() => {})
-  }, [layers.censo, mapReady])
+      .catch((err: unknown) => {
+        console.error('[MapView] falha ao carregar /api/censo:', err)
+        setLayerError(prev => ({ ...prev, censo: true }))
+      })
+      .finally(() => { censoLoading.current = false })
+  }, [layers.censo, mapReady, reloadTick])
 
-  // Lazy-load rio_context.json when any Rio layer is toggled on
+  // Lazy-load rio_context.json when any Rio layer is toggled on.
+  // The "loaded" guard is only set to true AFTER a successful fetch, so a
+  // failed/slow load (the file is ~9.5MB) can be retried on the next toggle
+  // instead of leaving the layer permanently — and silently — empty.
   useEffect(() => {
     const anyRio = layers.rioRings || layers.rioCrime || layers.rioDD || layers.rioDominio
-    if (!anyRio || rioLoaded.current || !mapReady) return
-    rioLoaded.current = true
+    if (!anyRio || rioLoaded.current || rioLoading.current || !mapReady) return
+    rioLoading.current = true
+    setLayerError(prev => ({ ...prev, rio: false }))
     fetch('/rio_context.json')
-      .then(r => r.ok ? r.json() : null)
+      .then(r => {
+        if (!r.ok) throw new Error(`rio_context.json HTTP ${r.status}`)
+        return r.json()
+      })
       .then((ctx: RioContext | null) => {
-        if (!ctx) return
+        if (!ctx) throw new Error('rio_context.json returned empty body')
+        rioLoaded.current = true
         setRioCtx(ctx)
         const map = mapInst.current
         if (!map) return
@@ -1673,8 +1701,12 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         // Domínio
         ;(map.getSource('rio-dominio') as GeoJSONSource | undefined)?.setData(ctx.dominio)
       })
-      .catch(() => {})
-  }, [layers.rioRings, layers.rioCrime, layers.rioDD, layers.rioDominio, mapReady])
+      .catch((err: unknown) => {
+        console.error('[MapView] falha ao carregar rio_context.json:', err)
+        setLayerError(prev => ({ ...prev, rio: true }))
+      })
+      .finally(() => { rioLoading.current = false })
+  }, [layers.rioRings, layers.rioCrime, layers.rioDD, layers.rioDominio, mapReady, reloadTick])
 
   function setLayerVisible(key: keyof LayerVisibility, visible: boolean) {
     setLayers(prev => {
@@ -1742,7 +1774,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
               <div style="font-size:10px;font-weight:600;margin-bottom:2px">${title}</div>
               <div style="font-size:10px;color:#8a8a95">${body}</div>
             </div>`)
-          const marker = new maplibregl.Marker({ element: el })
+          const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
             .setLngLat([lng, lat])
             .setPopup(popup)
             .addTo(mapInst.current)
@@ -2030,7 +2062,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
           core.className = 'location-ping-core'
           el.appendChild(ring)
           el.appendChild(core)
-          const marker = new maplibregl.Marker({ element: el }).setLngLat([lng, lat]).addTo(map)
+          const marker = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([lng, lat]).addTo(map)
           if (opts?.label) {
             marker.setPopup(new maplibregl.Popup({ closeButton: false, offset: 14, maxWidth: '200px' })
               .setHTML(`<div style="font-family:Inter,sans-serif;font-size:10px;color:#f0f0f3">${opts.label}</div>`))
@@ -2138,6 +2170,38 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
       {/* Map container */}
       <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+
+      {/* Lazy-layer load failure — never let a failed download look like "no data" */}
+      {(layerError.rio || layerError.censo) && (
+        <div style={{
+          position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 20, display: 'flex', alignItems: 'center', gap: 10,
+          background: 'rgba(120,20,20,0.92)', border: '1px solid rgba(239,68,68,0.7)',
+          backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+          borderRadius: 3, padding: '7px 12px', color: '#fecaca',
+          fontSize: 11, fontWeight: 500, maxWidth: 420,
+        }}>
+          <span>
+            Falha ao carregar dados {layerError.rio && layerError.censo ? 'do Rio e do Censo' : layerError.rio ? 'do Rio (camadas da cidade)' : 'do Censo'}. O mapa pode aparecer sem pontos.
+          </span>
+          <button
+            onClick={() => {
+              if (layerError.rio) rioLoaded.current = false
+              if (layerError.censo) censoLoaded.current = false
+              setLayerError({ rio: false, censo: false })
+              // Re-fire the lazy-load effects (their deps include reloadTick).
+              setReloadTick(t => t + 1)
+            }}
+            style={{
+              background: 'rgba(239,68,68,0.25)', border: '1px solid rgba(239,68,68,0.6)',
+              borderRadius: 2, padding: '3px 9px', color: '#fff', fontSize: 10.5,
+              fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+            }}
+          >
+            Tentar de novo
+          </button>
+        </div>
+      )}
 
       {/* Manual route tool ("Traçar rota") — operator clicks two points */}
       <div style={{ position: 'absolute', top: 12, left: 12, pointerEvents: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>

@@ -121,6 +121,37 @@ npm run test:run
 
 ---
 
+## Troubleshooting
+
+### "Abro a página e às vezes não tem dados / clico numa região e não aparecem pontos nem malhas"
+
+Os dados são carregados em três requisições independentes:
+
+| Requisição | Tamanho | Quando |
+|---|---|---|
+| `/areas_data.json` | ~2.5 MB | no carregamento inicial da página |
+| `/rio_context.json` | ~9.5 MB | sob demanda, ao ligar qualquer camada "Rio inteiro" |
+| `/api/censo` | variável | sob demanda, ao ligar a camada Censo |
+
+Antes, qualquer falha (conexão lenta, dev server reiniciando, download abortado
+ao trocar de camada) era **engolida silenciosamente**: a flag de "já carregado"
+era marcada *antes* do fetch terminar, então a camada ficava permanentemente
+vazia naquela sessão — sem nenhum aviso. Por isso o problema era intermitente,
+principalmente no `rio_context.json` (9.5 MB).
+
+Agora:
+- A flag `*Loaded` só vira `true` **após** o fetch ter sucesso, então uma falha
+  é automaticamente reaproveitável na próxima vez que a camada for ligada.
+- Falhas aparecem como um banner vermelho ("Falha ao carregar dados…") com botão
+  **Tentar de novo**, em vez de um mapa vazio sem explicação.
+- A falha no `areas_data.json` mostra uma tela de erro com retry, em vez de
+  travar para sempre em "carregando dados…".
+
+Se o problema persistir mesmo com boa conexão, considere comprimir/reduzir o
+`public/rio_context.json` (servido bruto a 9.5 MB).
+
+---
+
 ## Documentação Completa
 
 - [README principal](../README.md) — visão geral, funcionalidades, como rodar

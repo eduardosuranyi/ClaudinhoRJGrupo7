@@ -25,3 +25,4 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Never confuse DD (Disque Denúncia) data with Chamados 1746 — different sources
 - `rio_context.json` is ~10MB — always lazy-load, never import statically
 - `LayerVisibility` state tracked in both `useState` and `useRef` — update both
+- Lazy loaders (`rio_context.json`, `/api/censo`): flip the `*Loaded` guard only AFTER the fetch succeeds, never before. Setting it early + an empty `.catch(() => {})` makes a single failed download leave the layer silently empty for the whole session. Surface errors (banner + retry), don't swallow them.
