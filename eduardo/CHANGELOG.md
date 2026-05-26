@@ -5,6 +5,65 @@ Convenção: versões seguem `vMAJOR.MINOR.PATCH`. Cada entrada detalha impacto 
 
 ---
 
+## v2.5.0 — Correções de lógica: per-capita ponderado, Bingo espacial, cobertura de câmera por rede (2026-05-26)
+
+Três correções no `data_pipeline.py`, todas **estritamente aditivas** no schema (nenhum campo removido/renomeado; enum `recommendation` preservado para o match de paint do MapLibre). Implementadas e verificadas fase a fase. Detalhe completo em [`docs/DATA_LOGIC_FIXES.md`](docs/DATA_LOGIC_FIXES.md). Ontologia (`valente/`) deixada para depois.
+
+### 1. Denominador per-capita corrigido (interpolação areal)
+- **Bug**: `build_bairro_context()` usava `predicate="intersects"` e somava a população **inteira** de todo bairro que tangenciasse o polígono → denominador inflado, `crimes_per_1000_hab` deflacionado.
+- **Correção**: nova `weighted_population_for_area()` pondera a população de cada bairro pela fração de sua área dentro do polígono (EPSG:31983). Novo campo `stats.populacao_ponderada` (denominador da taxa); `populacao_estimada`/`populacao_bairros_2022` (contexto bruto) **inalterados**.
+- **Efeito**: taxa sobe em corredores comerciais (ex.: Presidente Vargas 107 → 671/1.000) — exposição relativa a residentes do polígono, com a população flutuante já ressalvada.
+- **Testes**: `tests/test_population.py` (7 casos).
+
+### 2. Bingo por proximidade espacial (fim do casamento por substring)
+- **Bug**: `compute_bingo()` casava camadas por substring de nome de rua, sem distância — falsos positivos (token compartilhado) e, sobretudo, falsos negativos por grafia/abreviação.
+- **Correção**: buffer de `BINGO_PROXIMITY_M` (100 m) em torno dos pontos de crime do trecho; fallback de **nome exato** (não substring) só para registros sem coordenada. Saída (`bingo_count`, `bingo_layers`, `n_bingo_trechos`, `n_triple_bingo`) inalterada.
+- **Efeito**: coincidências **sobem** (erro dominante eram falsos negativos), coerente com trechos = ruas inteiras nessas áreas densas.
+- **Testes**: `tests/test_bingo.py` reescrito (8 casos, inclui regressão do falso positivo e fallback sem coordenada).
+
+### 3. Cobertura de câmera por distância de rede viária
+- **Bug**: buffer euclidiano de 50 m (câmera atrás do quarteirão "cobria"), clustering por grade de 10 m, recomendação só por distância.
+- **Correção**: novo `load_street_network()` (grafo `networkx` do `street_network.routing.geojson.gz`) → cobertura por `multi_source_dijkstra` na malha viária (fallback euclidiano por crime quando o snap > 120 m); clustering DBSCAN-like (`cKDTree`+union-find, 60 m); `priority_score` (severidade × distância) ordena os gaps. Quando `network=None`, comportamento euclidiano **idêntico ao anterior** (testes legados intactos).
+- **Aditivo**: `camera_gaps.coverage_method` (`network`/`euclidean`), e por gap `network_camera_m` e `priority_score`. `nearest_camera_m` segue euclidiano; `recommendation` segue o enum `instalar`/`remanejar`.
+- **Efeito real**: Rodoviária — câmera a 49 m em linha reta mas **306 m pela rede** → reclassificada para `instalar`.
+- **Dependência**: `networkx>=3.0` adicionado ao `requirements.txt`. Pipeline ~9,4 s (vs ~7,5 s).
+- **Testes**: `tests/test_camera_network.py` (4 casos) + `tests/test_camera_gaps.py` mantidos.
+
+### Verificação
+`python3 -m pytest tests/ -q` → **78 backend**; `npx vitest run` (frontend) → **93** contra o `areas_data.json` regenerado. `tsc` do app fonte limpo (erros de `@/` em `__tests__` são de trabalho concorrente, não desta mudança).
+
+---
+
+## v2.4.0 — Camada Disque Denúncia, Significância de Tendência, Detecção de Deslocamento (2026-05-26)
+
+Três análises novas, todas **estritamente aditivas** (nenhum campo existente foi removido/renomeado; artefatos antigos continuam carregando). Implementação testada passo a passo. A implementação da ontologia foi deixada para depois.
+
+### 1. Disque Denúncia como camada de mapa (narrativa é o ativo)
+- **Backend** `get_disque_denuncia_pontos()` em `data_pipeline.py`: emite pontos geolocalizados das denúncias com `relato` (≤300 chars), `modus` (regex via `extract_modus`), `perfil_suspeito`, tipo/data/bairro/logradouro. Novo campo `map_layers.disque_denuncia_points` (463 pontos nas 8 áreas).
+- **Frontend** nova camada `Disque Denúncia` (rosa `#ec4899`, distinta dos Chamados 1746 âmbar) em `MapView.tsx` com popup que mostra o **relato + modus + perfil** ao clicar. Linha de referência cruzada na `DenunciasTab`.
+- **Testes**: `tests/test_dd_points.py` (9 casos).
+- ⚠️ **Limitações**: modus é casamento de palavras-chave por regex — perde paráfrase, negação ("não estava armado") e variantes; uma denúncia é alegação, não crime confirmado; só linhas geocodificadas viram pontos, então a contagem da camada é < `stats.denuncias_total`. *Melhoria futura: extração por LLM (vocabulário controlado); cruzar DD × ocorrências antes de tratar densidade como risco.*
+
+### 2. Significância de tendência (Mann-Kendall + Poisson + sazonalidade)
+- **Backend** `evolution_mensal_stats()` + helpers `monthly_counts_full()`, `_mann_kendall()`, `_poisson_ci_rows()`. Novo campo aditivo `evolucao_mensal_stats` (`evolucao_mensal` **intacto**). Deps: `scipy`, `statsmodels` (já no `requirements.txt`).
+- Janela de análise = últimos **60 meses** (período 2020-2024). Motivo documentado: a fonte traz alguns registros antigos esparsos (1900s) que, sem o corte, fariam a tendência ler "registro histórico quase-zero → registro moderno" (gerava `trend_delta_pct` de ~404.000%).
+- **Frontend** `OverviewTab.tsx`: banda de IC 95% de Poisson sob a linha + selo de significância ("queda real" / "alta real" / "ruído / sem tendência"). Sem stats, cai no gráfico de linha original.
+- **Testes**: `tests/test_trend.py` (14 casos, inclui guarda de regressão do `evolution_mensal`).
+- ⚠️ **Limitações**: Mann-Kendall ignora autocorrelação (p otimista) e roda sobre os 3 tipos de crime combinados (pode mascarar sub-tendências divergentes); IC de Poisson assume média=variância, mas crime é sobredisperso → banda real é mais larga; decomposição sazonal sobre poucos anos é sensível às pontas (descritiva, não preditiva). *Melhorias: testes por tipo, MK Hamed-Rao, IC binomial-negativa.*
+
+### 3. Detecção de deslocamento (Desafio 2)
+- **Backend** `classify_displacement()` (puro) + agregação anual área-vs-anel em `build_rio_context()`: contagens anuais **dentro** do polígono FM vs **dentro** do anel 500m, comparando os dois últimos anos completos. Rótulos: `deslocamento_provavel` (área ↓ & anel ↑), `reducao_genuina`, `intensificacao`, `inconclusivo`; confiança baixa/media/alta. Faixa neutra de ±10%.
+- Novos campos em `rio_context.json` (`rings[].area_year_counts/ring_year_counts/displacement`) + novo artefato compacto `displacement.json` (~3KB, sem geometria) para o painel não baixar os ~10MB.
+- **Frontend** linha de alerta no popup dos Anéis de Entorno + card "Alerta de Deslocamento" na tab Mancha Criminal (lazy-fetch de `/displacement.json`).
+- **Testes**: `tests/test_displacement.py` (9 casos).
+- Exemplo real: **Jardim de Alah** = `deslocamento_provavel` (área −28% / entorno +34%, 2023→2024).
+- ⚠️ **Limitações**: ocorrências apenas (DD é de ano único, não entra no a/a); o rótulo é **hipótese** — pode ser artefato de registro, anel sobrepondo hotspot vizinho, ou realocação de efetivo policial, não deslocamento criminal real; contagens do anel são **brutas**, não normalizadas por área (anel maior contém mais crime naturalmente). *Melhorias: teste de significância na diferença, baseline mais longo, deslocamento por tipo, normalizar por km².*
+
+### Testes
+- Backend: **74 testes** (de 32 para 74: +9 DD, +14 tendência, +9 deslocamento, +fixtures). Frontend: 93 testes mantidos.
+
+---
+
 ## v2.3.0 — Censo Choropleth, Rio Inteiro, Roteamento por Ruas, UI Polish (2026-05-25)
 
 ### Backend

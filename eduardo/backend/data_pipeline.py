@@ -17,6 +17,7 @@ from datetime import datetime
 from pathlib import Path
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 from shapely.geometry import Point, shape
 
@@ -424,12 +425,89 @@ def match_trechos_to_lines(top_trechos, logradouros, bairro_names, clip_polygon=
 # ───────────────────────────────────────────────────────────────────────────
 
 
+# Metric CRS used for any area-based computation (SIRGAS 2000 / UTM 23S — Rio).
+# In this CRS .area / .length are in metres², metres — required for areal weighting.
+METRIC_CRS = "EPSG:31983"
+
+
+def weighted_population_for_area(area_geom, bairros_gdf, pop_by_name, name_col="nome"):
+    """Estimate the resident population *inside* an FM polygon via areal interpolation.
+
+    For each bairro that intersects the polygon, the bairro's census population is
+    weighted by the fraction of the bairro's area that actually falls inside the
+    polygon::
+
+        contribution = bairro_pop * ( area(bairro ∩ polygon) / area(bairro) )
+
+    Summing the contributions estimates how many residents live within the patrol
+    polygon itself.
+
+    WHY this exists: the previous denominator summed the *entire* population of every
+    bairro that merely touched the polygon (``predicate="intersects"`` + full sum). A
+    polygon grazing the corner of a 200k-resident bairro inherited all 200k, deflating
+    ``crimes_per_1000_hab``. Areal weighting makes a corner-touch contribute ~0
+    automatically, so the rate reflects the patrolled area rather than whole bairros.
+
+    CAVEAT (documented in DATA_LOGIC_FIXES.md): areal interpolation assumes population
+    is uniform within a bairro (it is not), and FM polygons are mostly commercial/transit
+    corridors with few residents — so the resulting rate measures *exposure relative to
+    residents*, which is large where the floating (daytime) population dominates. That is
+    the correct direction and is already flagged to the agent in app/api/agent/route.ts.
+
+    Geometries in ``area_geom`` and ``bairros_gdf`` MUST share the same planar/metric CRS
+    (e.g. EPSG:31983) so ``.area`` is meaningful. Returns a float (0.0 when no overlap).
+    """
+    if (
+        bairros_gdf is None or bairros_gdf.empty
+        or area_geom is None or area_geom.is_empty
+        or not pop_by_name
+    ):
+        return 0.0
+    total = 0.0
+    for _, row in bairros_gdf.iterrows():
+        bgeom = row.geometry
+        if bgeom is None or bgeom.is_empty or not bgeom.intersects(area_geom):
+            continue
+        bairro_area = bgeom.area
+        if bairro_area <= 0:
+            continue
+        pop = pop_by_name.get(row.get(name_col))
+        if pop is None:
+            continue
+        frac = bgeom.intersection(area_geom).area / bairro_area
+        if frac <= 0:
+            continue
+        total += float(pop) * frac
+    return total
+
+
 def build_bairro_context(polys, bairros, censo):
-    """Precompute bairro→FM area mapping with population data + geometries."""
+    """Precompute bairro→FM area mapping with population data + geometries.
+
+    Two distinct population figures are produced per area:
+
+    * ``populacao_bairros_2022`` — sum of the *whole* residential population of every
+      surrounding bairro that intersects the polygon. This is the human-readable
+      "Pop. Residente (Censo 2022)" context number shown in the UI and is intentionally
+      left unchanged so displayed values stay stable.
+    * ``populacao_ponderada`` — areal-interpolated estimate of residents *inside* the
+      polygon (see :func:`weighted_population_for_area`). This is the denominator used
+      for ``crimes_per_1000_hab`` so the per-capita rate is not deflated by bairros that
+      only graze the polygon.
+    """
     if bairros.empty:
         return {}
 
     fm_bairros = gpd.sjoin(bairros, polys[["nome_area", "geometry"]], how="inner", predicate="intersects")
+
+    # Pre-project geometries once (metric CRS) for areal weighting, and build a
+    # name→population lookup from the census (matched to bairros by name, exactly as the
+    # whole-bairro sum below does, so both figures use a consistent source pairing).
+    polys_m = polys.to_crs(METRIC_CRS)
+    bairros_m = bairros.to_crs(METRIC_CRS) if "nome" in bairros.columns else bairros.iloc[0:0]
+    pop_by_name = {}
+    if not censo.empty and "nome" in censo.columns and "Total_de_pessoas_2022" in censo.columns:
+        pop_by_name = dict(zip(censo["nome"], censo["Total_de_pessoas_2022"]))
 
     context = {}
     for nome_area in polys["nome_area"].unique():
@@ -446,6 +524,15 @@ def build_bairro_context(polys, bairros, censo):
                 pop = int(censo_match[pop_col].sum())
             if "regiao_adm" in censo_match.columns and not censo_match["regiao_adm"].dropna().empty:
                 subpref = censo_match["regiao_adm"].mode().iloc[0]
+
+        # Area-weighted resident estimate inside the polygon (per-capita denominator).
+        pop_ponderada = 0
+        if bairro_names and pop_by_name and not bairros_m.empty:
+            area_rows_m = polys_m[polys_m["nome_area"] == nome_area]
+            if not area_rows_m.empty:
+                area_geom_m = area_rows_m.geometry.union_all()
+                bsub_m = bairros_m[bairros_m["nome"].isin(bairro_names)]
+                pop_ponderada = int(round(weighted_population_for_area(area_geom_m, bsub_m, pop_by_name)))
 
         bairro_rows = bairros[bairros["nome"].isin(bairro_names)] if "nome" in bairros.columns else bairros.iloc[0:0]
         for _, row in bairro_rows.iterrows():
@@ -464,6 +551,7 @@ def build_bairro_context(polys, bairros, censo):
         context[nome_area] = {
             "bairros": bairro_names,
             "populacao_bairros_2022": pop,
+            "populacao_ponderada": pop_ponderada,
             "subprefeitura": subpref,
             "bairro_features": bairro_features,
         }
@@ -529,6 +617,148 @@ def evolution_mensal(crimes_df):
     # Pegar últimos 24 meses não nulos
     grouped = grouped[grouped.index != "NaT"].tail(24)
     return [{"mes": str(k), "total": int(v)} for k, v in grouped.items()]
+
+
+def monthly_counts_full(crimes_df, max_months=60):
+    """Recent monthly crime series, gap-filled with 0 over a continuous month range.
+
+    Returns a pandas Series indexed by a continuous monthly PeriodIndex (most recent
+    `max_months` ending at the last month with data). Unlike `evolution_mensal`
+    (which keeps only the last 24 EXISTING months), this fills internal gaps with 0 —
+    a month with no recorded crime is a real 0, and the Mann-Kendall test / seasonal
+    decomposition need a regular series with no holes. Empty on empty/missing-`data`.
+
+    WHY the window (not the whole history): the source occasionally carries a few very
+    old records (1900s), so an unbounded series would gap-fill ~1200 mostly-zero months
+    and make the trend read as "near-zero historic recording → modern recording" rather
+    than a real change. 60 months = the platform's stated período (2020-2024) and gives
+    5 seasonal periods. CAVEAT: trends are therefore measured over this fixed window;
+    `n_meses` reflects it, not the raw record count.
+    """
+    if crimes_df.empty or "data" not in crimes_df.columns:
+        return pd.Series(dtype="int64")
+    dts = pd.to_datetime(crimes_df["data"], format="%d/%m/%Y", errors="coerce").dropna()
+    if dts.empty:
+        return pd.Series(dtype="int64")
+    per = dts.dt.to_period("M")
+    counts = per.value_counts().sort_index()
+    last = counts.index.max()
+    first = max(counts.index.min(), last - (max_months - 1))
+    full_idx = pd.period_range(first, last, freq="M")
+    return counts.reindex(full_idx, fill_value=0).astype("int64")
+
+
+def _mann_kendall(values):
+    """Non-parametric Mann-Kendall trend test (no extra deps beyond scipy.stats.norm).
+
+    Returns {available, direction, significant, tau, p_value}. Guards a constant
+    series (zero variance → no division) and is only meaningful for n>=4 (the caller
+    enforces the length floor). `direction` ∈ crescente|decrescente|estavel;
+    `significant` is p<0.05.
+
+    CAVEAT: MK ignores autocorrelation, so p-values are optimistic on serially
+    correlated crime counts; and run over 3 combined crime types it can mask
+    divergent sub-trends. Enhancement: per-type tests + Hamed-Rao modified MK.
+    """
+    from scipy.stats import norm
+    import numpy as np
+
+    x = np.asarray(values, dtype=float)
+    n = len(x)
+    if n < 4:
+        return {"available": False, "reason": "serie_curta", "direction": "estavel",
+                "significant": False, "tau": None, "p_value": None}
+    # S statistic
+    s = 0
+    for i in range(n - 1):
+        s += np.sign(x[i + 1:] - x[i]).sum()
+    s = float(s)
+    # Variance with tie correction
+    _, counts = np.unique(x, return_counts=True)
+    tie_term = sum(c * (c - 1) * (2 * c + 5) for c in counts)
+    var_s = (n * (n - 1) * (2 * n + 5) - tie_term) / 18.0
+    if var_s <= 0:
+        return {"available": False, "reason": "serie_constante", "direction": "estavel",
+                "significant": False, "tau": 0.0, "p_value": 1.0}
+    if s > 0:
+        z = (s - 1) / (var_s ** 0.5)
+    elif s < 0:
+        z = (s + 1) / (var_s ** 0.5)
+    else:
+        z = 0.0
+    p_value = float(2 * (1 - norm.cdf(abs(z))))
+    tau = float(s / (0.5 * n * (n - 1)))
+    direction = "crescente" if s > 0 else "decrescente" if s < 0 else "estavel"
+    return {"available": True, "direction": direction, "significant": bool(p_value < 0.05),
+            "tau": round(tau, 4), "p_value": round(p_value, 4)}
+
+
+def _poisson_ci_rows(display_rows):
+    """Exact Poisson 95% CI per month, aligned 1:1 to the display rows (evolution_mensal).
+
+    Uses chi-square quantiles (lo = chi2.ppf(.025, 2k)/2, hi = chi2.ppf(.975, 2(k+1))/2),
+    NOT the normal approximation k±1.96√k, because monthly counts are small and some are
+    0 (the normal approx gives negative / zero-width bands). lo = 0 when k = 0.
+
+    CAVEAT: assumes counts are Poisson (mean = variance). Crime tends to be
+    over-dispersed (clustering), so the TRUE band is wider than shown. Enhancement:
+    negative-binomial CI.
+    """
+    from scipy.stats import chi2
+
+    out = []
+    for r in display_rows:
+        k = int(r["total"])
+        lo = 0.0 if k == 0 else float(chi2.ppf(0.025, 2 * k) / 2)
+        hi = float(chi2.ppf(0.975, 2 * (k + 1)) / 2)
+        out.append({"mes": r["mes"], "total": k, "ci_lo": round(lo, 1), "ci_hi": round(hi, 1)})
+    return out
+
+
+def evolution_mensal_stats(crimes_df):
+    """Trend SIGNIFICANCE for the monthly series — so 11 vs 10 isn't read as a trend.
+
+    Combines: Mann-Kendall (real trend vs noise), exact Poisson 95% bands per month
+    (overlaid on the existing chart), and seasonal decomposition (statsmodels).
+    Strictly additive: emitted as `evolucao_mensal_stats`; `evolucao_mensal` is left
+    untouched. Returns {available: False} when there isn't enough data, so the
+    frontend can fall back to the plain line with zero behavioral change.
+    """
+    full = monthly_counts_full(crimes_df)
+    n = len(full)
+    if n < 4:
+        return {"available": False, "reason": "serie_curta", "n_meses": int(n)}
+
+    result = {
+        "available": True,
+        "n_meses": int(n),
+        "mann_kendall": _mann_kendall(full.values),
+        "poisson_ci": _poisson_ci_rows(evolution_mensal(crimes_df)),
+        "seasonal": {"available": False, "reason": "historico_insuficiente"},
+    }
+
+    # Seasonal decomposition needs >= 2 full periods (24 monthly obs) and no gaps.
+    if n >= 24:
+        try:
+            from statsmodels.tsa.seasonal import seasonal_decompose
+            dec = seasonal_decompose(full.values, model="additive", period=12, extrapolate_trend="freq")
+            trend = pd.Series(dec.trend).dropna()
+            seas = pd.Series(dec.seasonal, index=full.index)
+            trend_delta_pct = None
+            if len(trend) >= 2 and trend.iloc[0] != 0:
+                trend_delta_pct = round(float((trend.iloc[-1] - trend.iloc[0]) / abs(trend.iloc[0]) * 100), 1)
+            # Month-of-year (1-12) with the highest average seasonal component.
+            seas_by_month = seas.groupby(full.index.month).mean()
+            peak_month = int(seas_by_month.idxmax()) if not seas_by_month.empty else None
+            result["seasonal"] = {
+                "available": True,
+                "trend_delta_pct": trend_delta_pct,
+                "seasonal_peak_month": peak_month,
+            }
+        except Exception as exc:  # degrade gracefully — never break the pipeline
+            result["seasonal"] = {"available": False, "reason": f"erro: {type(exc).__name__}"}
+
+    return result
 
 
 def get_top_trechos(crimes_df, n=10):
@@ -658,6 +888,52 @@ def _build_perfil_suspeito(row) -> str:
     if pele_vals:
         parts.append(f"pele {pele_vals[0].lower()}")
     return ", ".join(parts) if parts else ""
+
+
+def get_disque_denuncia_pontos(dd_df, max_points=400):
+    """Geolocated Disque Denúncia points carrying the NARRATIVE for a map layer.
+
+    Unlike `get_relatos_sample` (a short text list with no coordinates), this emits
+    map-ready points so the operator can SEE where each denúncia is and click it to
+    read the modus operandi. The narrative — not the count — is the asset.
+
+    Each point: lat/lng + tipo + data + bairro + logradouro + relato (≤300 chars)
+    + modus (regex tags via extract_modus) + perfil_suspeito (omitted if empty).
+
+    Rows with a non-null `relato_redacted` come first (markers should carry text),
+    then the list is capped at `max_points` to keep the artifact lean.
+
+    CAVEAT (documented): modus is regex keyword matching — it misses paraphrase,
+    negation ("não estava armado") and spelling variants; a denúncia is an
+    allegation, not a confirmed crime; and only geocoded rows appear here, so this
+    count is < `stats.denuncias_total`. See eduardo/CHANGELOG.md "Limitações".
+    """
+    if dd_df.empty or "relato_redacted" not in dd_df.columns:
+        return []
+    # Prefer rows that actually carry a narrative, then cap.
+    with_relato = dd_df[dd_df["relato_redacted"].notna()]
+    without_relato = dd_df[dd_df["relato_redacted"].isna()]
+    df = pd.concat([with_relato, without_relato]).head(max_points)
+    out = []
+    for r in df.itertuples():
+        if pd.isna(getattr(r, "latitude", None)) or pd.isna(getattr(r, "longitude", None)):
+            continue
+        relato = str(getattr(r, "relato_redacted", "") or "")[:300]
+        entry = {
+            "lat": float(r.latitude),
+            "lng": float(r.longitude),
+            "tipo": str(getattr(r, "tipo", "")),
+            "data": str(getattr(r, "data_denuncia", "")),
+            "bairro": str(getattr(r, "bairro_logradouro", "")),
+            "logradouro": str(getattr(r, "logradouro", "")),
+            "relato": relato,
+            "modus": extract_modus(relato),
+        }
+        perfil = _build_perfil_suspeito(r)
+        if perfil:
+            entry["perfil_suspeito"] = perfil
+        out.append(entry)
+    return out
 
 
 def get_denuncias_por_bairro(dd_all_geo, bairros_gdf, area_geom):
@@ -856,83 +1132,271 @@ def get_dominio_features(dominio_gdf, area_geom):
 # 5. CAMERA GAP ANALYSIS
 # ───────────────────────────────────────────────────────────────────────────
 
-CAMERA_COVERAGE_RADIUS_M = 50
+CAMERA_COVERAGE_RADIUS_M = 50          # camera effective coverage radius (metres)
+CAMERA_CLUSTER_EPS_M = 60              # DBSCAN-style join radius for uncovered crimes (metres)
+CAMERA_SNAP_TOL_M = 120               # max crime→street snap distance to trust network coverage
+STREET_NETWORK_FILE = "street_network.routing.geojson.gz"
+
+# Severity weights for prioritising blind spots. All occurrences are robbery; "em coletivo"
+# is weighted slightly higher because a single event victimises many passengers. Tunable.
+CRIME_SEVERITY_WEIGHTS = {
+    "Roubo a transeunte": 1.0,
+    "Roubo de aparelho celular": 1.0,
+    "Roubo em coletivo": 1.3,
+}
+CRIME_SEVERITY_DEFAULT = 1.0
+
+# Cache for the (expensive-to-build) street graph, keyed by resolved path.
+_STREET_NETWORK_CACHE = {}
 
 
-def compute_camera_gaps(crimes_df, cam_df, max_gaps=15):
-    """Detect blind spots: crime clusters not covered by any camera buffer."""
-    if cam_df.empty:
-        return {"n_cameras": 0, "coverage_radius_m": CAMERA_COVERAGE_RADIUS_M,
-                "cameras": [], "gaps": []}
+def load_street_network(path=STREET_NETWORK_FILE):
+    """Load the street routing graph used for network-distance camera coverage.
+
+    Returns a dict ``{"graph", "kdtree", "nodes"}`` where:
+      * ``graph``  — undirected ``networkx.Graph``; nodes are rounded metric (EPSG:31983)
+        ``(x, y)`` tuples; each edge weight is the segment length in metres.
+      * ``kdtree`` — ``scipy.spatial.cKDTree`` over the node coordinates (nearest-node snap).
+      * ``nodes``  — list of node tuples aligned with the kdtree index order.
+
+    Returns ``None`` if the file is missing/empty so callers transparently fall back to the
+    straight-line (Euclidean) test. The graph is built once per process (cached per path).
+    The endpoints of the source GeoJSON are already snapped to identical coordinates by
+    build_routing_graph.py, so rounding to 0.1 m and keying nodes by coordinate is safe.
+    """
+    p = Path(path)
+    key = str(p.resolve()) if p.exists() else str(p)
+    if key in _STREET_NETWORK_CACHE:
+        return _STREET_NETWORK_CACHE[key]
+    if not p.is_file():
+        _STREET_NETWORK_CACHE[key] = None
+        return None
+
+    import gzip
+    import networkx as nx
+    from scipy.spatial import cKDTree
+
+    # The artifact is gzipped GeoJSON (LineStrings, EPSG:4326); pyogrio can't read .gz
+    # directly, so decompress + parse, build shapely geometries, then reproject to metres.
+    opener = gzip.open if p.suffix == ".gz" else open
+    with opener(p, "rt", encoding="utf-8") as fh:
+        fc = json.load(fh)
+    geoms = [shape(f["geometry"]) for f in fc.get("features", []) if f.get("geometry")]
+    if not geoms:
+        _STREET_NETWORK_CACHE[key] = None
+        return None
+    gdf = gpd.GeoDataFrame(geometry=geoms, crs=4326).to_crs(METRIC_CRS)
+    graph = nx.Graph()
+    for geom in gdf.geometry:
+        if geom is None or geom.is_empty:
+            continue
+        lines = geom.geoms if geom.geom_type == "MultiLineString" else [geom]
+        for ln in lines:
+            coords = [(round(x, 1), round(y, 1)) for x, y in ln.coords]
+            for a, b in zip(coords[:-1], coords[1:]):
+                if a == b:
+                    continue
+                d = ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5
+                if graph.has_edge(a, b):
+                    if d < graph[a][b]["weight"]:
+                        graph[a][b]["weight"] = d
+                else:
+                    graph.add_edge(a, b, weight=d)
+    if graph.number_of_nodes() == 0:
+        _STREET_NETWORK_CACHE[key] = None
+        return None
+    nodes = list(graph.nodes())
+    net = {"graph": graph, "kdtree": cKDTree(nodes), "nodes": nodes}
+    _STREET_NETWORK_CACHE[key] = net
+    return net
+
+
+def _snap_nodes(network, xs, ys):
+    """Snap arrays of metric x/y coordinates to nearest graph nodes.
+
+    Returns ``(node_keys, snap_dists)`` where snap_dists are straight-line metres from each
+    input point to the node it snapped to (used to decide whether to trust network distance).
+    """
+    pts = np.column_stack([np.asarray(xs, dtype=float), np.asarray(ys, dtype=float)])
+    dists, idx = network["kdtree"].query(pts)
+    idx = np.atleast_1d(idx)
+    return [network["nodes"][i] for i in idx], np.atleast_1d(dists)
+
+
+def _cluster_points_metric(xs, ys, eps):
+    """Cluster 2-D metric points: points within ``eps`` metres of each other join a cluster.
+
+    DBSCAN-with-min_samples=1 semantics via ``cKDTree.query_pairs`` + union-find (no sklearn
+    dependency; same pattern build_routing_graph.py uses to snap endpoints). Replaces the old
+    10 m grid-rounding, which split adjacent crimes across cell boundaries. Returns one
+    contiguous integer label per input point.
+    """
+    from scipy.spatial import cKDTree
+    n = len(xs)
+    parent = list(range(n))
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    if n > 1:
+        tree = cKDTree(np.column_stack([xs, ys]))
+        for i, j in tree.query_pairs(eps):
+            ri, rj = find(i), find(j)
+            if ri != rj:
+                parent[ri] = rj
+
+    roots, labels = {}, np.empty(n, dtype=int)
+    for i in range(n):
+        r = find(i)
+        labels[i] = roots.setdefault(r, len(roots))
+    return labels
+
+
+def compute_camera_gaps(crimes_df, cam_df, max_gaps=15, network=None,
+                        coverage_radius_m=CAMERA_COVERAGE_RADIUS_M):
+    """Detect camera blind spots: clusters of crimes not covered by any camera.
+
+    Coverage model:
+      * ``network`` provided (from :func:`load_street_network`) → a crime is "covered" only
+        when a camera lies within ``coverage_radius_m`` *along the street network*, so a
+        camera 50 m away behind a block no longer counts. Crimes that cannot be reliably
+        snapped to the network (snap > ``CAMERA_SNAP_TOL_M``) or whose node is unreachable
+        fall back to the straight-line test for that crime.
+      * ``network`` is ``None`` → original straight-line (Euclidean) buffer test, unchanged.
+        This keeps the function usable without the graph and keeps the unit tests valid.
+
+    Uncovered crimes are grouped with DBSCAN-style spatial clustering (cKDTree + union-find,
+    radius ``CAMERA_CLUSTER_EPS_M``) rather than grid-rounding. Each gap gets a
+    ``priority_score`` = severity-weighted uncovered-crime count × distance factor, and gaps
+    are ranked by it. The recommendation (``instalar``/``remanejar``) uses network distance
+    when available.
+
+    Additive output (vs the previous version): every gap also carries ``network_camera_m``
+    and ``priority_score``; the result carries ``coverage_method`` ("network"|"euclidean").
+    All previously emitted keys are preserved with the same meaning.
+    """
+    method = "network" if network is not None else "euclidean"
+    base = {"n_cameras": 0, "coverage_radius_m": coverage_radius_m,
+            "cameras": [], "gaps": [], "coverage_method": method}
+    if cam_df is None or cam_df.empty:
+        return base
 
     cam_points = [{"lat": float(r.lat), "lng": float(r.lng)} for r in cam_df.itertuples()]
+    base = {**base, "n_cameras": len(cam_points), "cameras": cam_points}
+    if crimes_df is None or crimes_df.empty:
+        return base
 
-    if crimes_df.empty:
-        return {"n_cameras": len(cam_points),
-                "coverage_radius_m": CAMERA_COVERAGE_RADIUS_M,
-                "cameras": cam_points, "gaps": []}
-
-    metric_crs = "EPSG:31983"
     cam_gdf = gpd.GeoDataFrame(
         cam_df, geometry=gpd.points_from_xy(cam_df["lng"], cam_df["lat"]), crs=4326
-    ).to_crs(metric_crs)
-    coverage_union = cam_gdf.buffer(CAMERA_COVERAGE_RADIUS_M).union_all()
+    ).to_crs(METRIC_CRS)
 
     valid = crimes_df[crimes_df["latitude"].notna() & crimes_df["longitude"].notna()]
     if valid.empty:
-        return {"n_cameras": len(cam_points),
-                "coverage_radius_m": CAMERA_COVERAGE_RADIUS_M,
-                "cameras": cam_points, "gaps": []}
-
+        return base
     crime_gdf = gpd.GeoDataFrame(
         valid, geometry=gpd.points_from_xy(valid["longitude"], valid["latitude"]), crs=4326
-    ).to_crs(metric_crs)
+    ).to_crs(METRIC_CRS)
+    cx = crime_gdf.geometry.x.to_numpy()
+    cy = crime_gdf.geometry.y.to_numpy()
 
-    uncovered_mask = ~crime_gdf.geometry.within(coverage_union)
-    uncovered = crime_gdf[uncovered_mask]
+    # Straight-line coverage (always computed; used directly in euclidean mode and as the
+    # per-crime fallback when a crime cannot be reliably snapped to the network).
+    coverage_union = cam_gdf.buffer(coverage_radius_m).union_all()
+    euclid_covered = crime_gdf.geometry.within(coverage_union).to_numpy()
 
+    dist_map = None  # node -> network distance to nearest camera (computed once per area)
+    if network is not None:
+        cam_nodes, _ = _snap_nodes(network, cam_gdf.geometry.x.to_numpy(), cam_gdf.geometry.y.to_numpy())
+        cam_nodes = [n for n in set(cam_nodes) if n in network["graph"]]
+        if cam_nodes:
+            import networkx as nx
+            dist_map = nx.multi_source_dijkstra_path_length(network["graph"], cam_nodes)
+            crime_nodes, snap_d = _snap_nodes(network, cx, cy)
+            net_cov = np.array([
+                dist_map.get(crime_nodes[i], float("inf")) <= coverage_radius_m
+                for i in range(len(crime_nodes))
+            ])
+            reliable = snap_d <= CAMERA_SNAP_TOL_M
+            covered = np.where(reliable, net_cov, euclid_covered)
+        else:
+            method = "euclidean"  # cameras could not be placed on the graph
+            covered = euclid_covered
+    else:
+        covered = euclid_covered
+
+    uncovered = crime_gdf[~covered]
     if uncovered.empty:
-        return {"n_cameras": len(cam_points),
-                "coverage_radius_m": CAMERA_COVERAGE_RADIUS_M,
-                "cameras": cam_points, "gaps": []}
+        return {**base, "coverage_method": method}
 
-    cluster_gdf = uncovered.copy()
-    cluster_gdf["cluster"] = (
-        cluster_gdf.geometry.apply(lambda g: f"{round(g.x, -1)}_{round(g.y, -1)}")
-    )
-    clusters = (
-        cluster_gdf.groupby("cluster")
-        .agg(count=("cluster", "size"),
-             x=("geometry", lambda gs: gs.iloc[0].x),
-             y=("geometry", lambda gs: gs.iloc[0].y))
-        .sort_values("count", ascending=False)
-        .head(max_gaps)
-    )
+    ux = uncovered.geometry.x.to_numpy()
+    uy = uncovered.geometry.y.to_numpy()
+    labels = _cluster_points_metric(ux, uy, eps=CAMERA_CLUSTER_EPS_M)
+    if "desc_delito" in uncovered.columns:
+        sev = uncovered["desc_delito"].map(CRIME_SEVERITY_WEIGHTS).fillna(CRIME_SEVERITY_DEFAULT).to_numpy()
+    else:
+        sev = np.ones(len(uncovered))
+
+    clusters = []
+    for lbl in np.unique(labels):
+        mask = labels == lbl
+        clusters.append({
+            "count": int(mask.sum()),
+            "sev": float(sev[mask].sum()),
+            "x": float(ux[mask].mean()),
+            "y": float(uy[mask].mean()),
+        })
+
+    # Distance to nearest camera per cluster centroid: network distance when available
+    # (and reachable), else straight-line. The distance factor saturates at 4×radius (200 m).
+    for c in clusters:
+        euclid_d = float(cam_gdf.distance(Point(c["x"], c["y"])).min())
+        net_d = None
+        if dist_map is not None:
+            (cnode,), (csnap,) = _snap_nodes(network, [c["x"]], [c["y"]])
+            if csnap <= CAMERA_SNAP_TOL_M:
+                d = dist_map.get(cnode)
+                if d is not None and d != float("inf"):
+                    net_d = float(d)
+        chosen_d = net_d if net_d is not None else euclid_d
+        c["euclid_d"] = euclid_d
+        c["net_d"] = net_d
+        c["chosen_d"] = chosen_d
+        dist_factor = min(chosen_d / (4 * coverage_radius_m), 1.0)
+        c["priority"] = round(c["sev"] * (1.0 + dist_factor), 2)
+
+    clusters.sort(key=lambda c: c["priority"], reverse=True)
+    clusters = clusters[:max_gaps]
 
     gaps = []
-    for i, (_, row) in enumerate(clusters.iterrows(), 1):
-        pt = gpd.GeoSeries([Point(row["x"], row["y"])], crs=metric_crs)
-        nearest_d = float(cam_gdf.distance(pt.iloc[0]).min())
-        pt_wgs = pt.to_crs(4326).iloc[0]
-        recommendation = "remanejar" if nearest_d <= 2 * CAMERA_COVERAGE_RADIUS_M else "instalar"
+    for i, c in enumerate(clusters, 1):
+        pt_wgs = gpd.GeoSeries([Point(c["x"], c["y"])], crs=METRIC_CRS).to_crs(4326).iloc[0]
+        chosen_d = c["chosen_d"]
+        recommendation = "remanejar" if chosen_d <= 2 * coverage_radius_m else "instalar"
+        dist_label = "rede viária" if c["net_d"] is not None else "linha reta"
         gaps.append({
             "rank": i,
             "lat": round(pt_wgs.y, 6),
             "lng": round(pt_wgs.x, 6),
-            "uncovered_crimes": int(row["count"]),
-            "nearest_camera_m": round(nearest_d, 1),
+            "uncovered_crimes": c["count"],
+            "nearest_camera_m": round(c["euclid_d"], 1),
+            "network_camera_m": round(c["net_d"], 1) if c["net_d"] is not None else None,
+            "priority_score": c["priority"],
             "recommendation": recommendation,
             "justification": (
-                f"{int(row['count'])} ocorrências sem cobertura; "
-                f"câmera mais próxima a {nearest_d:.0f} m"
+                f"{c['count']} ocorrências sem cobertura; "
+                f"câmera mais próxima a {chosen_d:.0f} m ({dist_label})"
             ),
         })
 
     return {
         "n_cameras": len(cam_points),
-        "coverage_radius_m": CAMERA_COVERAGE_RADIUS_M,
+        "coverage_radius_m": coverage_radius_m,
         "cameras": cam_points,
         "gaps": gaps,
+        "coverage_method": method,
     }
 
 
@@ -941,26 +1405,100 @@ def compute_camera_gaps(crimes_df, cam_df, max_gaps=15):
 # ───────────────────────────────────────────────────────────────────────────
 
 
+# A crime trecho "coincides" with an urban factor / denúncia when that record lies within
+# this many metres of the trecho's crime points. Replaces the previous street-name substring
+# match, which had no distance check and produced both false positives (unrelated streets
+# sharing a token, e.g. "rua da paz" ⊂ "praça da paz") and false negatives (abbreviation
+# differences, e.g. "Av. Brasil" vs "Avenida Brasil"). See docs/DATA_LOGIC_FIXES.md.
+BINGO_PROXIMITY_M = 100
+
+
+def _points_metric(df, lat_col="latitude", lng_col="longitude"):
+    """Split a DataFrame into (metric GeoDataFrame of geocoded rows, DataFrame of coordless rows).
+
+    Rows with missing lat/lon are returned separately so the caller can still match them by
+    exact street name instead of silently discarding their signal (Disque Denúncia is only
+    ~60% geocoded). The geocoded rows are reprojected to METRIC_CRS so distances are in metres.
+    """
+    if df is None or df.empty or lat_col not in df.columns or lng_col not in df.columns:
+        return None, df
+    has_coord = df[lat_col].notna() & df[lng_col].notna()
+    valid, coordless = df[has_coord], df[~has_coord]
+    if valid.empty:
+        return None, coordless
+    gdf = gpd.GeoDataFrame(
+        valid.copy(),
+        geometry=gpd.points_from_xy(valid[lng_col], valid[lat_col]),
+        crs=4326,
+    ).to_crs(METRIC_CRS)
+    return gdf, coordless
+
+
+def _coordless_norm_names(coordless_df, col="logradouro"):
+    """Exact normalized street names of coordless rows (for the no-coordinate fallback)."""
+    if coordless_df is None or coordless_df.empty or col not in coordless_df.columns:
+        return set()
+    return {_normalize_street(v) for v in coordless_df[col].dropna() if _normalize_street(v)}
+
+
 def compute_bingo(top_trechos, fu_area, dd_area, oc_area):
-    """Detect coincidence of crime + factors + signals on each trecho."""
+    """Detect coincidence of crime + urban factors + crime denúncias on each top trecho.
+
+    Each trecho gets three boolean layers:
+      * crime   — the trecho exists because it has crimes (total > 0).
+      * fatores — a field-observed urban factor lies within ``BINGO_PROXIMITY_M`` of the
+                  trecho's crime points (spatial test), OR — for factor records lacking
+                  coordinates — its normalized street name exactly equals the trecho's.
+      * sinais  — the same proximity / exact-name test against Disque Denúncia records.
+
+    This replaces the old substring name match with a real spatial join (with an exact-name
+    fallback only for coordless records). Output keys are unchanged: each trecho gets
+    ``bingo_count`` (0–3) and ``bingo_layers``; the function returns
+    ``(top_trechos, n_bingo, n_triple)`` where n_bingo counts trechos with ≥2 layers and
+    n_triple those with all 3. See docs/DATA_LOGIC_FIXES.md.
+    """
     if not top_trechos:
         return top_trechos, 0, 0
 
-    fu_logradouros = set()
-    if not fu_area.empty and "logradouro" in fu_area.columns:
-        fu_logradouros = set(fu_area["logradouro"].dropna().str.lower().str.strip())
+    # Build metric point layers once; keep coordless rows for the exact-name fallback.
+    fu_pts, fu_coordless = _points_metric(fu_area)
+    dd_pts, dd_coordless = _points_metric(dd_area)
+    oc_pts, _ = _points_metric(oc_area)
+    fu_names = _coordless_norm_names(fu_coordless)
+    dd_names = _coordless_norm_names(dd_coordless)
+    if oc_pts is not None and "locf_norm" in oc_pts.columns:
+        oc_pts = oc_pts.assign(_locf_n=oc_pts["locf_norm"].map(_normalize_street))
 
-    dd_logradouros = set()
-    if not dd_area.empty and "logradouro" in dd_area.columns:
-        dd_logradouros = set(dd_area["logradouro"].dropna().str.lower().str.strip())
+    def _near(pts, anchor):
+        return bool(
+            anchor is not None and pts is not None and not pts.empty
+            and pts.geometry.intersects(anchor).any()
+        )
 
     n_bingo = 0
     n_triple = 0
     for t in top_trechos:
-        name = t.get("locf_norm", "").lower().strip()
+        name = _normalize_street(t.get("locf_norm", ""))
         has_crime = t.get("total", 0) > 0
-        has_factor = any(name in fl or fl in name for fl in fu_logradouros) if name else False
-        has_signal = any(name in dl or dl in name for dl in dd_logradouros) if name else False
+
+        # Anchor = buffer around this trecho's own crime points (preferred), else a buffer
+        # around its aggregated centroid (lat/lng). None when no spatial anchor exists.
+        anchor = None
+        if oc_pts is not None and "_locf_n" in oc_pts.columns and name:
+            tp = oc_pts[oc_pts["_locf_n"] == name]
+            if not tp.empty:
+                anchor = tp.geometry.buffer(BINGO_PROXIMITY_M).union_all()
+        if anchor is None and t.get("lat") is not None and t.get("lng") is not None:
+            try:
+                centroid = gpd.GeoSeries(
+                    [Point(float(t["lng"]), float(t["lat"]))], crs=4326
+                ).to_crs(METRIC_CRS).iloc[0]
+                anchor = centroid.buffer(BINGO_PROXIMITY_M)
+            except (TypeError, ValueError):
+                anchor = None
+
+        has_factor = _near(fu_pts, anchor) or (bool(name) and name in fu_names)
+        has_signal = _near(dd_pts, anchor) or (bool(name) and name in dd_names)
 
         layers = sum([has_crime, has_factor, has_signal])
         t["bingo_count"] = layers
@@ -1064,6 +1602,11 @@ def build_areas_data(data_dir: Path) -> dict:
     bairro_context = build_bairro_context(polys, bairros, censo)
     has_censo = bool(bairro_context and any(v["populacao_bairros_2022"] > 0 for v in bairro_context.values()))
 
+    # Street routing graph for network-distance camera coverage (None -> Euclidean fallback).
+    street_network = load_street_network()
+    if street_network is None:
+        print("  [aviso] grafo de ruas ausente — cobertura de câmeras usará distância em linha reta")
+
     # Pre-build bairros GeoDataFrame for DD bairro aggregation
     bairros_gdf = bairros if not bairros.empty else gpd.GeoDataFrame()
 
@@ -1108,6 +1651,7 @@ def build_areas_data(data_dir: Path) -> dict:
         fatores_points = get_fatores_pontos(fu_area)
         cameras_points = get_cameras_pontos(cam_area)
         psr_points = get_psr_points(psr_area)
+        disque_denuncia_points = get_disque_denuncia_pontos(dd_area)
 
         # Top trechos + bingo coincidence scoring
         top_trechos = get_top_trechos(oc_area)
@@ -1117,7 +1661,7 @@ def build_areas_data(data_dir: Path) -> dict:
         top_trechos = match_trechos_to_lines(top_trechos, logradouros, _bairro_names, clip_polygon=geom)
 
         # Camera gap analysis
-        camera_gaps = compute_camera_gaps(oc_area, cam_area)
+        camera_gaps = compute_camera_gaps(oc_area, cam_area, network=street_network)
 
         # Fatores por órgão
         fatores_orgao = get_fatores_por_orgao(fu_area)
@@ -1125,14 +1669,21 @@ def build_areas_data(data_dir: Path) -> dict:
         # Relatos sample
         relatos = get_relatos_sample(dd_area)
 
-        # Evolução mensal
+        # Evolução mensal (série bruta + significância estatística)
         evolucao = evolution_mensal(oc_area)
+        evolucao_stats = evolution_mensal_stats(oc_area)
 
         # --- Enrichment: bairro context, population, per-capita ---
+        # `pop` is the whole-bairro residential sum (human-readable context, unchanged).
+        # `pop_ponderada` is the areal-interpolated estimate of residents *inside* the
+        # polygon and is the correct denominator for the per-capita rate (see
+        # weighted_population_for_area / DATA_LOGIC_FIXES.md). Falling back to None when
+        # the weighted denominator is unavailable keeps the field null-safe for the UI.
         ctx = bairro_context.get(nome, {})
         pop = ctx.get("populacao_bairros_2022", 0)
+        pop_ponderada = ctx.get("populacao_ponderada", 0)
         crimes_total = int(len(oc_area))
-        crimes_per_1000 = round((crimes_total / pop) * 1000, 1) if pop > 0 else None
+        crimes_per_1000 = round((crimes_total / pop_ponderada) * 1000, 1) if pop_ponderada > 0 else None
 
         # --- Enrichment: DD drogas (SMAS factor signal) ---
         drogas_area = dd_drogas_joined[dd_drogas_joined["nome_area"] == nome] if not dd_drogas_joined.empty else pd.DataFrame()
@@ -1194,7 +1745,12 @@ def build_areas_data(data_dir: Path) -> dict:
             "modus_operandi": modus_dist,
         }
         if pop > 0:
+            # Whole-bairro residential population — "Pop. Residente (Censo 2022)" (unchanged).
             stats["populacao_estimada"] = pop
+        if pop_ponderada > 0:
+            # Area-weighted residents inside the polygon = denominator of crimes_per_1000_hab.
+            # Exposed so the rate is auditable (rate = crimes_total / populacao_ponderada * 1000).
+            stats["populacao_ponderada"] = pop_ponderada
             stats["crimes_per_1000_hab"] = crimes_per_1000
         if denuncias_drogas > 0:
             stats["denuncias_drogas"] = denuncias_drogas
@@ -1221,6 +1777,7 @@ def build_areas_data(data_dir: Path) -> dict:
                 "cameras_points": cameras_points,
                 "psr_points": psr_points,
                 "chamados_points": ch_area_points,
+                "disque_denuncia_points": disque_denuncia_points,
             },
             "_raw": {
                 "crime": len(oc_area),
@@ -1236,6 +1793,8 @@ def build_areas_data(data_dir: Path) -> dict:
             area_obj["chamados_1746"] = chamados_area_data
         if validacao:
             area_obj["validacao_cruzada"] = validacao
+        if evolucao_stats.get("available"):
+            area_obj["evolucao_mensal_stats"] = evolucao_stats
 
         bairro_feats = ctx.get("bairro_features", [])
         if bairro_feats:
@@ -1294,6 +1853,80 @@ def build_areas_data(data_dir: Path) -> dict:
 # to "Rio inteiro" mode or enables an entorno layer — so if this file is absent
 # the app behaves exactly as before.
 
+def classify_displacement(area_year_counts: dict, ring_year_counts: dict) -> dict:
+    """Classify whether an FM area's crime drop is genuine or pushed to its ring.
+
+    Desafio 2: an intensive operation inside a polygon can push occurrences to the
+    adjacent streets. Comparing the last two full years INSIDE the area vs INSIDE its
+    500m ring tells genuine reduction from displacement.
+
+    Inputs are {year:int -> count:int} dicts. Compares the two most recent years the
+    AREA has data for (ring defaults to 0 for those years). Returns:
+      label ∈ deslocamento_provavel | reducao_genuina | intensificacao | inconclusivo
+      confidence ∈ baixa | media | alta   (heuristic, see below)
+      area_yoy_pct, ring_yoy_pct          (None when prior year is 0 → no baseline)
+      anos_comparados = [prev, curr]
+
+    Decision (±10% dead-band so small wiggles aren't called a trend):
+      area ↓ & ring ↑  → deslocamento_provavel
+      area ↓ & ring ↓  → reducao_genuina
+      area ↑ & ring ↑  → intensificacao
+      otherwise         → inconclusivo
+
+    CAVEATS (documented): ocorrências only (DD is single-year, can't drive YoY); the
+    label is a HYPOTHESIS — it can reflect a reporting/recording artifact, the ring
+    overlapping a neighbouring hotspot, or police-effort relocation rather than true
+    criminal displacement. Ring counts are RAW, not normalized by area (a bigger ring
+    naturally holds more crime). Enhancements: significance test on the difference,
+    longer baseline, per-type displacement, normalize by km².
+    """
+    def _last_two(d):
+        yrs = sorted(int(y) for y in d.keys())
+        return yrs[-2:] if len(yrs) >= 2 else yrs
+
+    years = _last_two(area_year_counts)
+    if len(years) < 2:
+        return {"label": "inconclusivo", "confidence": "baixa",
+                "area_yoy_pct": None, "ring_yoy_pct": None, "anos_comparados": years}
+
+    y_prev, y_curr = years
+    a_prev = int(area_year_counts.get(y_prev, area_year_counts.get(str(y_prev), 0)) or 0)
+    a_curr = int(area_year_counts.get(y_curr, area_year_counts.get(str(y_curr), 0)) or 0)
+    r_prev = int(ring_year_counts.get(y_prev, ring_year_counts.get(str(y_prev), 0)) or 0)
+    r_curr = int(ring_year_counts.get(y_curr, ring_year_counts.get(str(y_curr), 0)) or 0)
+
+    area_yoy = round((a_curr - a_prev) / a_prev * 100, 1) if a_prev > 0 else None
+    ring_yoy = round((r_curr - r_prev) / r_prev * 100, 1) if r_prev > 0 else None
+
+    base = {"area_yoy_pct": area_yoy, "ring_yoy_pct": ring_yoy, "anos_comparados": [y_prev, y_curr]}
+
+    # No baseline in either series → can't classify.
+    if area_yoy is None or ring_yoy is None:
+        return {**base, "label": "inconclusivo", "confidence": "baixa"}
+
+    DEAD = 10.0  # ±10% dead-band
+    if area_yoy <= -DEAD and ring_yoy >= DEAD:
+        label = "deslocamento_provavel"
+    elif area_yoy <= -DEAD and ring_yoy <= -DEAD:
+        label = "reducao_genuina"
+    elif area_yoy >= DEAD and ring_yoy >= DEAD:
+        label = "intensificacao"
+    else:
+        label = "inconclusivo"
+
+    # Confidence: low baselines are noisy; big divergence + solid counts is convincing.
+    baseline_min = min(a_prev, r_prev)
+    divergence = abs(area_yoy - ring_yoy)
+    if baseline_min < 10:
+        confidence = "baixa"
+    elif divergence >= 50 and baseline_min >= 30:
+        confidence = "alta"
+    else:
+        confidence = "media"
+
+    return {**base, "label": label, "confidence": confidence}
+
+
 def load_isp_series(data_dir: Path) -> pd.DataFrame:
     """ISP historical series (broad violence spectrum, aggregated by CISP/AISP).
 
@@ -1347,15 +1980,46 @@ def build_rio_context(data_dir: Path, buffer_m: float = 500.0,
     oc_ring_counts = oc_ring.groupby("fid").size().to_dict()
     dd_ring_counts = dd_ring.groupby("fid").size().to_dict()
 
+    # ── Displacement detection (Desafio 2): per-year crime counts INSIDE the FM
+    # polygon vs INSIDE its ring, so we can tell a genuine drop from one pushed to
+    # the adjacent streets. Ocorrências only (DD is single-year → can't drive YoY).
+    polys_4326 = polys.to_crs(4326) if polys.crs and polys.crs.to_epsg() != 4326 else polys
+    oc_in_area = gpd.sjoin(oc_gdf, polys_4326[["fid", "geometry"]], how="inner", predicate="within")
+
+    def _year_counts_by_fid(joined):
+        """{fid -> {year:int -> count}} from a sjoin result carrying `data` dd/mm/YYYY."""
+        if joined.empty or "data" not in joined.columns:
+            return {}
+        yr = pd.to_datetime(joined["data"], format="%d/%m/%Y", errors="coerce").dt.year
+        tmp = joined.assign(_ano=yr).dropna(subset=["_ano"])
+        out = {}
+        for (fid, ano), n in tmp.groupby(["fid", "_ano"]).size().items():
+            out.setdefault(int(fid), {})[int(ano)] = int(n)
+        return out
+
+    area_year_by_fid = _year_counts_by_fid(oc_in_area)
+    ring_year_by_fid = _year_counts_by_fid(oc_ring)
+
     rings_out = []
     for _, r in rings_gdf.iterrows():
         if r.geometry is None or r.geometry.is_empty:
             continue
+        fid = int(r["fid"])
+        area_yc = area_year_by_fid.get(fid, {})
+        ring_yc = ring_year_by_fid.get(fid, {})
+        # Emit only the recent 5-year window for display: the source carries a few
+        # stray ancient records (e.g. 1972) that would clutter a year chart. The
+        # classifier itself only looks at the last two years, so trimming is safe.
+        all_years = set(area_yc) | set(ring_yc)
+        recent_cut = (max(all_years) - 4) if all_years else 0
         rings_out.append({
-            "fid": int(r["fid"]),
+            "fid": fid,
             "nome": r["nome"],
             "crimes_in_ring": int(oc_ring_counts.get(r["fid"], 0)),
             "dd_in_ring": int(dd_ring_counts.get(r["fid"], 0)),
+            "area_year_counts": {str(y): c for y, c in sorted(area_yc.items()) if y >= recent_cut},
+            "ring_year_counts": {str(y): c for y, c in sorted(ring_yc.items()) if y >= recent_cut},
+            "displacement": classify_displacement(area_yc, ring_yc),
             "geometry": mapping(r.geometry),
         })
 
@@ -1480,6 +2144,28 @@ def main():
         if pub.is_dir():
             shutil.copy(rio_out, pub / "rio_context.json")
             print(f"Copiado → {pub / 'rio_context.json'}")
+
+        # Compact displacement summary (NO geometry) so the per-area panel can show the
+        # "Alerta de Deslocamento" card without downloading the ~10MB rio_context.json.
+        disp = {
+            "meta": {"buffer_m": ctx["meta"]["buffer_m"], "periodo": "ocorrências 2020-2024 (DD não entra no YoY)"},
+            "areas": {
+                str(r["fid"]): {
+                    "nome": r["nome"],
+                    "displacement": r["displacement"],
+                    "area_year_counts": r["area_year_counts"],
+                    "ring_year_counts": r["ring_year_counts"],
+                }
+                for r in ctx["rings"]
+            },
+        }
+        disp_out = Path("displacement.json")
+        with open(disp_out, "w", encoding="utf-8") as f:
+            json.dump(disp, f, ensure_ascii=False, separators=(",", ":"))
+        print(f"Displacement: {disp_out} ({disp_out.stat().st_size} B) — {len(disp['areas'])} áreas")
+        if pub.is_dir():
+            shutil.copy(disp_out, pub / "displacement.json")
+            print(f"Copiado → {pub / 'displacement.json'}")
 
 
 if __name__ == "__main__":

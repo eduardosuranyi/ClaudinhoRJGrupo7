@@ -125,6 +125,35 @@ export interface MapLayers {
   cameras_points: { lat: number; lng: number }[]
   psr_points: { lat: number; lng: number }[]
   chamados_points?: { lat: number; lng: number; tipo: string; orgao: string }[]
+  // Geolocated Disque Denúncia points carrying the narrative (modus operandi as the
+  // asset, not just a count). Optional: artifacts predating this field still parse.
+  disque_denuncia_points?: {
+    lat: number; lng: number; tipo: string; data: string; bairro: string
+    logradouro: string; relato: string; modus: string[]; perfil_suspeito?: string
+  }[]
+}
+
+/** Trend-significance stats for the monthly crime series. */
+export interface EvolucaoMensalStats {
+  available: boolean
+  reason?: string
+  n_meses: number
+  mann_kendall?: {
+    available: boolean
+    reason?: string
+    direction: 'crescente' | 'decrescente' | 'estavel'
+    significant: boolean
+    tau: number | null
+    p_value: number | null
+  }
+  /** Exact Poisson 95% CI per month, aligned 1:1 to `evolucao_mensal`. */
+  poisson_ci?: { mes: string; total: number; ci_lo: number; ci_hi: number }[]
+  seasonal?: {
+    available: boolean
+    reason?: string
+    trend_delta_pct?: number | null
+    seasonal_peak_month?: number | null
+  }
 }
 
 /** A camera gap / blind spot identified by the gap analysis. */
@@ -229,6 +258,9 @@ export interface Area {
   relint: Relint
   dominio_territorial: DominioFeature[]
   evolucao_mensal: { mes: string; total: number }[]
+  /** Significância estatística da série mensal (Mann-Kendall + bandas de Poisson +
+   *  decomposição sazonal). Opcional: ausente quando há poucos meses de dados. */
+  evolucao_mensal_stats?: EvolucaoMensalStats
   map_layers: MapLayers
   score: Score
   /** Chamados 1746 para a área (se CSV exportado do BigQuery) */
@@ -277,12 +309,37 @@ export interface RioContextMeta {
   isp_aisp_count: number
 }
 
+/** Displacement (Desafio 2) classification for an FM area vs its ring. */
+export interface DisplacementInfo {
+  label: 'deslocamento_provavel' | 'reducao_genuina' | 'intensificacao' | 'inconclusivo'
+  confidence: 'baixa' | 'media' | 'alta'
+  area_yoy_pct: number | null
+  ring_yoy_pct: number | null
+  anos_comparados: number[]
+}
+
 export interface RioRing {
   fid: number
   nome: string
   crimes_in_ring: number
   dd_in_ring: number
   geometry: GeoJSON.Geometry
+  // Displacement detection (additive; absent in artifacts predating it)
+  area_year_counts?: Record<string, number>
+  ring_year_counts?: Record<string, number>
+  displacement?: DisplacementInfo
+}
+
+/** Compact per-area displacement summary (public/displacement.json) — no geometry,
+ *  so the per-area panel can render the alert without the ~10MB rio_context.json. */
+export interface DisplacementData {
+  meta: { buffer_m: number; periodo: string }
+  areas: Record<string, {
+    nome: string
+    displacement: DisplacementInfo
+    area_year_counts: Record<string, number>
+    ring_year_counts: Record<string, number>
+  }>
 }
 
 export interface RioCrimePoint {

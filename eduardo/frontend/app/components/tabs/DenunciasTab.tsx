@@ -30,6 +30,9 @@ export default function DenunciasTab({ area }: { area: Area }) {
       <p style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 14 }}>
         Amostra de <span className="mono" style={{ color: 'var(--text-dim)' }}>{area.relatos_sample.length}</span> relatos
         de roubo/furto. Modus operandi extraído automaticamente do texto via NLP.
+        {area.map_layers.disque_denuncia_points && area.map_layers.disque_denuncia_points.length > 0 && (
+          <> As denúncias geocodadas aparecem na camada <span style={{ color: '#ec4899' }}>Disque Denúncia</span> do mapa — clique num ponto para ver o relato.</>
+        )}
       </p>
 
       {/* Bairro breakdown */}

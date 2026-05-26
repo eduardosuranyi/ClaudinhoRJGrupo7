@@ -23,6 +23,7 @@ interface LayerVisibility {
   cameras: boolean
   psr: boolean
   chamados: boolean
+  dd: boolean
   dominio: boolean
   gaps: boolean
   bairros: boolean
@@ -77,11 +78,11 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   const [mapReady, setMapReady] = useState(false)
   const [layerPanelOpen, setLayerPanelOpen] = useState(false)
   const [layers, setLayers] = useState<LayerVisibility>({
-    crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true,
+    crime: false, fatores: false, cameras: false, psr: false, chamados: false, dd: false, dominio: false, gaps: false, bairros: true,
     censo: false, rioRings: false, rioCrime: false, rioDD: false, rioDominio: false,
   })
   const layersRef = useRef<LayerVisibility>({
-    crime: false, fatores: false, cameras: false, psr: false, chamados: false, dominio: false, gaps: false, bairros: true,
+    crime: false, fatores: false, cameras: false, psr: false, chamados: false, dd: false, dominio: false, gaps: false, bairros: true,
     censo: false, rioRings: false, rioCrime: false, rioDD: false, rioDominio: false,
   })
 
@@ -548,6 +549,36 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         'icon-padding': 0,
       },
       paint: { 'icon-opacity': 0.6 },
+    })
+
+    // ── Disque Denúncia (focused area) ───────────────────
+    // The narrative IS the asset: each point carries the relato + modus + perfil so
+    // clicking surfaces the modus operandi, not just a count. Pink to stay clearly
+    // distinct from Chamados 1746 (amber) — they are different sources (see AGENTS.md).
+    const ddFeatures = data.areas.flatMap(a =>
+      (a.map_layers.disque_denuncia_points || []).map(p => ({
+        type: 'Feature' as const,
+        properties: {
+          tipo: p.tipo, data: p.data, bairro: p.bairro, logradouro: p.logradouro,
+          relato: p.relato, modus: (p.modus || []).join(', '), perfil_suspeito: p.perfil_suspeito || '',
+        },
+        geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
+      }))
+    )
+    map.addSource('dd', { type: 'geojson', data: { type: 'FeatureCollection', features: ddFeatures } })
+    map.addLayer({
+      id: 'dd-dot',
+      type: 'circle',
+      source: 'dd',
+      layout: { visibility: 'none' },
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 2.5, 14, 4.5, 16, 7],
+        'circle-color': '#ec4899',
+        'circle-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0.4, 14, 0.65, 16, 0.85],
+        'circle-blur': 0.15,
+        'circle-stroke-color': 'rgba(7,7,10,0.5)',
+        'circle-stroke-width': 0.5,
+      },
     })
 
     // ── Domínio territorial ─────────────────────────────
@@ -1190,7 +1221,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
 
     // ── Interactions ─────────────────────────────────────
 
-    const interactiveLayers = ['trechos-circle', 'fatores-dot', 'chamados-dot']
+    const interactiveLayers = ['trechos-circle', 'fatores-dot', 'chamados-dot', 'dd-dot']
     function hitsInteractive(point: any) {
       for (const l of interactiveLayers) {
         if (map.queryRenderedFeatures(point, { layers: [l] }).length > 0) return true
@@ -1329,15 +1360,30 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
       const p = e.features[0].properties
       const crimes = Number(p.crimes || 0)
       const dd = Number(p.dd || 0)
+      // Displacement alert line (Desafio 2): area-vs-ring YoY divergence.
+      const DISP_LABELS: Record<string, { txt: string; color: string }> = {
+        deslocamento_provavel: { txt: 'Deslocamento provável', color: '#ef4444' },
+        reducao_genuina: { txt: 'Redução genuína', color: '#36c476' },
+        intensificacao: { txt: 'Intensificação (área+entorno)', color: '#fbb040' },
+      }
+      const disp = DISP_LABELS[String(p.disp_label || '')]
+      const fmtPct = (v: any) => v == null ? '—' : `${Number(v) > 0 ? '+' : ''}${Number(v).toFixed(0)}%`
+      const dispHTML = disp
+        ? `<div style="margin-top:7px;padding-top:6px;border-top:1px solid #2a2a35">
+            <div style="font-size:10px;font-weight:600;color:${disp.color}">${disp.txt} <span style="color:#8a8a95;font-weight:400">· conf. ${p.disp_conf || '—'}</span></div>
+            <div style="font-size:10px;color:#8a8a95;margin-top:2px">área ${fmtPct(p.disp_area_yoy)} · entorno ${fmtPct(p.disp_ring_yoy)} (a/a)</div>
+          </div>`
+        : ''
       popupRef.current
         ?.setLngLat(e.lngLat)
-        .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:170px">
+        .setHTML(`<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:170px;max-width:250px">
           <div style="font-size:10px;color:#22d3ee;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Anel de Entorno (500m)</div>
           <div style="font-size:13px;font-weight:600;margin-bottom:6px">${p.nome}</div>
           <div style="display:flex;gap:14px;font-size:11px">
             <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Crimes</div><div style="font-weight:500;font-variant-numeric:tabular-nums;color:#ff6b35">${crimes > 0 ? crimes.toLocaleString('pt-BR') : '—'}</div></div>
             <div><div style="color:#4a4a55;font-size:10px;text-transform:uppercase">Denúncias</div><div style="font-weight:500;font-variant-numeric:tabular-nums;color:#f59e0b">${dd > 0 ? dd.toLocaleString('pt-BR') : '—'}</div></div>
           </div>
+          ${dispHTML}
         </div>`)
         .addTo(map)
     })
@@ -1449,6 +1495,45 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         properties: { tipo: p.tipo, orgao: p.orgao },
       })
       popupRef.current?.remove()
+    })
+
+    // ── Disque Denúncia hover + click ──
+    // The popup is the feature: it surfaces the narrative (relato), the regex modus
+    // tags, and the suspect profile — the intel that a bare point count throws away.
+    function ddPopupHTML(p: any, full: boolean) {
+      const modus = (p.modus || '').split(',').map((m: string) => m.trim()).filter(Boolean)
+      const modusChips = modus.length
+        ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">${modus.map((m: string) =>
+            `<span style="font-size:9px;background:rgba(236,72,153,0.18);color:#f9a8d4;border:1px solid rgba(236,72,153,0.4);border-radius:3px;padding:1px 5px">${m}</span>`).join('')}</div>`
+        : ''
+      const perfil = p.perfil_suspeito
+        ? `<div style="margin-top:5px;font-size:11px"><span style="color:#4a4a55;font-size:10px;text-transform:uppercase">Perfil</span> <span style="font-weight:500">${p.perfil_suspeito}</span></div>`
+        : ''
+      const relato = full && p.relato
+        ? `<div style="margin-top:6px;font-size:11px;line-height:1.4;color:#c8c8d0;font-style:italic">"${p.relato}"</div>`
+        : ''
+      return `<div style="font-family:Inter,sans-serif;color:#f0f0f3;min-width:190px;max-width:280px">
+        <div style="font-size:10px;color:#ec4899;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">Disque Denúncia</div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:3px">${p.tipo || '—'}</div>
+        <div style="font-size:10px;color:#8a8a95">${[p.logradouro, p.bairro].filter(Boolean).join(' · ')}${p.data ? ` · ${String(p.data).slice(0, 10)}` : ''}</div>
+        ${modusChips}${perfil}${relato}
+        ${full ? '' : '<div style="margin-top:5px;font-size:10px;color:#4a4a55;font-style:italic">Clique para o relato →</div>'}
+      </div>`
+    }
+    map.on('mouseenter', 'dd-dot', (e: any) => {
+      map.getCanvas().style.cursor = 'pointer'
+      if (!popupRef.current) return
+      popupRef.current.setLngLat(e.lngLat).setHTML(ddPopupHTML(e.features[0].properties, false)).addTo(map)
+    })
+    map.on('mousemove', 'dd-dot', (e: any) => {
+      popupRef.current?.setLngLat(e.lngLat)
+    })
+    map.on('mouseleave', 'dd-dot', () => {
+      map.getCanvas().style.cursor = ''
+      popupRef.current?.remove()
+    })
+    map.on('click', 'dd-dot', (e: any) => {
+      popupRef.current?.setLngLat(e.lngLat).setHTML(ddPopupHTML(e.features[0].properties, true)).addTo(map)
     })
 
     map.on('mouseenter', 'gaps-dot', (e: any) => {
@@ -1624,6 +1709,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
     cameras:  ['cameras-dot'],
     psr:      ['psr-dot'],
     chamados: ['chamados-dot'],
+    dd:       ['dd-dot'],
     dominio:  ['dominio-fill', 'dominio-stroke'],
     gaps:     ['gaps-dot'],
     bairros:  ['bairros-fill', 'bairros-stroke', 'bairros-label'],
@@ -1682,7 +1768,11 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
         // Rings
         const ringFeatures = ctx.rings
           .filter(r => r.geometry)
-          .map(r => ({ type: 'Feature' as const, geometry: r.geometry, properties: { nome: r.nome, crimes: r.crimes_in_ring, dd: r.dd_in_ring } }))
+          .map(r => ({ type: 'Feature' as const, geometry: r.geometry, properties: {
+            nome: r.nome, crimes: r.crimes_in_ring, dd: r.dd_in_ring,
+            disp_label: r.displacement?.label ?? '', disp_conf: r.displacement?.confidence ?? '',
+            disp_area_yoy: r.displacement?.area_yoy_pct ?? null, disp_ring_yoy: r.displacement?.ring_yoy_pct ?? null,
+          } }))
         ;(map.getSource('rio-rings') as GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: ringFeatures })
         // Crime points
         const crimeFeatures = ctx.crime_points.map(p => ({
@@ -2161,6 +2251,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
   const totalCameras = data.areas.reduce((s, a) => s + a.stats.cameras_total, 0)
   const totalPSR     = data.areas.reduce((s, a) => s + a.stats.psr_total, 0)
   const totalChamados = data.areas.reduce((s, a) => s + (a.map_layers.chamados_points?.length || 0), 0)
+  const totalDD = data.areas.reduce((s, a) => s + (a.map_layers.disque_denuncia_points?.length || 0), 0)
   const totalDominio = data.areas.reduce((s, a) => s + a.dominio_territorial.length, 0)
   const totalGaps    = data.areas.reduce((s, a) => s + a.camera_gaps.gaps.length, 0)
   const totalBairros = selected?.bairros_entorno?.length ?? 0
@@ -2331,6 +2422,7 @@ export default function MapView({ data, selected, weights, onSelectArea, mapCont
             <LayerBtn label="Câmeras CIVITAS"       color="#4a90e2" active={layers.cameras} n={totalCameras} onClick={() => toggleLayer('cameras')} shape="camera" />
             <LayerBtn label="Pop. Situação de Rua"  color="#a855f7" active={layers.psr}     n={totalPSR}     onClick={() => toggleLayer('psr')} shape="diamond" />
             {totalChamados > 0 && <LayerBtn label="Chamados 1746"  color="#f59e0b" active={layers.chamados} n={totalChamados} onClick={() => toggleLayer('chamados')} shape="triangle" />}
+            {totalDD > 0 && <LayerBtn label="Disque Denúncia"  color="#ec4899" active={layers.dd} n={totalDD} onClick={() => toggleLayer('dd')} shape="circle" />}
             <LayerBtn label="Domínio Territorial"   color="#fbb040" active={layers.dominio} n={totalDominio} onClick={() => toggleLayer('dominio')} shape="square" />
             <LayerBtn label="Pontos Cegos"          color="#ef4444" active={layers.gaps}    n={totalGaps}    onClick={() => toggleLayer('gaps')} shape="warning" />
             {layers.gaps && (

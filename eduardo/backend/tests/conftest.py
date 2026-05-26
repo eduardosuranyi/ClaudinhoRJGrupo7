@@ -48,6 +48,32 @@ def sample_fatores_df():
 
 
 @pytest.fixture
+def sample_long_crimes_df():
+    """36 months of crimes with a clear DOWNWARD trend (declining counts/month)."""
+    rows = []
+    start = pd.Timestamp("2022-01-01")
+    for i in range(36):
+        month = start + pd.DateOffset(months=i)
+        n = max(1, 40 - i)  # 40, 39, ... declining
+        for d in range(n):
+            day = (d % 28) + 1
+            rows.append({
+                "data": f"{day:02d}/{month.month:02d}/{month.year}",
+                "desc_delito": "Roubo a transeunte",
+            })
+    return pd.DataFrame(rows)
+
+
+@pytest.fixture
+def sample_short_crimes_df():
+    """Only 3 months of data — too short for trend/seasonal."""
+    return pd.DataFrame({
+        "data": ["01/01/2024", "15/02/2024", "10/03/2024"],
+        "desc_delito": ["Roubo a transeunte"] * 3,
+    })
+
+
+@pytest.fixture
 def sample_dd_df():
     """Synthetic Disque Denuncia DataFrame."""
     return pd.DataFrame({

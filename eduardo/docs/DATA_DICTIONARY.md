@@ -80,8 +80,9 @@ Estatísticas agregadas da área, correspondentes às seções "Indicadores do P
 | `cameras_total` | `number` | Câmeras CIVITAS associadas | Câmeras (seção 4) |
 | `psr_total` | `number` | Registros PSR no polígono | Fatores (PSR) |
 | `modus_operandi` | `Record<string, number>` | Frequência de modus extraídos via regex | Dinâmica Criminal |
-| `populacao_estimada` | `number?` | Pop. para normalização per capita (Censo) | Enriquecimento |
-| `crimes_per_1000_hab` | `number?` | Crimes por 1.000 habitantes | Enriquecimento |
+| `populacao_estimada` | `number?` | Pop. residente **dos bairros do entorno** (soma Censo 2022, número de contexto) | Enriquecimento |
+| `populacao_ponderada` | `number?` | Pop. residente **estimada dentro do polígono FM** por interpolação areal — denominador de `crimes_per_1000_hab` (ver DATA_LOGIC_FIXES.md) | Enriquecimento |
+| `crimes_per_1000_hab` | `number?` | Crimes por 1.000 residentes do polígono = `crimes_total / populacao_ponderada × 1000`. Em corredores comerciais/de passagem (poucos residentes) o valor é alto — reflete exposição relativa a residentes, não ao fluxo diário | Enriquecimento |
 | `denuncias_drogas` | `number?` | Denúncias de consumo de drogas (fator SMAS) | Fatores |
 
 #### Tipos de Crime (`crimes_por_tipo`)
@@ -109,8 +110,8 @@ Array com até **10** logradouros de maior incidência criminal, correspondentes
 | `bingo_count` | `number` | Camadas coincidentes (1–3) | Painel de Coincidências |
 | `bingo_layers` | `object` | Detalhamento por camada | Painel de Coincidências |
 | `bingo_layers.crime` | `boolean` | Presença de crime no trecho | Seção 5: Mancha Criminal |
-| `bingo_layers.fatores` | `boolean` | Fator urbano no logradouro | Seção 5: Fator Urbano |
-| `bingo_layers.sinais` | `boolean` | Denúncia DD no trecho | Seção 5: Dinâmica Criminal |
+| `bingo_layers.fatores` | `boolean` | Fator urbano **a ≤ `BINGO_PROXIMITY_M` (100 m) dos crimes do trecho** (proximidade espacial; fallback de nome exato p/ registros sem coordenada) | Seção 5: Fator Urbano |
+| `bingo_layers.sinais` | `boolean` | Denúncia DD a ≤ 100 m dos crimes do trecho (mesma regra espacial) | Seção 5: Dinâmica Criminal |
 
 ### 2.5 Campos de Coincidência (Bingo)
 
@@ -128,21 +129,24 @@ Análise de lacunas de cobertura de câmeras. Endereça o Desafio 4 do briefing 
 | Campo | Tipo | Descrição |
 |---|---|---|
 | `n_cameras` | `number` | Câmeras na área |
-| `coverage_radius_m` | `number` | Raio assumido por câmera (50 m) |
+| `coverage_radius_m` | `number` | Raio de cobertura por câmera (50 m) |
 | `cameras` | `Array<{lat, lng}>` | Coordenadas das câmeras |
 | `gaps` | `CameraGap[]` | Pontos cegos prioritários (até 15) |
+| `coverage_method` | `string` | `"network"` quando a cobertura usa distância pela malha viária; `"euclidean"` no fallback em linha reta (grafo ausente / câmera não ancorável) |
 
-Cada `CameraGap`:
+Cada `CameraGap` (ordenado por `priority_score` decrescente):
 
 | Campo | Tipo | Valores | Descrição |
 |---|---|---|---|
-| `rank` | `number` | 1–15 | Prioridade do gap |
+| `rank` | `number` | 1–15 | Prioridade do gap (1 = maior `priority_score`) |
 | `lat` | `number` | WGS84 | Latitude do cluster |
 | `lng` | `number` | WGS84 | Longitude do cluster |
-| `uncovered_crimes` | `number` | >= 1 | Ocorrências sem cobertura |
-| `nearest_camera_m` | `number` | >= 0 | Distância à câmera mais próxima (metros) |
-| `recommendation` | `string` | `"instalar"`, `"remanejar"` | `"remanejar"` se <= 100 m; caso contrário `"instalar"` |
-| `justification` | `string` | — | Texto explicativo gerado automaticamente |
+| `uncovered_crimes` | `number` | >= 1 | Ocorrências sem cobertura no cluster (clustering espacial DBSCAN-like, raio `CAMERA_CLUSTER_EPS_M` = 60 m) |
+| `nearest_camera_m` | `number` | >= 0 | Distância **em linha reta** à câmera mais próxima (metros) |
+| `network_camera_m` | `number \| null` | >= 0 | Distância **pela malha viária** à câmera mais próxima; `null` se grafo ausente ou nó inalcançável |
+| `priority_score` | `number` | > 0 | Contagem de crimes ponderada por severidade × fator de distância à câmera. Base do ranking |
+| `recommendation` | `string` | `"instalar"`, `"remanejar"` | `"remanejar"` se a distância escolhida (rede quando disponível) <= 100 m; caso contrário `"instalar"` |
+| `justification` | `string` | — | Texto explicativo (indica se a distância citada é "rede viária" ou "linha reta") |
 
 ### 2.7 `fatores_por_orgao`
 

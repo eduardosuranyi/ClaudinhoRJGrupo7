@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { Area, InspectedPoint } from '../types'
+import type { Area, InspectedPoint, DisplacementData } from '../types'
 import { scoreColor, faccaoColor } from '../lib/helpers'
 import OverviewTab from './tabs/OverviewTab'
 import TrechosTab from './tabs/TrechosTab'
@@ -188,6 +188,7 @@ export default function AreaPanel({ area, allAreas, weights, onClose, highlighte
         {tab === 'analise' && (
           <>
             <OverviewTab area={area} allAreas={allAreas} />
+            <DisplacementCard areaId={area.id} />
             <CensoCard bairros={area.identificacao.bairros} />
             <div style={{ margin: '0 16px', padding: '12px 0', borderTop: '1px solid var(--border)' }}>
               <span className="label-overline" style={{ fontSize: 10 }}>
@@ -451,6 +452,77 @@ function CensoCard({ bairros }: { bairros?: string[] }) {
       {open && !data && (
         <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 6 }}>Carregando…</div>
       )}
+    </div>
+  )
+}
+
+// Displacement summary lives in public/displacement.json (~3KB). Fetched once per
+// session (module-level cache) so opening each area doesn't re-download it.
+let _dispCache: Promise<DisplacementData | null> | null = null
+function loadDisplacement(): Promise<DisplacementData | null> {
+  if (!_dispCache) {
+    _dispCache = fetch('/displacement.json')
+      .then(r => (r.ok ? r.json() : null))
+      .catch(() => null)
+  }
+  return _dispCache
+}
+
+const DISP_META: Record<string, { txt: string; color: string; desc: string }> = {
+  deslocamento_provavel: { txt: 'Deslocamento provável', color: '#ef4444', desc: 'Crime caiu na área mas subiu no entorno (500m) — possível migração para ruas adjacentes, não redução real.' },
+  reducao_genuina:       { txt: 'Redução genuína', color: '#36c476', desc: 'Crime caiu tanto na área quanto no entorno — redução consistente.' },
+  intensificacao:        { txt: 'Intensificação', color: '#fbb040', desc: 'Crime subiu na área e no entorno — pressão criminal crescente na região.' },
+  inconclusivo:          { txt: 'Inconclusivo', color: '#8a8a95', desc: 'Sem divergência clara entre área e entorno (variação dentro da faixa neutra de ±10%).' },
+}
+
+function DisplacementCard({ areaId }: { areaId: number }) {
+  const [info, setInfo] = useState<DisplacementData['areas'][string] | null>(null)
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    let alive = true
+    setLoaded(false)
+    loadDisplacement().then(d => {
+      if (!alive) return
+      setInfo(d?.areas?.[String(areaId)] ?? null)
+      setLoaded(true)
+    })
+    return () => { alive = false }
+  }, [areaId])
+
+  // Render nothing when displacement.json is absent or this area has no entry.
+  if (!loaded || !info) return null
+  const d = info.displacement
+  const meta = DISP_META[d.label] ?? DISP_META.inconclusivo
+  const [yPrev, yCurr] = d.anos_comparados ?? []
+  const fmtPct = (v: number | null) => (v == null ? '—' : `${v > 0 ? '+' : ''}${v.toFixed(0)}%`)
+
+  return (
+    <div style={{
+      margin: '10px 16px 6px', padding: '10px 12px',
+      background: 'var(--bg-1)', border: `1px solid ${meta.color}40`,
+      borderLeft: `3px solid ${meta.color}`, borderRadius: 2,
+    }}>
+      <span style={{ fontSize: 10, color: meta.color, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
+        Alerta de Deslocamento {yPrev != null && <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>· {yPrev}→{yCurr}</span>}
+      </span>
+      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginTop: 3 }}>
+        {meta.txt} <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 400 }}>· confiança {d.confidence}</span>
+      </div>
+      <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
+        <div>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dentro da área</div>
+          <div className="mono tnum" style={{ fontSize: 13, fontWeight: 600, marginTop: 1, color: (d.area_yoy_pct ?? 0) < 0 ? '#36c476' : '#ef4444' }}>{fmtPct(d.area_yoy_pct)}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>No entorno (500m)</div>
+          <div className="mono tnum" style={{ fontSize: 13, fontWeight: 600, marginTop: 1, color: (d.ring_yoy_pct ?? 0) > 0 ? '#ef4444' : '#36c476' }}>{fmtPct(d.ring_yoy_pct)}</div>
+        </div>
+      </div>
+      <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 8, lineHeight: 1.4 }}>{meta.desc}</div>
+      <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 6, fontStyle: 'italic' }}>
+        Hipótese baseada em ocorrências 2020-2024; denúncias (DD) não entram no comparativo anual. Contagens do anel não são normalizadas por área.
+      </div>
     </div>
   )
 }

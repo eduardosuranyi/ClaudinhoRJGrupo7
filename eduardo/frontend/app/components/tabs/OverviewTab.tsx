@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, YAxis } from 'recharts'
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, LineChart, ComposedChart, Line, Area as AreaShape, YAxis } from 'recharts'
 import type { Area } from '../../types'
 import { fmt, MODUS_LABELS } from '../../lib/helpers'
 import RiskSignals from '../RiskSignals'
@@ -15,6 +15,21 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
   const tipoTotal = tipoEntries.reduce((s, [, v]) => s + v, 0) || 1
 
   const evol = area.evolucao_mensal.slice(-12)
+  // Trend significance: merge the Poisson CI band (by month) onto the display rows so
+  // the band overlays the line. Falls back to the plain line when stats are absent.
+  const trendStats = area.evolucao_mensal_stats
+  const ciByMes = new Map((trendStats?.poisson_ci ?? []).map(c => [c.mes, c]))
+  const evolData = evol.map(e => {
+    const ci = ciByMes.get(e.mes)
+    return { ...e, ci_band: ci ? [ci.ci_lo, ci.ci_hi] as [number, number] : undefined }
+  })
+  const hasBand = evolData.some(d => d.ci_band)
+  const mk = trendStats?.available ? trendStats.mann_kendall : undefined
+  const trendBadge = mk?.available && mk.significant
+    ? (mk.direction === 'decrescente'
+        ? { text: 'queda real', color: '#36c476', bg: 'rgba(54,196,118,0.15)' }
+        : { text: 'alta real', color: '#ef4444', bg: 'rgba(239,68,68,0.15)' })
+    : (trendStats?.available ? { text: 'ruído / sem tendência', color: '#8a8a95', bg: 'rgba(138,138,149,0.12)' } : null)
 
   const modusEntries = Object.entries(area.stats.modus_operandi).slice(0, 6)
   const modusTotal = modusEntries.reduce((s, [, v]) => s + v, 0) || 1
@@ -272,20 +287,36 @@ export default function OverviewTab({ area, allAreas }: { area: Area; allAreas?:
         </div>
       )}
 
-      {/* Evolução mensal */}
+      {/* Evolução mensal + significância de tendência */}
       {evol.length > 1 && (
         <div>
-          <SectionLabel>Evolução Mensal (últimos {evol.length} meses)</SectionLabel>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <SectionLabel>Evolução Mensal (últimos {evol.length} meses)</SectionLabel>
+            {trendBadge && (
+              <span
+                title={mk?.available ? `Mann-Kendall: τ=${mk.tau}, p=${mk.p_value}` : 'sem tendência estatística'}
+                style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: trendBadge.color, background: trendBadge.bg, border: `1px solid ${trendBadge.color}55`, borderRadius: 3, padding: '1px 6px', whiteSpace: 'nowrap' }}
+              >
+                {trendBadge.text}
+              </span>
+            )}
+          </div>
           <div style={{ height: 70 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={evol} margin={{ top: 4, right: 0, left: -25, bottom: 0 }}>
+              <ComposedChart data={evolData} margin={{ top: 4, right: 0, left: -25, bottom: 0 }}>
                 <XAxis dataKey="mes" tick={{ fontSize: 10, fill: '#4a4a55' }} interval={Math.max(0, Math.floor(evol.length / 4))} tickLine={false} axisLine={{ stroke: '#2a2a35' }} />
                 <YAxis tick={{ fontSize: 10, fill: '#4a4a55' }} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={{ background: '#14141a', border: '1px solid #2a2a35', fontSize: 10 }} labelStyle={{ color: '#8a8a95' }} itemStyle={{ color: '#f0f0f3' }} />
+                {hasBand && <AreaShape type="monotone" dataKey="ci_band" stroke="none" fill="#ff6b35" fillOpacity={0.13} isAnimationActive={false} name="IC 95% (Poisson)" />}
                 <Line type="monotone" dataKey="total" stroke="#ff6b35" strokeWidth={1.5} dot={false} />
-              </LineChart>
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
+          {hasBand && (
+            <p style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2, fontStyle: 'italic' }}>
+              Banda = IC 95% de Poisson; variações dentro da banda são ruído, não tendência.
+            </p>
+          )}
         </div>
       )}
 
